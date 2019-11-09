@@ -7,28 +7,28 @@ using System.Text;
 
 namespace HollowTwitch
 {
-    class TwitchClient
+    class TwitchClient : IDisposable
     {
-
         private TcpClient _client;
-        private StreamReader _output;
-        private StreamWriter _input;
+        private readonly StreamReader _output;
+        private readonly StreamWriter _input;
 
         public event Action<string> ChatMessageReceived;
         public event Action<string> RawPayload;
         public TwitchClient(string oauth, string username, string channel)
         {
             _client = new TcpClient("irc.twitch.tv", 6667);
-            var stream = _client.GetStream();
+            
             _output = new StreamReader(_client.GetStream());
-            _input = new StreamWriter(_client.GetStream());
-            _input.AutoFlush = true;
+            _input = new StreamWriter(_client.GetStream())
+            {
+                AutoFlush = true
+            };
 
             SendMessage($"PASS oauth:{oauth}");
             SendMessage($"NICK {username}");
             SendMessage($"JOIN #{channel}");
-            Console.WriteLine("Sent the auth");
-
+          
             this.RawPayload += ProcessMessage;
         }
 
@@ -36,17 +36,17 @@ namespace HollowTwitch
         {
             if (message == null)
                 return;
-            ChatMessageReceived?.Invoke(message);
+
             if (message.Contains("PING"))
             {
                 SendMessage("PONG :tmi.twitch.tv");
                 Console.WriteLine("sent pong!");
             }
-            /* else if (message.Contains("PRIVMSG"))
-             {
-                 ChatMessageReceived?.Invoke(message);
-             }
-             */
+            else if (message.Contains("PRIVMSG"))
+            {
+                var cleaned = message.Split(':').Last();
+                ChatMessageReceived?.Invoke(cleaned);
+            }
         }
 
         public void StartReceive()
@@ -66,5 +66,12 @@ namespace HollowTwitch
         
         private void SendMessage(string message)
             => _input.WriteLine(message);
+
+        public void Dispose()
+        {
+            _input.Dispose();
+            _output.Dispose();
+            _client.Close();
+        }
     }
 }
