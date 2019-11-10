@@ -9,7 +9,6 @@ namespace HollowTwitch
 {
     public class TwitchMod : Mod
     {
-
         private TwitchClient _client;
         private Thread _currentThread;
 
@@ -20,15 +19,13 @@ namespace HollowTwitch
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
         }
 
-       
-
         static bool once;
         private void OnSaveGameLoad(SaveGameData data)
         {
             if (!once)
             {
                 Logger.Log("starting this shit");              
-                _client = new TwitchClient("rnbl5u9yyomookje7dot24to0df91u", "sid0003", "5fiftysix6");
+                _client = new TwitchClient(new TwitchConfig("rnbl5u9yyomookje7dot24to0df91u", "sid0003", "5fiftysix6"));
                 _client.ChatMessageReceived += OnMessageReceived;
                 _currentThread = new Thread(new ThreadStart(_client.StartReceive));
                 _currentThread.Start();
@@ -46,7 +43,6 @@ namespace HollowTwitch
         private void OnMessageReceived(string message)
         {
             Logger.Log("Twitch chat: " + message);
-
             //handle commands here
         }
     }

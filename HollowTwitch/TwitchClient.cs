@@ -10,26 +10,34 @@ namespace HollowTwitch
     class TwitchClient : IDisposable
     {
         private TcpClient _client;
-        private readonly StreamReader _output;
-        private readonly StreamWriter _input;
+        private StreamReader _output;
+        private StreamWriter _input;
+
+        private readonly TwitchConfig _config;
 
         public event Action<string> ChatMessageReceived;
         public event Action<string> RawPayload;
-        public TwitchClient(string oauth, string username, string channel)
+
+        public TwitchClient(TwitchConfig config)
+        {
+            _config = config;
+            ConnectAndAuthenticate(config);
+            this.RawPayload += ProcessMessage;
+        }
+
+        private void ConnectAndAuthenticate(TwitchConfig config)
         {
             _client = new TcpClient("irc.twitch.tv", 6667);
-            
+
             _output = new StreamReader(_client.GetStream());
             _input = new StreamWriter(_client.GetStream())
             {
                 AutoFlush = true
             };
 
-            SendMessage($"PASS oauth:{oauth}");
-            SendMessage($"NICK {username}");
-            SendMessage($"JOIN #{channel}");
-          
-            this.RawPayload += ProcessMessage;
+            SendMessage($"PASS oauth:{config.Token}");
+            SendMessage($"NICK {config.Username}");
+            SendMessage($"JOIN #{config.Channel}");
         }
 
         private void ProcessMessage(string message)
@@ -51,19 +59,19 @@ namespace HollowTwitch
 
         public void StartReceive()
         {
-            if (!_client.Connected)
-            {
-                _client.Close();
-                _client = new TcpClient("irc://irc-ws.chat.twitch.tv", 6667);
-            }
             while (true)
             {
+                if (!_client.Connected)
+                {
+                    Dispose();
+                    ConnectAndAuthenticate(_config);
+                }
                 var message = _output.ReadLine();
                 RawPayload?.Invoke(message);
             }
         }
 
-        
+
         private void SendMessage(string message)
             => _input.WriteLine(message);
 

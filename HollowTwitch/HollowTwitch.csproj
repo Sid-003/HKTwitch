@@ -51,6 +51,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TwitchConfig.cs" />
     <Compile Include="TwitchMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TwitchClient.cs" />
