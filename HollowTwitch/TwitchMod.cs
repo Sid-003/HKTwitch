@@ -1,4 +1,5 @@
-﻿using Modding;
+﻿using HollowTwitch.Commands;
+using Modding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace HollowTwitch
     {
         private TwitchClient _client;
         private Thread _currentThread;
-
+        private CommandProcessor _p;
         public override void Initialize()
         {
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoad;
@@ -24,8 +25,10 @@ namespace HollowTwitch
         {
             if (!once)
             {
+                _p = new CommandProcessor();
+                _p.RegisterCommands<Player>();
                 Logger.Log("starting this shit");              
-                _client = new TwitchClient(new TwitchConfig("rnbl5u9yyomookje7dot24to0df91u", "sid0003", "5fiftysix6"));
+                _client = new TwitchClient(new TwitchConfig("rnbl5u9yyomookje7dot24to0df91u", "sid0003", "sid0003"));
                 _client.ChatMessageReceived += OnMessageReceived;
                 _currentThread = new Thread(new ThreadStart(_client.StartReceive));
                 _currentThread.Start();
@@ -44,6 +47,12 @@ namespace HollowTwitch
         {
             Logger.Log("Twitch chat: " + message);
             //handle commands here
+            char prefix = '$';
+            if (message.StartsWith(prefix.ToString()))
+            {
+                var command = message.TrimStart(prefix);
+                _p.Execute(command);
+            }
         }
     }
 }
