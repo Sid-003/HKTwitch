@@ -1,11 +1,10 @@
 ﻿using HollowTwitch.Entities;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 
 namespace HollowTwitch
 {
@@ -25,26 +24,33 @@ namespace HollowTwitch
 
         public void Execute(string command)
         {
-            Modding.Logger.Log("reached here execute");
             var pieces = command.Split(Seperator);
             var found = _commands.Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase)).OrderByDescending(x => x.Priority);
-            Modding.Logger.Log("reached here execute past command finding");
             foreach (var c in found)
             {
-                Modding.Logger.Log("reached loop");
+                if (!c.Preconditions.All(x => x.Check()))
+                    continue;
+
                 var args = pieces.Skip(1);
-                var sucess = BuildArguments(args, c, out var parsed);
-                if (!sucess)
+                if (!BuildArguments(args, c, out var parsed))
                     continue;
                 try
-                {                 
-                    c.MethodInfo.Invoke(c.ClassInstance, parsed);
+                {
+                    Modding.Logger.Log("got here");
+                    if(c.MethodInfo.ReturnType == typeof(IEnumerator))
+                    {
+                        var t = (IEnumerator)c.MethodInfo.Invoke(c.ClassInstance, parsed);
+                        GameManager.instance.StartCoroutine(t);
+                    }
+                    else
+                    {
+                        _ = c.MethodInfo.Invoke(c.ClassInstance, parsed);
+                    }
                 }
                 catch (Exception e)
                 {
                     Modding.Logger.Log(e.ToString());
                 }
-                Modding.Logger.Log("invoked");
             }
                                  
 

@@ -13,6 +13,9 @@ namespace HollowTwitch.Entities
         public int Priority { get; set; }
         public ParameterInfo[] Parameters { get; set; }
         public object ClassInstance { get; set; }
+        public IEnumerable<PreconditionAttribute> Preconditions { get; set; }
+
+
         public Command(string name, MethodInfo method, Type classInfo)
         {
             this.Name = name;
@@ -20,6 +23,7 @@ namespace HollowTwitch.Entities
             this.Parameters = this.MethodInfo.GetParameters();
             this.Priority = Parameters.Length;
             this.ClassInstance = Activator.CreateInstance(classInfo);
+            this.Preconditions = method.GetCustomAttributes(typeof(PreconditionAttribute), false).Cast<PreconditionAttribute>();
         }
 
     }

@@ -57,6 +57,8 @@
     <Compile Include="Entities\Command.cs" />
     <Compile Include="Entities\HKCommandAttribute.cs" />
     <Compile Include="Entities\IArgumentParser.cs" />
+    <Compile Include="Entities\PreconditionAttribute.cs" />
+    <Compile Include="Precondition\CooldownAttribute.cs" />
     <Compile Include="TwitchConfig.cs" />
     <Compile Include="TwitchMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

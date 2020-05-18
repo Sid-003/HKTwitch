@@ -4,16 +4,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace HollowTwitch.Commands
 {
     public class Player
     {
         [HKCommand("naildamage")]
-        public void SetNailDamage(int d)
+        public IEnumerator SetNailDamage(int d)
         {
             Modding.Logger.Log("reached the actual command");
+            yield return new WaitForSeconds(10f);
+            Modding.Logger.Log("waited and did shit");
             PlayerData.instance.nailDamage = d;
+            
             PlayMakerFSM.BroadcastEvent("UPDATE NAIL DAMANGE");
         }
         
