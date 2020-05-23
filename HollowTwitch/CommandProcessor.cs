@@ -39,7 +39,7 @@ namespace HollowTwitch
                     Modding.Logger.Log("got here");
                     if(c.MethodInfo.ReturnType == typeof(IEnumerator))
                     {
-                        var t = (IEnumerator)c.MethodInfo.Invoke(c.ClassInstance, parsed);
+                        var t = c.MethodInfo.Invoke(c.ClassInstance, parsed) as IEnumerator;
                         GameManager.instance.StartCoroutine(t);
                     }
                     else
