@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ModCommon;
 using System.Text;
 using UnityEngine;
 
@@ -17,8 +18,6 @@ namespace HollowTwitch.Commands
         [HKCommand("naildamage")]
         public void SetNailDamage(int d)
         {
-            Modding.Logger.Log("reached the actual command");
-            Modding.Logger.Log("waited and did shit");
             PlayerData.instance.nailDamage = d;       
             PlayMakerFSM.BroadcastEvent("UPDATE NAIL DAMANGE");
         }
@@ -79,11 +78,23 @@ namespace HollowTwitch.Commands
         private void InvertControls(On.HeroController.orig_Move orig, HeroController self, float move_direction)
         {
             if (_inverted)
-            {
                 move_direction = -move_direction;
-                Modding.Logger.Log("inverted the ddirection");
-            }
             orig(self, move_direction);
         }
+
+        [HKCommand("spawn")]
+        [Cooldown(60, 3)]
+        public IEnumerator SpawnEnemy(string name)
+        {    
+            Modding.Logger.Log("spawn called");
+            var enemy = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects[name], HeroController.instance.gameObject.transform.position, Quaternion.identity);
+            UnityEngine.Object.DontDestroyOnLoad(enemy);
+            yield return new WaitForSeconds(1);
+            enemy.SetActive(true);
+            Modding.Logger.Log("ended");
+        }
+
+        
+      
     }
 }

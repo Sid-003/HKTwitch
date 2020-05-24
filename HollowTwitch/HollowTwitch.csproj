@@ -35,6 +35,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="ModCommon">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\ModCommon.dll</HintPath>
+    </Reference>
     <Reference Include="PlayMaker">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\PlayMaker.dll</HintPath>
     </Reference>
@@ -64,6 +67,7 @@
     <Compile Include="Entities\HKCommandAttribute.cs" />
     <Compile Include="Entities\IArgumentParser.cs" />
     <Compile Include="Entities\PreconditionAttribute.cs" />
+    <Compile Include="ObjectLoader.cs" />
     <Compile Include="Precondition\CooldownAttribute.cs" />
     <Compile Include="TwitchConfig.cs" />
     <Compile Include="TwitchMod.cs" />

@@ -2,9 +2,11 @@
 using Modding;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using UnityEngine;
 
 namespace HollowTwitch
 {
@@ -13,12 +15,17 @@ namespace HollowTwitch
         private TwitchClient _client;
         private Thread _currentThread;
         private CommandProcessor _p;
-        public override void Initialize()
-        {
-            ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoad;
 
+      
+        public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
+        {
+            ObjectLoader.Load(preloadedObjects);
+            ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoad;
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
         }
+
+        public override List<(string, string)> GetPreloadNames()
+               => ObjectLoader.ObjectList.Values.ToList();
 
         static bool once;
         private void OnSaveGameLoad(SaveGameData data)
@@ -26,13 +33,12 @@ namespace HollowTwitch
             if (!once)
             {
                 _p = new CommandProcessor();
-                _p.RegisterCommands<Player>();
-                Logger.Log("starting this shit");              
-                _client = new TwitchClient(new TwitchConfig("rnbl5u9yyomookje7dot24to0df91u", "sid0003", "sid0003"));
+                _p.RegisterCommands<Player>();          
+                _client = new TwitchClient(new TwitchConfig("lmao gottem", "sid0003", "sid0003"));
                 _client.ChatMessageReceived += OnMessageReceived;
                 _currentThread = new Thread(new ThreadStart(_client.StartReceive));
                 _currentThread.Start();
-                Logger.Log("started receiving");
+                Modding.Logger.Log("started receiving");
                 once = true;
             }
         }
@@ -45,7 +51,7 @@ namespace HollowTwitch
 
         private void OnMessageReceived(string message)
         {
-            Logger.Log("Twitch chat: " + message);
+            Modding.Logger.Log("Twitch chat: " + message);
             //handle commands here
             char prefix = '$';
             if (message.StartsWith(prefix.ToString()))

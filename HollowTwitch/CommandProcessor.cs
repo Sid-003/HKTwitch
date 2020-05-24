@@ -1,4 +1,5 @@
 ﻿using HollowTwitch.Entities;
+using HollowTwitch.Precondition;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,7 +29,19 @@ namespace HollowTwitch
             var found = _commands.Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase)).OrderByDescending(x => x.Priority);
             foreach (var c in found)
             {
-                if (!c.Preconditions.All(x => x.Check()))
+                /*if (!c.Preconditions.All(x => x.Check()))
+                    continue;*/
+                bool allGood = true;
+                foreach(var p in c.Preconditions)
+                {
+                    if(p.Check() != true)
+                    {
+                        allGood = false;
+                        if(c.Preconditions.FirstOrDefault() is CooldownAttribute cooldown)
+                            Modding.Logger.Log($"The coodown for command {c.Name} failed. The cooldown has {cooldown.MaxUses - cooldown.Uses} and will reset in {cooldown.ResetTime - DateTimeOffset.Now}");       
+                    }
+                }
+                if (!allGood)
                     continue;
 
                 var args = pieces.Skip(1);
