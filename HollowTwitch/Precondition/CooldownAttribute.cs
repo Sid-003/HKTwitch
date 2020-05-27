@@ -23,9 +23,7 @@ namespace HollowTwitch.Precondition
         public CooldownAttribute(double seconds, int maxUses = 1)
             => (Reset, ResetTime, MaxUses) = (TimeSpan.FromSeconds(seconds), DateTimeOffset.Now + Reset, maxUses);
 
-        public CooldownAttribute(TimeSpan resetAfter, int maxUses = 1)
-            =>  (Reset, ResetTime, MaxUses) = (resetAfter, DateTimeOffset.Now + Reset, maxUses);
-
+        
         public override bool Check()
         {
             if(DateTimeOffset.Now > ResetTime)

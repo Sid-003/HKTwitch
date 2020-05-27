@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
+using ModCommon.Util;
+using ModCommon;
 using UnityEngine;
+using HutongGames.PlayMaker.Actions;
 
 namespace HollowTwitch
 {
@@ -17,6 +20,7 @@ namespace HollowTwitch
                 UnityEngine.Object.Destroy(obj.GetComponent<PersistentBoolItem>());
             }), ("Deepnest_East_11", "Super Spitter")
             },
+            { ("pv", null), ("GG_Hollow_Knight","Battle Scene/HK Prime")}
         };
 
         public static Dictionary<string, GameObject> InstantiableObjects { get; private set; } = new Dictionary<string, GameObject>();

@@ -109,12 +109,13 @@ namespace HollowTwitch
         public void RegisterCommands<T>()
         {
             var methods = typeof(T).GetMethods(BindingFlags.Public | BindingFlags.Instance);
+            var instance = Activator.CreateInstance(typeof(T));
             foreach (var method in methods)
             {
                 if((method.GetCustomAttributes(typeof(HKCommandAttribute), false).FirstOrDefault() is HKCommandAttribute attribute))
                 {
                     var name = attribute.Name;
-                    _commands.Add(new Command(name, method, typeof(T)));
+                    _commands.Add(new Command(name, method, instance));
                     Modding.Logger.Log(name);
                     Modding.Logger.Log("added the command");
                 }

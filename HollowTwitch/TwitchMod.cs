@@ -21,19 +21,30 @@ namespace HollowTwitch
         {
             ObjectLoader.Load(preloadedObjects);
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoad;
+            ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
         }
 
         public override List<(string, string)> GetPreloadNames()
                => ObjectLoader.ObjectList.Values.ToList();
 
-        static bool once;
+        
         private void OnSaveGameLoad(SaveGameData data)
+            => ReceiveCommands();
+
+        private void OnNewGame()
+            => ReceiveCommands();
+
+        private static bool once;
+        
+        private void ReceiveCommands()
         {
             if (!once)
             {
                 _p = new CommandProcessor();
-                _p.RegisterCommands<Player>();          
+                _p.RegisterCommands<Player>();
+                _p.RegisterCommands<Enemies>();
+              
                 _client = new TwitchClient(new TwitchConfig("lmao gottem", "sid0003", "sid0003"));
                 _client.ChatMessageReceived += OnMessageReceived;
                 _currentThread = new Thread(new ThreadStart(_client.StartReceive));

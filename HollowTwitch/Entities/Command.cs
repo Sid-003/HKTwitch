@@ -16,13 +16,13 @@ namespace HollowTwitch.Entities
         public IEnumerable<PreconditionAttribute> Preconditions { get; set; }
 
 
-        public Command(string name, MethodInfo method, Type classInfo)
+        public Command(string name, MethodInfo method, object classInstance)
         {
             this.Name = name;
             this.MethodInfo = method;
             this.Parameters = this.MethodInfo.GetParameters();
             this.Priority = Parameters.Length;
-            this.ClassInstance = Activator.CreateInstance(classInfo);
+            this.ClassInstance = classInstance;
             this.Preconditions = method.GetCustomAttributes(typeof(PreconditionAttribute), false).Cast<PreconditionAttribute>();
         }
 
