@@ -53,25 +53,38 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandProcessor.cs" />
+    <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
+    <Compile Include="Entities\Attributes\SummaryAttribute.cs" />
     <Compile Include="ModHelpers\BindingsHelper.cs" />
     <Compile Include="Commands\Enemies.cs" />
     <Compile Include="Commands\Player.cs" />
     <Compile Include="Entities\Command.cs" />
-    <Compile Include="Entities\HKCommandAttribute.cs" />
+    <Compile Include="Entities\Attributes\HKCommandAttribute.cs" />
     <Compile Include="Entities\IArgumentParser.cs" />
-    <Compile Include="Entities\PreconditionAttribute.cs" />
+    <Compile Include="Entities\Attributes\PreconditionAttribute.cs" />
     <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="ModHelpers\SanicHelper.cs" />
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="Precondition\CooldownAttribute.cs" />
+    <Compile Include="Precondition\EnsureFloatAttribute.cs" />
     <Compile Include="TwitchConfig.cs" />
     <Compile Include="TwitchMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

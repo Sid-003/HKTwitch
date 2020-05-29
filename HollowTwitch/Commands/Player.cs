@@ -1,22 +1,46 @@
 using HollowTwitch.Commands.ModHelpers;
 using HollowTwitch.Entities;
+using HollowTwitch.ModHelpers;
 using HollowTwitch.Precondition;
+using ModCommon.Util;
+using System;
 using System.Collections;
+using System.Net;
 using UnityEngine;
-
+using UnityEngine.Networking;
 namespace HollowTwitch.Commands
 {
     public class Player
-    {   
+    {
         //most(all) of the commands stolen from Chaos Mod by seanpr
-
+        private GameObject _maggot;
+     
         public Player()
         {
             On.HeroController.Move += InvertControls;
             On.NailSlash.StartSlash += ChangeNailScale;
-        }
+            On.HeroController.CheckTouchingGround += OnTouchingGround;
+
+            IEnumerator GetMaggotPrime()
+            {
+                var www = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/410556297046523905/715658438654558238/maggotprimebig.png");
+                yield return www.SendWebRequest();
+
+                Texture texture = DownloadHandlerTexture.GetContent(www);
+                var maggotPrime = Sprite.Create(texture as Texture2D, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                Modding.Logger.Log("createed texture");
+                _maggot = new GameObject("maggot");
+                _maggot.AddComponent<SpriteRenderer>().sprite = maggotPrime;
+                _maggot.SetActive(false);
+                UnityEngine.Object.DontDestroyOnLoad(_maggot);
+            
+            }
+
+            GameManager.instance.StartCoroutine(GetMaggotPrime());
+        }      
 
         [HKCommand("naildamage")]
+        [Summary("Allows users to set the nail damage for 30 seconds.")]
         [Cooldown(60)]
         public IEnumerator SetNailDamage(int d)
         {
@@ -29,6 +53,7 @@ namespace HollowTwitch.Commands
         }
         
         [HKCommand("ax2uBlind")]
+        [Summary("Enables darkness for some time.")]
         [Cooldown(30)]
         public IEnumerator Darken()
         {
@@ -42,23 +67,25 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("timescale")]
+        [Summary("Changes the timescale of the game for the time specified.\nTime Limit: [5, 60]\nScale Limit: [0.01, 2]")]
         [Cooldown(60 * 2)]
-        public IEnumerator ChangeTimescale(float scale, float seconds)
+        public IEnumerator ChangeTimescale([EnsureFloat(0.01f, 2f)]float scale, [EnsureFloat(5, 60)]float seconds)
         {
-            scale = Mathf.Clamp(scale, 1f, 3f);
-            seconds = Mathf.Clamp(seconds, 0, 60);
-            Time.timeScale = Time.timeScale == 0f ? 0f : scale;
+            Modding.Logger.Log(scale);
+            Modding.Logger.Log(seconds);
+
+            SanicHelper.TimeScale = scale;
+            Time.timeScale = Time.timeScale == 0 ? 0 : scale;
             yield return new WaitForSecondsRealtime(seconds);
-            Time.timeScale = Time.timeScale == 0f ? 0f : 1f;
+            Time.timeScale = Time.timeScale == 0 ? 0f : 1;
+            SanicHelper.TimeScale = 1;
         }
 
-        
-
         [HKCommand("gravity")]
+        [Summary("Changes the gravity to the specified scale. Scale Limit: [0.2, 1.9]")]
         [Cooldown(60 * 2)]
-        public IEnumerator ChangeGravity(float scale)
+        public IEnumerator ChangeGravity([EnsureFloat(0.2f, 1.90f)]float scale)
         {
-            scale = Mathf.Clamp(scale, 0.2f, 1.90f);
             var rigidBody = HeroController.instance.gameObject.GetComponent<Rigidbody2D>();
             float def = rigidBody.gravityScale;
             rigidBody.gravityScale = scale;
@@ -70,6 +97,7 @@ namespace HollowTwitch.Commands
         private bool _inverted = false;
 
         [HKCommand("invertcontrols")]
+        [Summary("Inverts the move direction of the player.")]
         [Cooldown(30)]
         public void InvertControls()
             => _inverted = !_inverted;
@@ -84,10 +112,11 @@ namespace HollowTwitch.Commands
         private float _nailScale = 1f;
 
         [HKCommand("nailscale")]
-        [Cooldown(60 * 2)]
-        public IEnumerator NailScale(float nailScale)
+        [Summary("Makes the nail huge or tiny.")]
+        public IEnumerator NailScale([EnsureFloat(1f, 5f)]float nailScale)
         {
-            _nailScale = Mathf.Clamp(nailScale, 1f, 5f);
+            Modding.Logger.Log(nailScale);
+            _nailScale = nailScale;
             yield return new WaitForSecondsRealtime(30f);
             _nailScale = 1f;
         }
@@ -96,15 +125,6 @@ namespace HollowTwitch.Commands
         {
             orig(self);
             self.transform.localScale *= _nailScale;
-        }
-
-
-        [HKCommand("invisible")]
-        [Cooldown(60)]
-        public void SetInvisible()
-        {
-            var renderer = HeroController.instance.GetComponent<MeshRenderer>();
-            renderer.enabled ^= true;
         }
 
         [HKCommand("bindings")]
@@ -117,6 +137,73 @@ namespace HollowTwitch.Commands
             BindingsHelper.ShowIcons();
             yield return new WaitForSecondsRealtime(60);     
             BindingsHelper.Unload();
+        }
+
+        private bool _floorislava = false;
+        [HKCommand("floorislava")]
+        [Cooldown(60 * 2)]
+        public IEnumerator FloorIsLava([EnsureFloat(10, 60)]float seconds)
+        {
+            //stolen from zaliant
+            _floorislava = true;
+            yield return new WaitForSecondsRealtime(seconds);
+            _floorislava = false;
+        }
+
+        private bool OnTouchingGround(On.HeroController.orig_CheckTouchingGround orig, HeroController self)
+        {
+            var touching = orig(self);
+            if (touching && _floorislava && !GameManager.instance.IsInSceneTransition)
+                self.TakeDamage(null, GlobalEnums.CollisionSide.bottom, 1, 69420);
+            return touching;
+        }
+
+
+
+        [HKCommand("maggotPrime")]
+        [Cooldown(60 * 5)]
+        public IEnumerator EnableMaggotPrimeSkin()
+        {
+            var go = UnityEngine.Object.Instantiate(_maggot, HeroController.instance.transform);
+            go.SetActive(true);
+            var renderer = HeroController.instance.GetComponent<MeshRenderer>();
+            renderer.enabled = false;
+            yield return new WaitForSecondsRealtime(60 * 2);
+            UnityEngine.Object.DestroyImmediate(go);
+            renderer.enabled = true;
+        }
+       
+
+        [HKCommand("toggle")]
+        [Cooldown(60 * 10)]
+        public IEnumerator ToggleAbility(string ability)
+        {
+            float time = 60 * 5;
+            switch (ability)
+            {
+                case "dash":
+                    PlayerData.instance.canDash ^= true;
+                    yield return new WaitForSecondsRealtime(time);
+                    PlayerData.instance.canDash ^= true;
+                    break;
+                case "superdash":
+                    PlayerData.instance.canSuperDash ^= true;
+                    yield return new WaitForSecondsRealtime(time);
+                    PlayerData.instance.canSuperDash ^= true;
+                    break;
+                case "claw":
+                    PlayerData.instance.canWallJump ^= true;
+                    yield return new WaitForSecondsRealtime(time);
+                    PlayerData.instance.canWallJump ^= true;
+                    break;
+                case "wings":
+                    PlayerData.instance.hasDoubleJump ^= true;
+                    yield return new WaitForSecondsRealtime(time);
+                    PlayerData.instance.hasDoubleJump ^= true;
+                    break;
+            }
+
+            yield break;
         }
 
     }

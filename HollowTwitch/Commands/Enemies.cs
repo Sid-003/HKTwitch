@@ -87,5 +87,19 @@ namespace HollowTwitch.Commands
             cp.xMax = x + castRight.distance;
             cp.xMin = x - castLeft.distance;
         }
+
+
+        [HKCommand("duplicateboss")]
+        public IEnumerator DuplicateBoss()
+        {
+            if (BossSceneController.Instance == null || BossSceneController.Instance?.bosses == null)
+                yield break;
+            foreach(var boss in BossSceneController.Instance?.bosses)
+            {
+                _ = UnityEngine.Object.Instantiate(boss.gameObject, boss.gameObject.transform.position, boss.gameObject.transform.rotation);
+                yield return new WaitForSeconds(0.2f);
+            }
+            yield break;
+        }
     }
 }

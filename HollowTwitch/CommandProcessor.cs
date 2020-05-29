@@ -1,4 +1,5 @@
 ﻿using HollowTwitch.Entities;
+using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
 using System;
 using System.Collections;
@@ -79,6 +80,8 @@ namespace HollowTwitch
                 var p = ParseParameter(args.ElementAt(i), parameters[i].ParameterType);
                 if (p is null)
                     return false;
+                if (parameters[i].GetCustomAttributes(typeof(EnsureParameterAttribute), false).FirstOrDefault() is EnsureParameterAttribute epa)
+                    p = epa.Ensure(p);
                 built.Add(p);
             }
             parsed = built.ToArray();
