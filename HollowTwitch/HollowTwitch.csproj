@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandProcessor.cs" />
+    <Compile Include="Commands\Area.cs" />
     <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
     <Compile Include="Entities\Attributes\SummaryAttribute.cs" />
     <Compile Include="ModHelpers\BindingsHelper.cs" />
@@ -81,10 +82,12 @@
     <Compile Include="Entities\IArgumentParser.cs" />
     <Compile Include="Entities\Attributes\PreconditionAttribute.cs" />
     <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="ModHelpers\DarknessHelper.cs" />
     <Compile Include="ModHelpers\SanicHelper.cs" />
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="Precondition\CooldownAttribute.cs" />
     <Compile Include="Precondition\EnsureFloatAttribute.cs" />
+    <Compile Include="Precondition\RequireSceneChangeAttribute.cs" />
     <Compile Include="TwitchConfig.cs" />
     <Compile Include="TwitchMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -20,7 +20,11 @@ namespace HollowTwitch
                 UnityEngine.Object.Destroy(obj.GetComponent<PersistentBoolItem>());
             }), ("Deepnest_East_11", "Super Spitter")
             },
-            { ("pv", null), ("GG_Hollow_Knight","Battle Scene/HK Prime")}
+            { ("pv", null), ("GG_Hollow_Knight","Battle Scene/HK Prime")},
+            { ("spike", (GameObject obj) => 
+            {
+                  obj.AddComponent<DamageHero>().damageDealt = 1;
+            }), ("Room_Colosseum_Bronze", "Colosseum Manager/Ground Spikes/Colosseum Spike")}
         };
 
         public static Dictionary<string, GameObject> InstantiableObjects { get; private set; } = new Dictionary<string, GameObject>();

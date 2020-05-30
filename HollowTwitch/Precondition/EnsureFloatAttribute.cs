@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace HollowTwitch.Precondition
 {
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = true)]
     public class EnsureFloatAttribute : EnsureParameterAttribute
     {
         private float _min;

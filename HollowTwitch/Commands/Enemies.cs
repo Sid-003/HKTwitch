@@ -21,7 +21,6 @@ namespace HollowTwitch.Commands
             {
                 Modding.Logger.Log(string.Join(", ", AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().Select(x => x.Name).ToArray()));
                 _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().FirstOrDefault(x => x.Name == "Prince");
-
             }
         }
 
@@ -31,7 +30,6 @@ namespace HollowTwitch.Commands
         {
             Modding.Logger.Log("spawn called");
             var enemy = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects[name], HeroController.instance.gameObject.transform.position, Quaternion.identity);
-            UnityEngine.Object.DontDestroyOnLoad(enemy);
             yield return new WaitForSecondsRealtime(1);
             enemy.SetActive(true);
             Modding.Logger.Log("ended");

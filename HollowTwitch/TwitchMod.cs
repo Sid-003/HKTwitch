@@ -44,7 +44,7 @@ namespace HollowTwitch
                 _p = new CommandProcessor();
                 _p.RegisterCommands<Player>();
                 _p.RegisterCommands<Enemies>();
-              
+                _p.RegisterCommands<Area>();
                 _client = new TwitchClient(new TwitchConfig("lmao gottem", "sid0003", "sid0003"));
                 _client.ChatMessageReceived += OnMessageReceived;
                 _currentThread = new Thread(new ThreadStart(_client.StartReceive));

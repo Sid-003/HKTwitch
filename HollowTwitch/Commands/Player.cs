@@ -1,13 +1,18 @@
+using GlobalEnums;
 using HollowTwitch.Commands.ModHelpers;
 using HollowTwitch.Entities;
 using HollowTwitch.ModHelpers;
 using HollowTwitch.Precondition;
+using HutongGames.PlayMaker;
 using ModCommon.Util;
+using Modding;
 using System;
 using System.Collections;
 using System.Net;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
+
 namespace HollowTwitch.Commands
 {
     public class Player
@@ -20,7 +25,7 @@ namespace HollowTwitch.Commands
             On.HeroController.Move += InvertControls;
             On.NailSlash.StartSlash += ChangeNailScale;
             On.HeroController.CheckTouchingGround += OnTouchingGround;
-
+            ModHooks.Instance.DashVectorHook += OnDashVector;
             IEnumerator GetMaggotPrime()
             {
                 var www = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/410556297046523905/715658438654558238/maggotprimebig.png");
@@ -37,7 +42,7 @@ namespace HollowTwitch.Commands
             }
 
             GameManager.instance.StartCoroutine(GetMaggotPrime());
-        }      
+        }
 
         [HKCommand("naildamage")]
         [Summary("Allows users to set the nail damage for 30 seconds.")]
@@ -52,28 +57,30 @@ namespace HollowTwitch.Commands
             PlayMakerFSM.BroadcastEvent("UPDATE NAIL DAMANGE");
         }
         
+        
         [HKCommand("ax2uBlind")]
         [Summary("Enables darkness for some time.")]
-        [Cooldown(30)]
-        public IEnumerator Darken()
+        [Cooldown(60)]
+        public IEnumerator Blind()
         {
-            HeroController.instance.vignette.enabled = true;
-            HeroController.instance.vignetteFSM.SetState("Dark 2");
+            DarknessHelper.Darken();
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoad;
+            yield return new WaitForSecondsRealtime(30);
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoad;
+            DarknessHelper.Lighten();
+        }
 
-            yield return new WaitForSecondsRealtime(20);
-
-            HeroController.instance.vignetteFSM.SetState("Normal");
-            HeroController.instance.vignette.enabled = false;
+        private void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
+        {
+            if (HeroController.instance == null) return;
+            DarknessHelper.Darken();
         }
 
         [HKCommand("timescale")]
-        [Summary("Changes the timescale of the game for the time specified.\nTime Limit: [5, 60]\nScale Limit: [0.01, 2]")]
+        [Summary("Changes the timescale of the game for the time specified.")]
         [Cooldown(60 * 2)]
         public IEnumerator ChangeTimescale([EnsureFloat(0.01f, 2f)]float scale, [EnsureFloat(5, 60)]float seconds)
         {
-            Modding.Logger.Log(scale);
-            Modding.Logger.Log(seconds);
-
             SanicHelper.TimeScale = scale;
             Time.timeScale = Time.timeScale == 0 ? 0 : scale;
             yield return new WaitForSecondsRealtime(seconds);
@@ -90,23 +97,55 @@ namespace HollowTwitch.Commands
             float def = rigidBody.gravityScale;
             rigidBody.gravityScale = scale;
             yield return new WaitForSecondsRealtime(30);
-            rigidBody.gravityScale = def;
+            rigidBody.gravityScale = 0.7f;
         }
 
 
         private bool _inverted = false;
+        private bool _slippery = false;
+        private float _lastMoveDir = 0;
 
         [HKCommand("invertcontrols")]
         [Summary("Inverts the move direction of the player.")]
-        [Cooldown(30)]
-        public void InvertControls()
-            => _inverted = !_inverted;
+        [Cooldown(60)]
+        public IEnumerator InvertControls()
+        {
+            _inverted = true;
+            yield return new WaitForSecondsRealtime(60);
+            _inverted = false;
+        }
         
+        [HKCommand("slippery")]
+        public IEnumerator Slipery()
+        {
+            _slippery = true;
+            yield return new WaitForSecondsRealtime(60);
+            _slippery = false;
+        }
+
         private void InvertControls(On.HeroController.orig_Move orig, HeroController self, float move_direction)
         {
+            if (HeroController.instance.transitionState != HeroTransitionState.WAITING_TO_TRANSITION)
+            {
+                orig(self, move_direction);
+                return;
+            }
+
+            if (move_direction == 0f && _slippery) 
+                move_direction = _lastMoveDir == 0f ? 1f : _lastMoveDir;
+
             if (_inverted)
                 move_direction = -move_direction;
             orig(self, move_direction);
+
+            _lastMoveDir = move_direction;
+            
+        }
+        private Vector2 OnDashVector(Vector2 change)
+        {
+            if (_inverted)
+                return -1 * change;
+            return change;
         }
 
         private float _nailScale = 1f;
@@ -115,7 +154,6 @@ namespace HollowTwitch.Commands
         [Summary("Makes the nail huge or tiny.")]
         public IEnumerator NailScale([EnsureFloat(1f, 5f)]float nailScale)
         {
-            Modding.Logger.Log(nailScale);
             _nailScale = nailScale;
             yield return new WaitForSecondsRealtime(30f);
             _nailScale = 1f;
@@ -154,11 +192,9 @@ namespace HollowTwitch.Commands
         {
             var touching = orig(self);
             if (touching && _floorislava && !GameManager.instance.IsInSceneTransition)
-                self.TakeDamage(null, GlobalEnums.CollisionSide.bottom, 1, 69420);
+                self.TakeDamage(null, CollisionSide.bottom, 1, 69420);
             return touching;
         }
-
-
 
         [HKCommand("maggotPrime")]
         [Cooldown(60 * 5)]
@@ -172,29 +208,28 @@ namespace HollowTwitch.Commands
             UnityEngine.Object.DestroyImmediate(go);
             renderer.enabled = true;
         }
-       
 
         [HKCommand("toggle")]
-        [Cooldown(60 * 10)]
+        [Cooldown(60 * 5)]
         public IEnumerator ToggleAbility(string ability)
         {
-            float time = 60 * 5;
+            float time = 45;
             switch (ability)
             {
                 case "dash":
-                    PlayerData.instance.canDash ^= true;
+                    PlayerData.instance.hasDash ^= true;
                     yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.canDash ^= true;
+                    PlayerData.instance.hasDash ^= true;
                     break;
                 case "superdash":
-                    PlayerData.instance.canSuperDash ^= true;
+                    PlayerData.instance.hasSuperDash ^= true;
                     yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.canSuperDash ^= true;
+                    PlayerData.instance.hasSuperDash ^= true;
                     break;
                 case "claw":
-                    PlayerData.instance.canWallJump ^= true;
+                    PlayerData.instance.hasWalljump ^= true;
                     yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.canWallJump ^= true;
+                    PlayerData.instance.hasWalljump ^= true;
                     break;
                 case "wings":
                     PlayerData.instance.hasDoubleJump ^= true;
@@ -205,6 +240,5 @@ namespace HollowTwitch.Commands
 
             yield break;
         }
-
     }
 }
