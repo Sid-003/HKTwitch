@@ -28,7 +28,7 @@ namespace HollowTwitch.Commands
             ModHooks.Instance.DashVectorHook += OnDashVector;
             IEnumerator GetMaggotPrime()
             {
-                var www = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/410556297046523905/715658438654558238/maggotprimebig.png");
+                var www = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/410556297046523905/716824653280313364/hwurmpU.png");
                 yield return www.SendWebRequest();
 
                 Texture texture = DownloadHandlerTexture.GetContent(www);
@@ -116,6 +116,7 @@ namespace HollowTwitch.Commands
         }
         
         [HKCommand("slippery")]
+        [Summary("Makes the floor have no friction at all. Lasts for 60 seconds.")]
         public IEnumerator Slipery()
         {
             _slippery = true;
@@ -196,7 +197,8 @@ namespace HollowTwitch.Commands
             return touching;
         }
 
-        [HKCommand("maggotPrime")]
+        [HKCommand("hwurmpU")]
+        [Summary("I don't even know honestly.")]
         [Cooldown(60 * 5)]
         public IEnumerator EnableMaggotPrimeSkin()
         {
@@ -210,7 +212,8 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("toggle")]
-        [Cooldown(60 * 5)]
+        [Summary("Toogles an ability for 45 seconds.")]
+        [Cooldown(60 * 4)]
         public IEnumerator ToggleAbility(string ability)
         {
             float time = 45;

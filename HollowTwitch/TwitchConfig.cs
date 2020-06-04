@@ -1,18 +1,15 @@
-﻿namespace HollowTwitch
+﻿using Modding;
+
+namespace HollowTwitch
 {
-    public class TwitchConfig
+    public class TwitchConfig : ModSettings
     {
-        public string Token { get; }
+        public string Token;
 
-        public string Username { get; }
+        public string Username;
 
-        public string Channel { get; }
+        public string Channel;
 
-        public TwitchConfig(string oauth, string username, string channel)
-        {
-            Token = oauth;
-            Username = username;
-            Channel = channel;
-        }
+        public string Prefix;
     }
 }

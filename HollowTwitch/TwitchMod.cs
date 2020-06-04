@@ -3,6 +3,7 @@ using Modding;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,8 +16,10 @@ namespace HollowTwitch
         private TwitchClient _client;
         private Thread _currentThread;
         private CommandProcessor _p;
+        private TwitchConfig _config =  new TwitchConfig();
 
-      
+        public override ModSettings GlobalSettings { get => _config; set => _config = value as TwitchConfig; }
+
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
             ObjectLoader.Load(preloadedObjects);
@@ -45,7 +48,8 @@ namespace HollowTwitch
                 _p.RegisterCommands<Player>();
                 _p.RegisterCommands<Enemies>();
                 _p.RegisterCommands<Area>();
-                _client = new TwitchClient(new TwitchConfig("lmao gottem", "sid0003", "sid0003"));
+                _p.RegisterCommands<Caméra>();
+                _client = new TwitchClient(_config);
                 _client.ChatMessageReceived += OnMessageReceived;
                 _currentThread = new Thread(new ThreadStart(_client.StartReceive));
                 _currentThread.Start();
@@ -64,10 +68,11 @@ namespace HollowTwitch
         {
             Modding.Logger.Log("Twitch chat: " + message);
             //handle commands here
-            char prefix = '$';
-            if (message.StartsWith(prefix.ToString()))
+
+            var index = message.IndexOf(_config.Prefix);
+            if (index == 0)
             {
-                var command = message.TrimStart(prefix);
+                var command = message.Substring(_config.Prefix.Length).Trim();
                 _p.Execute(command);
             }
         }

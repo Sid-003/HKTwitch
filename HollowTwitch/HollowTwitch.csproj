@@ -56,6 +56,9 @@
     <Reference Include="UnityEngine.ImageConversionModule">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
       <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
@@ -72,6 +75,7 @@
   <ItemGroup>
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="Commands\Area.cs" />
+    <Compile Include="Commands\Caméra.cs" />
     <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
     <Compile Include="Entities\Attributes\SummaryAttribute.cs" />
     <Compile Include="ModHelpers\BindingsHelper.cs" />
@@ -93,7 +97,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TwitchClient.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Components\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /y "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods"</PostBuildEvent>

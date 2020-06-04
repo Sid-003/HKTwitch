@@ -1,11 +1,9 @@
 ﻿using HollowTwitch.Entities;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
-using System;
+using ModCommon.Util;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace HollowTwitch.Commands
@@ -68,5 +66,7 @@ namespace HollowTwitch.Commands
                 spike.LocateMyFSM("Control").SendEvent("EXPAND");
             yield break;
         }
+
+        
     }
 }
