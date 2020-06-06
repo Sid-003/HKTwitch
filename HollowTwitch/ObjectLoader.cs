@@ -7,6 +7,8 @@ using ModCommon.Util;
 using ModCommon;
 using UnityEngine;
 using HutongGames.PlayMaker.Actions;
+using System.Reflection;
+using System.IO;
 
 namespace HollowTwitch
 {
@@ -35,7 +37,9 @@ namespace HollowTwitch
             {("Beam Ball", null), ("Mines_18_boss", "Beam Ball")}
         };
 
-        public static Dictionary<string, GameObject> InstantiableObjects { get; private set; } = new Dictionary<string, GameObject>();
+        public static Dictionary<string, GameObject> InstantiableObjects { get; } = new Dictionary<string, GameObject>();
+
+        public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
 
         public static void Load(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
@@ -53,6 +57,29 @@ namespace HollowTwitch
                 var (name, modify) = kvp.Key;
                 var (room, go) = kvp.Value;
                 InstantiableObjects.Add(name, Spawnable(preloadedObjects[room][go], modify));
+            }
+        }
+
+        public static void LoadAssets()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            var bundleName = assembly.GetManifestResourceNames().First(x => x.Contains("shaders"));
+            using var bundleStream = assembly.GetManifestResourceStream(bundleName);
+            byte[] buffer = new byte[bundleStream.Length];
+            bundleStream.Read(buffer, 0, buffer.Length);
+            var assetBundle = AssetBundle.LoadFromStream(bundleStream);
+
+            if(assetBundle != null)
+            {
+                var shaders = assetBundle.LoadAllAssets<Shader>();
+                if(shaders != null && shaders?.Count() != 0)
+                {
+                    foreach (var shader in shaders)
+                    {
+                        Shaders.Add(shader.name, shader);
+                        Modding.Logger.Log(shader.name);
+                    }
+                }
             }
         }
 

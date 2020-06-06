@@ -23,6 +23,7 @@ namespace HollowTwitch
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
             ObjectLoader.Load(preloadedObjects);
+            ObjectLoader.LoadAssets();
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoad;
             ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
