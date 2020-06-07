@@ -80,6 +80,7 @@
     <Compile Include="Commands\Area.cs" />
     <Compile Include="Commands\Caméra.cs" />
     <Compile Include="Components\ApplyShader.cs" />
+    <Compile Include="Components\Pixelate.cs" />
     <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
     <Compile Include="Entities\Attributes\SummaryAttribute.cs" />
     <Compile Include="ModHelpers\BindingsHelper.cs" />

@@ -46,12 +46,25 @@ namespace HollowTwitch.Commands
                         _activeEffects &= ~cameffect;
                         break;
                     case CameraEffects.Invert:
-                        var cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, Camera>("_unityCamera");
-                        var ivc = cam.gameObject.GetComponent<ApplyShader>() ?? cam.gameObject.AddComponent<ApplyShader>();
-                        ivc.CurrentMaterial = _invertMat;
-                        yield return new WaitForSecondsRealtime(time);
-                        ivc.CurrentMaterial = _defaultMat;
-                        break;
+                        {
+                            var cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, Camera>("_unityCamera");
+                            var ivc = cam.gameObject.GetComponent<ApplyShader>() ?? cam.gameObject.AddComponent<ApplyShader>();
+                            ivc.CurrentMaterial = _invertMat;
+                            ivc.enabled = true;
+                            yield return new WaitForSecondsRealtime(time);
+                            ivc.enabled = false;
+                            break;
+                        }
+                    case CameraEffects.Pixelate:
+                        {
+                            var cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, Camera>("_unityCamera");
+                            var pix = cam.gameObject.GetComponent<Pixelate>() ?? cam.gameObject.AddComponent<Pixelate>();
+                            pix.mainCamera ??= cam;
+                            pix.enabled = true;
+                            yield return new WaitForSecondsRealtime(time);
+                            pix.enabled = false;
+                            break;
+                        }
                     default:
                         _activeEffects |= cameffect;
                         yield return new WaitForSecondsRealtime(time);
@@ -65,7 +78,9 @@ namespace HollowTwitch.Commands
         private void OnUpdateCameraMatrix(On.tk2dCamera.orig_UpdateCameraMatrix orig, tk2dCamera self)
         {
             orig(self);
-            var cam = self.GetAttr<tk2dCamera, Camera>("_unityCamera");
+            var cam = GameCameras.instance?.tk2dCam?.GetAttr<tk2dCamera, Camera>("_unityCamera");
+            if (cam == null)
+                return;
             Matrix4x4 p = cam.projectionMatrix;
             if (_activeEffects.HasValue(CameraEffects.Nausea))
             {                   
@@ -99,6 +114,7 @@ namespace HollowTwitch.Commands
         Nausea = 2,
         Mirror = 4,
         Zoom = 8,
-        Invert = 16
+        Invert = 16,
+        Pixelate = 32,
     }
 }

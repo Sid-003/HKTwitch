@@ -65,8 +65,6 @@ namespace HollowTwitch
             var assembly = Assembly.GetExecutingAssembly();
             var bundleName = assembly.GetManifestResourceNames().First(x => x.Contains("shaders"));
             using var bundleStream = assembly.GetManifestResourceStream(bundleName);
-            byte[] buffer = new byte[bundleStream.Length];
-            bundleStream.Read(buffer, 0, buffer.Length);
             var assetBundle = AssetBundle.LoadFromStream(bundleStream);
 
             if(assetBundle != null)
