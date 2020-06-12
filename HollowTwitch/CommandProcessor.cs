@@ -24,6 +24,11 @@ namespace HollowTwitch
             _commands = new List<Command>();
             _parsers = new Dictionary<Type, IArgumentParser>();
         }
+        
+        public void AddTypeParser<T>(T parser, Type t) where T : IArgumentParser
+        {
+            _parsers.Add(t, parser);
+        }
 
         public void Execute(string command)
         {
