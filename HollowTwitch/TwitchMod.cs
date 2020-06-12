@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using UnityEngine;
+using Camera = HollowTwitch.Commands.Camera;
 
 namespace HollowTwitch
 {
@@ -49,7 +50,7 @@ namespace HollowTwitch
                 _p.RegisterCommands<Player>();
                 _p.RegisterCommands<Enemies>();
                 _p.RegisterCommands<Area>();
-                _p.RegisterCommands<Caméra>();
+                _p.RegisterCommands<Camera>();
                 _client = new TwitchClient(_config);
                 _client.ChatMessageReceived += OnMessageReceived;
                 _currentThread = new Thread(new ThreadStart(_client.StartReceive));
