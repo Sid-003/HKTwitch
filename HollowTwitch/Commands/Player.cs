@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using GlobalEnums;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
@@ -14,28 +15,36 @@ namespace HollowTwitch.Commands
 {
     public class Player
     {
-        //most(all) of the commands stolen from Chaos Mod by seanpr
+        // Most (all) of the commands stolen from Chaos Mod by Seanpr
         private GameObject _maggot;
-     
+
         public Player()
         {
             On.HeroController.Move += InvertControls;
             On.NailSlash.StartSlash += ChangeNailScale;
             On.HeroController.CheckTouchingGround += OnTouchingGround;
             ModHooks.Instance.DashVectorHook += OnDashVector;
+
             IEnumerator GetMaggotPrime()
             {
-                var www = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/410556297046523905/716824653280313364/hwurmpU.png");
+                UnityWebRequest www = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/410556297046523905/716824653280313364/hwurmpU.png");
+                
                 yield return www.SendWebRequest();
 
                 Texture texture = DownloadHandlerTexture.GetContent(www);
-                var maggotPrime = Sprite.Create(texture as Texture2D, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-                Logger.Log("createed texture");
+
+                Sprite maggotPrime = Sprite.Create
+                (
+                    (Texture2D) texture,
+                    new Rect(0, 0, texture.width, texture.height),
+                    new Vector2(0.5f, 0.5f)
+                );
+
                 _maggot = new GameObject("maggot");
                 _maggot.AddComponent<SpriteRenderer>().sprite = maggotPrime;
                 _maggot.SetActive(false);
+
                 Object.DontDestroyOnLoad(_maggot);
-            
             }
 
             GameManager.instance.StartCoroutine(GetMaggotPrime());
@@ -46,15 +55,18 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public IEnumerator SetNailDamage(int d)
         {
-            var defNailDamage = PlayerData.instance.nailDamage;
-            PlayerData.instance.nailDamage = d;       
+            int defNailDamage = PlayerData.instance.nailDamage;
+
+            PlayerData.instance.nailDamage = d;
             PlayMakerFSM.BroadcastEvent("UPDATE NAIL DAMANGE");
+
             yield return new WaitForSecondsRealtime(30);
+
             PlayerData.instance.nailDamage = defNailDamage;
             PlayMakerFSM.BroadcastEvent("UPDATE NAIL DAMANGE");
         }
-        
-        
+
+
         [HKCommand("ax2uBlind")]
         [Summary("Enables darkness for some time.")]
         [Cooldown(60)]
@@ -62,39 +74,51 @@ namespace HollowTwitch.Commands
         {
             DarknessHelper.Darken();
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoad;
+
             yield return new WaitForSecondsRealtime(30);
+
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoad;
             DarknessHelper.Lighten();
         }
 
-        private void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
+        private static void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
         {
             if (HeroController.instance == null) return;
+
             DarknessHelper.Darken();
         }
 
         [HKCommand("timescale")]
         [Summary("Changes the timescale of the game for the time specified.")]
         [Cooldown(60 * 2)]
-        public IEnumerator ChangeTimescale([EnsureFloat(0.01f, 2f)]float scale, [EnsureFloat(5, 60)]float seconds)
+        [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
+        public IEnumerator ChangeTimescale([EnsureFloat(0.01f, 2f)] float scale, [EnsureFloat(5, 60)] float seconds)
         {
             SanicHelper.TimeScale = scale;
+
             Time.timeScale = Time.timeScale == 0 ? 0 : scale;
+
             yield return new WaitForSecondsRealtime(seconds);
-            Time.timeScale = Time.timeScale == 0 ? 0f : 1;
+
+            Time.timeScale = Time.timeScale == 0 ? 0 : 1;
+
             SanicHelper.TimeScale = 1;
         }
 
         [HKCommand("gravity")]
         [Summary("Changes the gravity to the specified scale. Scale Limit: [0.2, 1.9]")]
         [Cooldown(60 * 2)]
-        public IEnumerator ChangeGravity([EnsureFloat(0.2f, 1.90f)]float scale)
+        public IEnumerator ChangeGravity([EnsureFloat(0.2f, 1.90f)] float scale)
         {
             var rigidBody = HeroController.instance.gameObject.GetComponent<Rigidbody2D>();
+
             float def = rigidBody.gravityScale;
+
             rigidBody.gravityScale = scale;
+
             yield return new WaitForSecondsRealtime(30);
-            rigidBody.gravityScale = 0.7f;
+
+            rigidBody.gravityScale = def;
         }
 
 
@@ -111,7 +135,7 @@ namespace HollowTwitch.Commands
             yield return new WaitForSecondsRealtime(60);
             _inverted = false;
         }
-        
+
         [HKCommand("slippery")]
         [Summary("Makes the floor have no friction at all. Lasts for 60 seconds.")]
         public IEnumerator Slipery()
@@ -129,7 +153,7 @@ namespace HollowTwitch.Commands
                 return;
             }
 
-            if (move_direction == 0f && _slippery) 
+            if (move_direction == 0f && _slippery)
                 move_direction = _lastMoveDir == 0f ? 1f : _lastMoveDir;
 
             if (_inverted)
@@ -137,8 +161,8 @@ namespace HollowTwitch.Commands
             orig(self, move_direction);
 
             _lastMoveDir = move_direction;
-            
         }
+
         private Vector2 OnDashVector(Vector2 change)
         {
             if (_inverted)
@@ -150,7 +174,7 @@ namespace HollowTwitch.Commands
 
         [HKCommand("nailscale")]
         [Summary("Makes the nail huge or tiny.")]
-        public IEnumerator NailScale([EnsureFloat(1f, 5f)]float nailScale)
+        public IEnumerator NailScale([EnsureFloat(1f, 5f)] float nailScale)
         {
             _nailScale = nailScale;
             yield return new WaitForSecondsRealtime(30f);
@@ -168,29 +192,38 @@ namespace HollowTwitch.Commands
         public IEnumerator EnableBindings()
         {
             BindingsHelper.AddDetours();
+
             On.BossSceneController.RestoreBindings += BindingsHelper.NoOp;
             On.GGCheckBoundSoul.OnEnter += BindingsHelper.CheckBoundSoulEnter;
+
             BindingsHelper.ShowIcons();
-            yield return new WaitForSecondsRealtime(60);     
+
+            yield return new WaitForSecondsRealtime(60);
+
             BindingsHelper.Unload();
         }
 
         private bool _floorislava;
+
         [HKCommand("floorislava")]
         [Cooldown(60 * 2)]
-        public IEnumerator FloorIsLava([EnsureFloat(10, 60)]float seconds)
+        public IEnumerator FloorIsLava([EnsureFloat(10, 60)] float seconds)
         {
-            //stolen from zaliant
+            // Stolen from zaliant
             _floorislava = true;
+
             yield return new WaitForSecondsRealtime(seconds);
+
             _floorislava = false;
         }
 
         private bool OnTouchingGround(On.HeroController.orig_CheckTouchingGround orig, HeroController self)
         {
-            var touching = orig(self);
+            bool touching = orig(self);
+
             if (touching && _floorislava && !GameManager.instance.IsInSceneTransition)
                 self.TakeDamage(null, CollisionSide.bottom, 1, 69420);
+
             return touching;
         }
 
@@ -199,12 +232,16 @@ namespace HollowTwitch.Commands
         [Cooldown(60 * 5)]
         public IEnumerator EnableMaggotPrimeSkin()
         {
-            var go = Object.Instantiate(_maggot, HeroController.instance.transform);
+            GameObject go = Object.Instantiate(_maggot, HeroController.instance.transform);
             go.SetActive(true);
+
             var renderer = HeroController.instance.GetComponent<MeshRenderer>();
             renderer.enabled = false;
+
             yield return new WaitForSecondsRealtime(60 * 2);
+
             Object.DestroyImmediate(go);
+
             renderer.enabled = true;
         }
 
@@ -213,7 +250,8 @@ namespace HollowTwitch.Commands
         [Cooldown(60 * 4)]
         public IEnumerator ToggleAbility(string ability)
         {
-            float time = 45;
+            const float time = 45;
+
             switch (ability)
             {
                 case "dash":
