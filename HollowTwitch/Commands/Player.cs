@@ -81,6 +81,161 @@ namespace HollowTwitch.Commands
             DarknessHelper.Lighten();
         }
 
+        [HKCommand("conveyor")]
+        [Summary("Conveyor storage.")]
+        [Cooldown(60)]
+        public IEnumerator Conveyor()
+        {
+            bool vert = Random.Range(0, 2) == 0;
+
+            float speed = Random.Range(-30f, 30f);
+
+            HeroController hc = HeroController.instance;
+
+            if (vert)
+            {
+                hc.cState.onConveyorV = true;
+                hc.GetComponent<ConveyorMovementHero>().StartConveyorMove(0f, speed);
+            }
+            else
+            {
+                hc.cState.onConveyor = true;
+                hc.SetConveyorSpeed(speed);
+            }
+
+            yield return new WaitForSecondsRealtime(30);
+
+            if (vert)
+                hc.cState.onConveyorV = false;
+            else
+                hc.cState.onConveyor = false;
+            
+            hc.GetComponent<ConveyorMovementHero>().StopConveyorMove();
+        }
+
+        [HKCommand("glass")]
+        [Summary("Die in one hit for a short period of time.")]
+        [Cooldown(60)]
+        public IEnumerator Glass()
+        {
+            int Damage(ref int hazardtype, int damage)
+            {
+                return 420;
+            }
+
+            ModHooks.Instance.TakeDamageHook += Damage;
+            
+            yield return new WaitForSecondsRealtime(8);
+            
+            ModHooks.Instance.TakeDamageHook -= Damage;
+        }
+
+        [HKCommand("jumplength")]
+        [Cooldown(60)]
+        public IEnumerator JumpLength()
+        {
+            HeroController hc = HeroController.instance;
+
+            int prev_steps = hc.JUMP_STEPS;
+
+            hc.JUMP_STEPS = Random.Range(hc.JUMP_STEPS / 2, hc.JUMP_STEPS * 8);
+            
+            yield return new WaitForSecondsRealtime(30);
+
+            hc.JUMP_STEPS = prev_steps;
+        }
+        
+        [HKCommand("jumpspeed")]
+        [Cooldown(60)]
+        public IEnumerator JumpSpeed()
+        {
+            HeroController hc = HeroController.instance;
+
+            float prev_speed = hc.JUMP_SPEED;
+
+            hc.JUMP_SPEED = Random.Range(hc.JUMP_SPEED / 4f, hc.JUMP_SPEED * 4f);
+            
+            yield return new WaitForSecondsRealtime(30);
+
+            hc.JUMP_SPEED = prev_speed;
+        }
+
+        [HKCommand("wind")]
+        [Summary("Make it a windy day.")]
+        [Cooldown(60)]
+        public IEnumerator ChadConveyor()
+        {
+            float speed = Random.Range(-30f, 30f);
+            
+            float prev_s = HeroController.instance.conveyorSpeed;
+
+            HeroController.instance.cState.inConveyorZone = true;
+            HeroController.instance.conveyorSpeed = speed;
+
+            yield return new WaitForSecondsRealtime(30);
+
+            HeroController.instance.cState.inConveyorZone = false;
+            HeroController.instance.conveyorSpeed = prev_s;
+        }    
+
+        [HKCommand("dashSpeed")]
+        [Summary("Change dash speed.")]
+        [Cooldown(60)]
+        public IEnumerator DashSpeed()
+        {
+            HeroController hc = HeroController.instance;
+
+            float len = Random.Range(.25f * hc.DASH_SPEED, hc.DASH_SPEED * 12f);
+            float orig_dash = hc.DASH_SPEED;
+
+            hc.DASH_SPEED = len;
+            
+            yield return new WaitForSecondsRealtime(30);
+
+            hc.DASH_SPEED = orig_dash;
+        }
+        
+        [HKCommand("dashLength")]
+        [Summary("Change dash length.")]
+        [Cooldown(60)]
+        public IEnumerator DashLength()
+        {
+            HeroController hc = HeroController.instance;
+
+            float len = Random.Range(.25f * hc.DASH_TIME, hc.DASH_TIME * 12f);
+            float orig_dash = hc.DASH_TIME;
+            
+            hc.DASH_TIME = len;
+            
+            yield return new WaitForSecondsRealtime(30);
+
+            hc.DASH_TIME = orig_dash;
+        }
+
+        [HKCommand("dashVector")]
+        [Summary("Change dash vector.")]
+        [Cooldown(60)]
+        public IEnumerator DashVector()
+        {
+            Vector2 VectorHook(Vector2 change)
+            {
+                const float factor = 4f;
+                
+                float mag = change.magnitude;
+
+                float x = factor * Random.Range(-mag, mag);
+                float y = factor * Random.Range(-mag, mag);
+                
+                return new Vector2(x, y);
+            }
+            
+            ModHooks.Instance.DashVectorHook += VectorHook;
+            
+            yield return new WaitForSecondsRealtime(30f);
+            
+            ModHooks.Instance.DashVectorHook -= VectorHook;
+        }
+
         private static void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
         {
             if (HeroController.instance == null) return;
