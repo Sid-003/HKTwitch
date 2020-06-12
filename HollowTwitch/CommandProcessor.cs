@@ -80,7 +80,7 @@ namespace HollowTwitch
                     }
                     else
                     {
-                        _ = c.MethodInfo.Invoke(c.ClassInstance, parsed);
+                        c.MethodInfo.Invoke(c.ClassInstance, parsed);
                     }
                 }
                 catch (Exception e)

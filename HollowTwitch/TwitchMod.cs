@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using HollowTwitch.Commands;
+using JetBrains.Annotations;
 using Modding;
 using UnityEngine;
 using Camera = HollowTwitch.Commands.Camera;
@@ -13,8 +14,9 @@ namespace HollowTwitch
     {
         private TwitchClient _client;
         private Thread _currentThread;
-        private CommandProcessor _p;
         private TwitchConfig _config = new TwitchConfig();
+
+        private CommandProcessor _proc;
 
         public override ModSettings GlobalSettings
         {
@@ -26,6 +28,7 @@ namespace HollowTwitch
         {
             ObjectLoader.Load(preloadedObjects);
             ObjectLoader.LoadAssets();
+            
             ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoad;
             ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
@@ -43,11 +46,12 @@ namespace HollowTwitch
         {
             if (once) return;
 
-            _p = new CommandProcessor();
-            _p.RegisterCommands<Player>();
-            _p.RegisterCommands<Enemies>();
-            _p.RegisterCommands<Area>();
-            _p.RegisterCommands<Camera>();
+            _proc = new CommandProcessor();
+            _proc.RegisterCommands<Player>();
+            _proc.RegisterCommands<Enemies>();
+            _proc.RegisterCommands<Area>();
+            _proc.RegisterCommands<Camera>();
+            _proc.RegisterCommands<Game>();
             _client = new TwitchClient(_config);
             _client.ChatMessageReceived += OnMessageReceived;
             _currentThread = new Thread(_client.StartReceive);
@@ -73,7 +77,7 @@ namespace HollowTwitch
             
             string command = message.Substring(_config.Prefix.Length).Trim();
             
-            _p.Execute(command);
+            _proc.Execute(command);
         }
     }
 }
