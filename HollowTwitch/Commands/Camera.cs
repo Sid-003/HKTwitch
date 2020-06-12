@@ -35,7 +35,19 @@ namespace HollowTwitch.Commands
         {
             const float time = 60f;
 
-            var camEffect = (CameraEffects) Enum.Parse(typeof(CameraEffects), effect, true);
+            CameraEffects camEffect;
+
+            try
+            {
+                camEffect = (CameraEffects) Enum.Parse(typeof(CameraEffects), effect, true);
+            }
+            // Couldn't parse the effect, we'll go with a random one (at least for now).
+            catch (ArgumentException)
+            {
+                CameraEffects[] values = (CameraEffects[]) Enum.GetValues(typeof(CameraEffects));
+
+                camEffect = values[UnityEngine.Random.Range(0, values.Length)];
+            }
 
             switch (camEffect)
             {
