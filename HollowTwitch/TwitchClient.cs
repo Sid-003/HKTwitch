@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
 
 namespace HollowTwitch
 {
@@ -22,7 +20,7 @@ namespace HollowTwitch
         {
             _config = config;
             ConnectAndAuthenticate(config);
-            this.RawPayload += ProcessMessage;
+            RawPayload += ProcessMessage;
         }
 
         private void ConnectAndAuthenticate(TwitchConfig config)
@@ -52,7 +50,7 @@ namespace HollowTwitch
             }
             else if (message.Contains("PRIVMSG"))
             {
-                var cleaned = message.Split(':').Last();
+                string cleaned = message.Split(':').Last();
                 ChatMessageReceived?.Invoke(cleaned);
             }
         }
@@ -66,14 +64,14 @@ namespace HollowTwitch
                     Dispose();
                     ConnectAndAuthenticate(_config);
                 }
-                var message = _output.ReadLine();
+
+                string message = _output.ReadLine();
                 RawPayload?.Invoke(message);
             }
         }
 
 
-        private void SendMessage(string message)
-            => _input.WriteLine(message);
+        private void SendMessage(string message) => _input.WriteLine(message);
 
         public void Dispose()
         {

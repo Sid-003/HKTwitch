@@ -1,17 +1,14 @@
+using System.Collections;
 using GlobalEnums;
-using HollowTwitch.Commands.ModHelpers;
 using HollowTwitch.Entities;
+using HollowTwitch.Entities.Attributes;
 using HollowTwitch.ModHelpers;
 using HollowTwitch.Precondition;
-using HutongGames.PlayMaker;
-using ModCommon.Util;
 using Modding;
-using System;
-using System.Collections;
-using System.Net;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using Logger = Modding.Logger;
 
 namespace HollowTwitch.Commands
 {
@@ -33,11 +30,11 @@ namespace HollowTwitch.Commands
 
                 Texture texture = DownloadHandlerTexture.GetContent(www);
                 var maggotPrime = Sprite.Create(texture as Texture2D, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-                Modding.Logger.Log("createed texture");
+                Logger.Log("createed texture");
                 _maggot = new GameObject("maggot");
                 _maggot.AddComponent<SpriteRenderer>().sprite = maggotPrime;
                 _maggot.SetActive(false);
-                UnityEngine.Object.DontDestroyOnLoad(_maggot);
+                Object.DontDestroyOnLoad(_maggot);
             
             }
 
@@ -101,9 +98,9 @@ namespace HollowTwitch.Commands
         }
 
 
-        private bool _inverted = false;
-        private bool _slippery = false;
-        private float _lastMoveDir = 0;
+        private bool _inverted;
+        private bool _slippery;
+        private float _lastMoveDir;
 
         [HKCommand("invertcontrols")]
         [Summary("Inverts the move direction of the player.")]
@@ -178,7 +175,7 @@ namespace HollowTwitch.Commands
             BindingsHelper.Unload();
         }
 
-        private bool _floorislava = false;
+        private bool _floorislava;
         [HKCommand("floorislava")]
         [Cooldown(60 * 2)]
         public IEnumerator FloorIsLava([EnsureFloat(10, 60)]float seconds)
@@ -202,12 +199,12 @@ namespace HollowTwitch.Commands
         [Cooldown(60 * 5)]
         public IEnumerator EnableMaggotPrimeSkin()
         {
-            var go = UnityEngine.Object.Instantiate(_maggot, HeroController.instance.transform);
+            var go = Object.Instantiate(_maggot, HeroController.instance.transform);
             go.SetActive(true);
             var renderer = HeroController.instance.GetComponent<MeshRenderer>();
             renderer.enabled = false;
             yield return new WaitForSecondsRealtime(60 * 2);
-            UnityEngine.Object.DestroyImmediate(go);
+            Object.DestroyImmediate(go);
             renderer.enabled = true;
         }
 
@@ -240,8 +237,6 @@ namespace HollowTwitch.Commands
                     PlayerData.instance.hasDoubleJump ^= true;
                     break;
             }
-
-            yield break;
         }
     }
 }

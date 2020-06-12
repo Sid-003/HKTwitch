@@ -1,4 +1,8 @@
-﻿using HollowTwitch.Entities;
+﻿using System;
+using System.Collections;
+using System.Linq;
+using HollowTwitch.Entities;
+using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker;
@@ -6,11 +10,9 @@ using HutongGames.PlayMaker.Actions;
 using ModCommon;
 using ModCommon.Util;
 using Modding;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using Logger = Modding.Logger;
+using Object = UnityEngine.Object;
 
 namespace HollowTwitch.Commands
 {
@@ -22,7 +24,7 @@ namespace HollowTwitch.Commands
         {
             if (ModHooks.Instance.LoadedMods.Any(x => x.Contains("PalePrince")))
             {
-                Modding.Logger.Log(string.Join(", ", AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().Select(x => x.Name).ToArray()));
+                Logger.Log(string.Join(", ", AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().Select(x => x.Name).ToArray()));
                 _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().FirstOrDefault(x => x.Name == "Prince");
             }
         }
@@ -31,11 +33,11 @@ namespace HollowTwitch.Commands
         [Cooldown(60, 3)]
         public IEnumerator SpawnEnemy(string name)
         {
-            Modding.Logger.Log("spawn called");
-            var enemy = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects[name], HeroController.instance.gameObject.transform.position, Quaternion.identity);
+            Logger.Log("spawn called");
+            var enemy = Object.Instantiate(ObjectLoader.InstantiableObjects[name], HeroController.instance.gameObject.transform.position, Quaternion.identity);
             yield return new WaitForSecondsRealtime(1);
             enemy.SetActive(true);
-            Modding.Logger.Log("ended");
+            Logger.Log("ended");
         }
 
 
@@ -46,7 +48,7 @@ namespace HollowTwitch.Commands
 
             yield return null;
             var (x, y, _) = HeroController.instance.gameObject.transform.position;
-            var pv = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects["pv"], HeroController.instance.gameObject.transform.position + new Vector3(0, 2.6f), Quaternion.identity);
+            var pv = Object.Instantiate(ObjectLoader.InstantiableObjects["pv"], HeroController.instance.gameObject.transform.position + new Vector3(0, 2.6f), Quaternion.identity);
 
             pv.SetActive(true);
             //    if (!(_palePrince is null)) pv.AddComponent(_palePrince);  //sad gamer moment
@@ -95,7 +97,7 @@ namespace HollowTwitch.Commands
         public void SpawnEnragedGuardian()
         {
             var position = HeroController.instance.gameObject.transform.position;
-            var cg2 = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects["cg2"], position, Quaternion.identity);
+            var cg2 = Object.Instantiate(ObjectLoader.InstantiableObjects["cg2"], position, Quaternion.identity);
             cg2.SetActive(true);
             var miner = cg2.LocateMyFSM("Beam Miner");
             miner.SetState("Battle Init");
@@ -112,7 +114,7 @@ namespace HollowTwitch.Commands
                 {
                     if (gp.gameObject.GameObject.Name == "Beam Point R" || gp.gameObject.GameObject.Name == "Beam Point L")
                     {
-                        GameObject beamPoint = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects[gp.gameObject.GameObject.Name]);
+                        GameObject beamPoint = Object.Instantiate(ObjectLoader.InstantiableObjects[gp.gameObject.GameObject.Name]);
                         FsmGameObject fsmGO = new FsmGameObject(beamPoint);
 
                         FsmOwnerDefault fsmOwnerDefault = new FsmOwnerDefault
@@ -141,8 +143,8 @@ namespace HollowTwitch.Commands
                 {
                     if (sp.gameObject.GameObject.Name == "Beam Ball")
                     {
-                        GameObject beamBall = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects[sp.gameObject.GameObject.Name]);
-                        FsmGameObject fsmGO = new HutongGames.PlayMaker.FsmGameObject(beamBall);
+                        GameObject beamBall = Object.Instantiate(ObjectLoader.InstantiableObjects[sp.gameObject.GameObject.Name]);
+                        FsmGameObject fsmGO = new FsmGameObject(beamBall);
 
                         FsmOwnerDefault fsmOwnerDefault = new FsmOwnerDefault
                         {
@@ -155,7 +157,7 @@ namespace HollowTwitch.Commands
 
                     if (sp.gameObject.GameObject.Name == "Beam")
                     {
-                        GameObject beam = UnityEngine.Object.Instantiate(ObjectLoader.InstantiableObjects[sp.gameObject.GameObject.Name]);
+                        GameObject beam = Object.Instantiate(ObjectLoader.InstantiableObjects[sp.gameObject.GameObject.Name]);
                         FsmGameObject fsmGO = new FsmGameObject(beam);
 
                         FsmOwnerDefault fsmOwnerDefault = new FsmOwnerDefault
@@ -179,10 +181,9 @@ namespace HollowTwitch.Commands
                 yield break;
             foreach(var boss in BossSceneController.Instance?.bosses)
             {
-                _ = UnityEngine.Object.Instantiate(boss.gameObject, boss.gameObject.transform.position, boss.gameObject.transform.rotation);
+                _ = Object.Instantiate(boss.gameObject, boss.gameObject.transform.position, boss.gameObject.transform.rotation);
                 yield return new WaitForSeconds(0.2f);
             }
-            yield break;
         }
     }
 }

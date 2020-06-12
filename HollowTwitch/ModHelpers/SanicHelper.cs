@@ -1,18 +1,11 @@
-﻿using ModCommon.Util;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace HollowTwitch.ModHelpers
 {
     public static class SanicHelper
     {
-        //stolen from Sanic Mod by Katie: https://github.com/fifty-six/HollowKnight.Sanic
-
-
+        // Stolen from Sanic Mod by Katie: https://github.com/fifty-six/HollowKnight.Sanic
         static SanicHelper()
         {
             On.GameManager.FreezeMoment_float_float_float_float += OnFreezeMoment;
@@ -45,14 +38,22 @@ namespace HollowTwitch.ModHelpers
             Time.timeScale = (newTimeScale <= 0.01f ? 0f : newTimeScale) * TimeScale;
         }
 
-        private static IEnumerator OnFreezeMoment(On.GameManager.orig_FreezeMoment_float_float_float_float orig, GameManager self, float rampDownTime, float waitTime, float rampUpTime, float targetSpeed)
+        private static IEnumerator OnFreezeMoment
+        (
+            On.GameManager.orig_FreezeMoment_float_float_float_float orig,
+            GameManager self,
+            float rampDownTime,
+            float waitTime,
+            float rampUpTime,
+            float targetSpeed
+        )
         {
             yield return self.StartCoroutine(SetTimeScale(targetSpeed, rampDownTime));
+            
             for (float timer = 0f; timer < waitTime; timer += Time.unscaledDeltaTime * TimeScale)
                 yield return null;
+            
             yield return self.StartCoroutine(SetTimeScale(1f, rampUpTime));
-
-            yield break;
         }
     }
 }

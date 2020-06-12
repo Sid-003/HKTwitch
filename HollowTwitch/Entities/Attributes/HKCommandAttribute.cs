@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using JetBrains.Annotations;
 
-namespace HollowTwitch.Entities
+namespace HollowTwitch.Entities.Attributes
 {
-    [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
+    [MeansImplicitUse]
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
     public sealed class HKCommandAttribute : Attribute
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public HKCommandAttribute(string name)
         {
-            this.Name = name;
+            Name = name;
         }
     }
 

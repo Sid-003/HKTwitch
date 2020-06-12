@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HollowTwitch.Components
 {
@@ -10,7 +6,7 @@ namespace HollowTwitch.Components
     {
         public Material CurrentMaterial;
 
-        void OnRenderImage(RenderTexture src, RenderTexture dest)
+        private void OnRenderImage(RenderTexture src, RenderTexture dest)
         {
             Graphics.Blit(src, dest, CurrentMaterial);
         }

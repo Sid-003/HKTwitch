@@ -1,16 +1,17 @@
-﻿using HollowTwitch.Entities;
-using HollowTwitch.Entities.Attributes;
-using HollowTwitch.Precondition;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using HollowTwitch.Entities;
+using HollowTwitch.Entities.Attributes;
+using HollowTwitch.Precondition;
+using Modding;
 
 namespace HollowTwitch
 {
-    //scuffed command proccersor thingy, needs a lot of work
+    // Scuffed command proccersor thingy, needs a lot of work
     public class CommandProcessor
     {
         private const char Seperator = ' ';
@@ -26,32 +27,48 @@ namespace HollowTwitch
 
         public void Execute(string command)
         {
-            var pieces = command.Split(Seperator);
-            var found = _commands.Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase)).OrderByDescending(x => x.Priority);
-            foreach (var c in found)
+            string[] pieces = command.Split(Seperator);
+
+            IOrderedEnumerable<Command> found = _commands
+                                                .Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase))
+                                                .OrderByDescending(x => x.Priority);
+
+            foreach (Command c in found)
             {
-                /*if (!c.Preconditions.All(x => x.Check()))
-                    continue;*/
+                // if (!c.Preconditions.All(x => x.Check()))
+                //     continue;
+
                 bool allGood = true;
-                foreach(var p in c.Preconditions)
+
+                foreach (PreconditionAttribute p in c.Preconditions)
                 {
-                    if(p.Check() != true)
+                    if (p.Check()) continue;
+
+                    allGood = false;
+
+                    if (c.Preconditions.FirstOrDefault() is CooldownAttribute cooldown)
                     {
-                        allGood = false;
-                        if(c.Preconditions.FirstOrDefault() is CooldownAttribute cooldown)
-                            Modding.Logger.Log($"The coodown for command {c.Name} failed. The cooldown has {cooldown.MaxUses - cooldown.Uses} and will reset in {cooldown.ResetTime - DateTimeOffset.Now}");       
+                        Logger.Log
+                        (
+                            $"The coodown for command {c.Name} failed. "
+                            + $"The cooldown has {cooldown.MaxUses - cooldown.Uses} and will reset in {cooldown.ResetTime - DateTimeOffset.Now}"
+                        );
                     }
                 }
+
                 if (!allGood)
                     continue;
 
-                var args = pieces.Skip(1);
-                if (!BuildArguments(args, c, out var parsed))
+                IEnumerable<string> args = pieces.Skip(1);
+
+                if (!BuildArguments(args, c, out object[] parsed))
                     continue;
+
                 try
                 {
-                    Modding.Logger.Log("got here");
-                    if(c.MethodInfo.ReturnType == typeof(IEnumerator))
+                    Logger.Log($"Built arguments for command {command}.");
+
+                    if (c.MethodInfo.ReturnType == typeof(IEnumerator))
                     {
                         var t = c.MethodInfo.Invoke(c.ClassInstance, parsed) as IEnumerator;
                         GameManager.instance.StartCoroutine(t);
@@ -63,34 +80,43 @@ namespace HollowTwitch
                 }
                 catch (Exception e)
                 {
-                    Modding.Logger.Log(e.ToString());
+                    Logger.Log(e.ToString());
                 }
             }
-                                 
-
         }
 
-        public bool BuildArguments(IEnumerable<string> args, Command command, out object[] parsed) 
+        private bool BuildArguments(IEnumerable<string> args, Command command, out object[] parsed)
         {
             parsed = null;
-            var parameters = command.Parameters;
-            var built = new List<object>();
+
+            ParameterInfo[] parameters = command.Parameters;
+            List<object> built = new List<object>();
+
+            // Avoid multiple enumerations when indexing
+            string[] enumerated = args.ToArray();
+
             for (int i = 0; i < parameters.Length; i++)
             {
-                var p = ParseParameter(args.ElementAt(i), parameters[i].ParameterType);
+                object p = ParseParameter(enumerated[i], parameters[i].ParameterType);
+
                 if (p is null)
                     return false;
+
                 if (parameters[i].GetCustomAttributes(typeof(EnsureParameterAttribute), false).FirstOrDefault() is EnsureParameterAttribute epa)
                     p = epa.Ensure(p);
+
                 built.Add(p);
             }
+
             parsed = built.ToArray();
+
             return true;
         }
 
-        public object ParseParameter(string arg, Type type)
+        private object ParseParameter(string arg, Type type)
         {
-            var converter = TypeDescriptor.GetConverter(type);
+            TypeConverter converter = TypeDescriptor.GetConverter(type);
+
             try
             {
                 return converter.ConvertFromString(arg);
@@ -99,10 +125,9 @@ namespace HollowTwitch
             {
                 try
                 {
-                    var parsed = _parsers[type].Parse(arg);
-                    return parsed;
+                    return _parsers[type].Parse(arg);
                 }
-                catch 
+                catch
                 {
                     return null;
                 }
@@ -111,20 +136,20 @@ namespace HollowTwitch
 
         public void RegisterCommands<T>()
         {
-            var methods = typeof(T).GetMethods(BindingFlags.Public | BindingFlags.Instance);
-            var instance = Activator.CreateInstance(typeof(T));
-            foreach (var method in methods)
+            MethodInfo[] methods = typeof(T).GetMethods(BindingFlags.Public | BindingFlags.Instance);
+
+            object instance = Activator.CreateInstance(typeof(T));
+
+            foreach (MethodInfo method in methods)
             {
-                if((method.GetCustomAttributes(typeof(HKCommandAttribute), false).FirstOrDefault() is HKCommandAttribute attribute))
-                {
-                    var name = attribute.Name;
-                    _commands.Add(new Command(name, method, instance));
-                    Modding.Logger.Log(name);
-                    Modding.Logger.Log("added the command");
-                }
+                HKCommandAttribute attr = method.GetCustomAttributes(typeof(HKCommandAttribute), false).OfType<HKCommandAttribute>().FirstOrDefault();
+
+                if (attr == null)
+                    continue;
+
+                _commands.Add(new Command(attr.Name, method, instance));
+                Logger.Log($"Added command: {attr.Name}");
             }
         }
-
-
     }
 }

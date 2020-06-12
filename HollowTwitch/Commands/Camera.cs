@@ -1,10 +1,11 @@
-﻿using HollowTwitch.Components;
-using HollowTwitch.Entities;
-using HollowTwitch.Extensions;
-using ModCommon.Util;
-using System;
+﻿using System;
 using System.Collections;
+using HollowTwitch.Components;
+using HollowTwitch.Entities;
+using HollowTwitch.Entities.Attributes;
+using HollowTwitch.Extensions;
 using JetBrains.Annotations;
+using ModCommon.Util;
 using UnityEngine;
 using UCamera = UnityEngine.Camera;
 
@@ -128,6 +129,6 @@ namespace HollowTwitch.Commands
         Mirror = 4,
         Zoom = 8,
         Invert = 16,
-        Pixelate = 32,
+        Pixelate = 32
     }
 }

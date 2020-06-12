@@ -1,9 +1,6 @@
-﻿using HollowTwitch.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Threading;
+using HollowTwitch.Entities;
 
 namespace HollowTwitch.Precondition
 {
@@ -12,7 +9,7 @@ namespace HollowTwitch.Precondition
     {
         public int MaxUses { get; private set; }
 
-        private int _uses = 0;
+        private int _uses;
 
         public int Uses { get => _uses;}
 

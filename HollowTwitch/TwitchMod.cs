@@ -1,14 +1,11 @@
-﻿using HollowTwitch.Commands;
-using Modding;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
+using HollowTwitch.Commands;
+using Modding;
 using UnityEngine;
 using Camera = HollowTwitch.Commands.Camera;
+using Logger = Modding.Logger;
 
 namespace HollowTwitch
 {
@@ -17,9 +14,13 @@ namespace HollowTwitch
         private TwitchClient _client;
         private Thread _currentThread;
         private CommandProcessor _p;
-        private TwitchConfig _config =  new TwitchConfig();
+        private TwitchConfig _config = new TwitchConfig();
 
-        public override ModSettings GlobalSettings { get => _config; set => _config = value as TwitchConfig; }
+        public override ModSettings GlobalSettings
+        {
+            get => _config;
+            set => _config = value as TwitchConfig;
+        }
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
@@ -30,34 +31,30 @@ namespace HollowTwitch
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
         }
 
-        public override List<(string, string)> GetPreloadNames()
-               => ObjectLoader.ObjectList.Values.ToList();
+        public override List<(string, string)> GetPreloadNames() => ObjectLoader.ObjectList.Values.ToList();
 
-        
-        private void OnSaveGameLoad(SaveGameData data)
-            => ReceiveCommands();
+        private void OnSaveGameLoad(SaveGameData data) => ReceiveCommands();
 
-        private void OnNewGame()
-            => ReceiveCommands();
+        private void OnNewGame() => ReceiveCommands();
 
         private static bool once;
-        
+
         private void ReceiveCommands()
         {
-            if (!once)
-            {
-                _p = new CommandProcessor();
-                _p.RegisterCommands<Player>();
-                _p.RegisterCommands<Enemies>();
-                _p.RegisterCommands<Area>();
-                _p.RegisterCommands<Camera>();
-                _client = new TwitchClient(_config);
-                _client.ChatMessageReceived += OnMessageReceived;
-                _currentThread = new Thread(new ThreadStart(_client.StartReceive));
-                _currentThread.Start();
-                Modding.Logger.Log("started receiving");
-                once = true;
-            }
+            if (once) return;
+
+            _p = new CommandProcessor();
+            _p.RegisterCommands<Player>();
+            _p.RegisterCommands<Enemies>();
+            _p.RegisterCommands<Area>();
+            _p.RegisterCommands<Camera>();
+            _client = new TwitchClient(_config);
+            _client.ChatMessageReceived += OnMessageReceived;
+            _currentThread = new Thread(_client.StartReceive);
+            _currentThread.Start();
+            Logger.Log("started receiving");
+
+            once = true;
         }
 
         private void OnQuit()
@@ -68,15 +65,15 @@ namespace HollowTwitch
 
         private void OnMessageReceived(string message)
         {
-            Modding.Logger.Log("Twitch chat: " + message);
-            //handle commands here
+            Logger.Log("Twitch chat: " + message);
 
-            var index = message.IndexOf(_config.Prefix);
-            if (index == 0)
-            {
-                var command = message.Substring(_config.Prefix.Length).Trim();
-                _p.Execute(command);
-            }
+            int index = message.IndexOf(_config.Prefix);
+
+            if (index != 0) return;
+            
+            string command = message.Substring(_config.Prefix.Length).Trim();
+            
+            _p.Execute(command);
         }
     }
 }

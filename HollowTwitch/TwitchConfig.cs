@@ -1,7 +1,9 @@
-﻿using Modding;
+﻿using System;
+using Modding;
 
 namespace HollowTwitch
 {
+    [Serializable]
     public class TwitchConfig : ModSettings
     {
         public string Token;

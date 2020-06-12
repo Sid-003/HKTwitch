@@ -1,23 +1,20 @@
-﻿using HollowTwitch.Entities;
-using Modding;
-using MonoMod.RuntimeDetour;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
+using JetBrains.Annotations;
+using MonoMod.RuntimeDetour;
 using UnityEngine;
 
-namespace HollowTwitch.Commands.ModHelpers
+namespace HollowTwitch.ModHelpers
 {
     public static class BindingsHelper
     {
-        //stolen 100% from https://github.com/fifty-six/HollowKnight.Bindings
+        // Stolen 100% from https://github.com/fifty-six/HollowKnight.Bindings
         private static readonly List<Detour> _detours =  new List<Detour>();
 
+        [UsedImplicitly]
         public static bool True() => true;
 
+        [UsedImplicitly]
         public static int BoundNailDamage()
         {
             int @base = PlayerData.instance.nailDamage;
@@ -25,6 +22,7 @@ namespace HollowTwitch.Commands.ModHelpers
             return @base < 13 ? Mathf.RoundToInt(@base * .8f) : 13;
         }
 
+        [UsedImplicitly]
         public static int BoundMaxHealth() => 4;
 
         private static readonly string[] BindingProperties =
@@ -67,13 +65,9 @@ namespace HollowTwitch.Commands.ModHelpers
                     typeof(BindingsHelper).GetMethod(nameof(BoundMaxHealth))
                 )
             );
-
-           
         }
-
         
-        public static void ShowIcons()
-            => _ = GameManager.instance.StartCoroutine(ShowIconsCoroutine());
+        public static void ShowIcons() => GameManager.instance.StartCoroutine(ShowIconsCoroutine());
 
         public static void CheckBoundSoulEnter(On.GGCheckBoundSoul.orig_OnEnter orig, GGCheckBoundSoul self)
         {
@@ -105,7 +99,7 @@ namespace HollowTwitch.Commands.ModHelpers
             PlayerData.instance.equippedCharms.Clear();
         }
 
-        public static void RestoreBindingsUI()
+        private static void RestoreBindingsUI()
         {
             EventRegister.SendEvent("UPDATE BLUE HEALTH");
             EventRegister.SendEvent("HIDE BOUND NAIL");

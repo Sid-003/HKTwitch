@@ -1,14 +1,11 @@
-﻿using HutongGames.PlayMaker;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using HutongGames.PlayMaker;
 
 namespace HollowTwitch.ModHelpers
 {
-    public class DarknessHelper
+    public static class DarknessHelper
     {
-        //stolen from Darkness mod by Katie and 56 again https://github.com/fifty-six/HollowKnight.Darkenss
+        // Stolen from Darkness mod by Katie and 56 again https://github.com/fifty-six/HollowKnight.Darkenss
 
         private static readonly Dictionary<(string Name, string EventName), string> _originalTransitions = new Dictionary<(string Name, string EventName), string>();
 

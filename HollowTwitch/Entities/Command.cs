@@ -1,29 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
 namespace HollowTwitch.Entities
 {
     public class Command
     {
-        public string Name { get; set; }
-        public MethodInfo MethodInfo { get; set; }
-        public int Priority { get; set; }
-        public ParameterInfo[] Parameters { get; set; }
-        public object ClassInstance { get; set; }
-        public IEnumerable<PreconditionAttribute> Preconditions { get; set; }
+        public string Name { get; }
+        public MethodInfo MethodInfo { get; }
+        public int Priority { get; }
+        public ParameterInfo[] Parameters { get; }
+        public object ClassInstance { get; }
+        public IEnumerable<PreconditionAttribute> Preconditions { get; }
 
 
         public Command(string name, MethodInfo method, object classInstance)
         {
-            this.Name = name;
-            this.MethodInfo = method;
-            this.Parameters = this.MethodInfo.GetParameters();
-            this.Priority = Parameters.Length;
-            this.ClassInstance = classInstance;
-            this.Preconditions = method.GetCustomAttributes(typeof(PreconditionAttribute), false).Cast<PreconditionAttribute>();
+            Name = name;
+            MethodInfo = method;
+            Parameters = MethodInfo.GetParameters();
+            Priority = Parameters.Length;
+            ClassInstance = classInstance;
+            Preconditions = method.GetCustomAttributes(typeof(PreconditionAttribute), false).Cast<PreconditionAttribute>();
         }
 
     }
