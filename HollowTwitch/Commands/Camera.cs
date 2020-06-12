@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using HollowTwitch.Components;
-using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using JetBrains.Annotations;
@@ -29,13 +28,12 @@ namespace HollowTwitch.Commands
         private Matrix4x4 _reflectMatrix = Matrix4x4.identity;
         private CameraEffects _activeEffects;
 
-        private Material _defaultMat = new Material(Shader.Find("Sprites/Default-ColorFlash"));
-        private Material _invertMat = new Material(ObjectLoader.Shaders["Custom/InvertColor"]);
+        private readonly Material _invertMat = new Material(ObjectLoader.Shaders["Custom/InvertColor"]);
 
         [HKCommand("cameffect")]
         public IEnumerator AddEffect(string effect)
         {
-            float time = 60f;
+            const float time = 60f;
 
             var camEffect = (CameraEffects) Enum.Parse(typeof(CameraEffects), effect, true);
 
@@ -52,22 +50,30 @@ namespace HollowTwitch.Commands
                 }
                 case CameraEffects.Invert:
                 {
-                    var cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
-                    var ivc = cam.gameObject.GetComponent<ApplyShader>() ?? cam.gameObject.AddComponent<ApplyShader>();
+                    UCamera cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
+                    ApplyShader ivc = cam.gameObject.GetComponent<ApplyShader>() ?? cam.gameObject.AddComponent<ApplyShader>();
+                    
                     ivc.CurrentMaterial = _invertMat;
                     ivc.enabled = true;
+                    
                     yield return new WaitForSecondsRealtime(time);
+                    
                     ivc.enabled = false;
+                    
                     break;
                 }
                 case CameraEffects.Pixelate:
                 {
-                    var cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
-                    var pix = cam.gameObject.GetComponent<Pixelate>() ?? cam.gameObject.AddComponent<Pixelate>();
+                    UCamera cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
+                    Pixelate pix = cam.gameObject.GetComponent<Pixelate>() ?? cam.gameObject.AddComponent<Pixelate>();
+                    
                     pix.mainCamera ??= cam;
                     pix.enabled = true;
+                    
                     yield return new WaitForSecondsRealtime(time);
+                    
                     pix.enabled = false;
+                    
                     break;
                 }
                 default:
