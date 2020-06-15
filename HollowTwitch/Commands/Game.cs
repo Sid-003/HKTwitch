@@ -24,11 +24,6 @@ namespace HollowTwitch.Commands
         [HKCommand("sfxRando")]
         public IEnumerator SfxRando()
         {
-            for (int i = 0; i < 20; i++)
-            {
-                Modding.Logger.Log("You are an idiot");
-            }
-            
             var oneShotHook = new Hook
             (
                 typeof(AudioSource).GetMethod("PlayOneShot", new[] {typeof(AudioClip), typeof(float)}),
@@ -54,13 +49,13 @@ namespace HollowTwitch.Commands
 
         private void Play(Action<AudioSource> orig, AudioSource self)
         {
-            AudioClip orig_clip = self.clip;
+            AudioClip origClip = self.clip;
             
             self.clip = _clips[UnityEngine.Random.Range(0, _clips.Length - 1)];
             
             orig(self);
 
-            self.clip = orig_clip;
+            self.clip = origClip;
         }
     }
 }

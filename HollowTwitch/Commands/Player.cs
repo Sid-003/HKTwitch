@@ -217,7 +217,7 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public IEnumerator DashVector()
         {
-            Vector2 VectorHook(Vector2 change)
+            static Vector2 VectorHook(Vector2 change)
             {
                 const float factor = 4f;
                 
@@ -431,5 +431,18 @@ namespace HollowTwitch.Commands
                     break;
             }
         }
+
+        [HKCommand("doubledamage")]
+        [Summary("Makes the player take double damage.")]
+        [Cooldown(60)]
+        public IEnumerator DoubleDamage()
+        {
+            static int InstanceOnTakeDamageHook(ref int hazardtype, int damage) => damage * 2;
+            ModHooks.Instance.TakeDamageHook += InstanceOnTakeDamageHook;
+            yield return new WaitForSecondsRealtime(30);
+            ModHooks.Instance.TakeDamageHook -= InstanceOnTakeDamageHook;
+        }
+
+       
     }
 }

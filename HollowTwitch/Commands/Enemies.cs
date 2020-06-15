@@ -11,7 +11,7 @@ using ModCommon;
 using ModCommon.Util;
 using Modding;
 using UnityEngine;
-using Logger = Modding.Logger;
+using static Modding.Logger;
 using Object = UnityEngine.Object;
 
 namespace HollowTwitch.Commands
@@ -24,8 +24,7 @@ namespace HollowTwitch.Commands
         {
             if (ModHooks.Instance.LoadedMods.Any(x => x.Contains("PalePrince")))
             {
-                Logger.Log(string.Join(", ", AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().Select(x => x.Name).ToArray()));
-                _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().FirstOrDefault(x => x.Name == "Prince");
+                _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince"))?.GetTypes()?.FirstOrDefault(x => x.Name == "Prince");
             }
         }
 
@@ -33,11 +32,11 @@ namespace HollowTwitch.Commands
         [Cooldown(60, 3)]
         public IEnumerator SpawnEnemy(string name)
         {
-            Logger.Log("spawn called");
+            Log("spawn called");
             var enemy = Object.Instantiate(ObjectLoader.InstantiableObjects[name], HeroController.instance.gameObject.transform.position, Quaternion.identity);
             yield return new WaitForSecondsRealtime(1);
             enemy.SetActive(true);
-            Logger.Log("ended");
+            Log("ended");
         }
 
 
@@ -177,13 +176,24 @@ namespace HollowTwitch.Commands
         [HKCommand("duplicateboss")]
         public IEnumerator DuplicateBoss()
         {
-            if (BossSceneController.Instance == null || BossSceneController.Instance?.bosses == null)
+            if (BossSceneController.Instance == null)
                 yield break;
-            foreach(var boss in BossSceneController.Instance?.bosses)
+            foreach(var boss in BossSceneController.Instance.bosses)
             {
                 _ = Object.Instantiate(boss.gameObject, boss.gameObject.transform.position, boss.gameObject.transform.rotation);
                 yield return new WaitForSeconds(0.2f);
             }
         }
+
+
+        
+        [HKCommand("spawnshade")]
+        public void SpawnShade()
+        {
+             Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);
+        }
+        
+        
+        
     }
 }
