@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace HollowTwitch
 {
@@ -15,6 +16,8 @@ namespace HollowTwitch
 
         public event Action<string> ChatMessageReceived;
         public event Action<string> RawPayload;
+
+        public event Action<string> ClientErrored;
 
         public TwitchClient(TwitchConfig config)
         {
@@ -59,14 +62,25 @@ namespace HollowTwitch
         {
             while (true)
             {
-                if (!_client.Connected)
+                try
                 {
+                    if (!_client.Connected)
+                    {
+                        Dispose();
+                        ConnectAndAuthenticate(_config);
+                    }
+
+                    string message = _output.ReadLine();
+                    RawPayload?.Invoke(message);
+                }
+                catch (Exception e)
+                {
+                    ClientErrored?.Invoke(e.ToString());
+                    Thread.Sleep(5);
                     Dispose();
                     ConnectAndAuthenticate(_config);
                 }
-
-                string message = _output.ReadLine();
-                RawPayload?.Invoke(message);
+               
             }
         }
 

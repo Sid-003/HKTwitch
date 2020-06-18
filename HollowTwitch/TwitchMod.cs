@@ -57,6 +57,10 @@ namespace HollowTwitch
             Processor.RegisterCommands<Game>();
             _client = new TwitchClient(_config);
             _client.ChatMessageReceived += OnMessageReceived;
+            _client.ClientErrored += s =>
+            {
+                Logger.Log($"An error occured while receiving messages.\nError: " + s);
+            };
             _currentThread = new Thread(_client.StartReceive);
             _currentThread.Start();
             Logger.Log("started receiving");

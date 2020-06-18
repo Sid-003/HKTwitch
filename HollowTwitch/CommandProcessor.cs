@@ -94,12 +94,17 @@ namespace HollowTwitch
         {
             parsed = null;
 
-            ParameterInfo[] parameters = command.Parameters;
-            List<object> built = new List<object>();
-
             // Avoid multiple enumerations when indexing
             string[] enumerated = args.ToArray();
+            
+            ParameterInfo[] parameters = command.Parameters;
+            
+            if (enumerated.Length < parameters.Length)
+                return false;
+            
+            List<object> built = new List<object>();
 
+            
             for (int i = 0; i < parameters.Length; i++)
             {
                 object p = ParseParameter(enumerated[i], parameters[i].ParameterType);
