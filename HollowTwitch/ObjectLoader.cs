@@ -68,9 +68,16 @@ namespace HollowTwitch
             foreach (var kvp in ObjectList)
             {
                 var (name, modify) = kvp.Key;
-                var (room, go) = kvp.Value;
+                var (room, go_name) = kvp.Value;
 
-                InstantiableObjects.Add(name, Spawnable(preloadedObjects[room][go], modify));
+                if (!preloadedObjects[room].TryGetValue(go_name, out GameObject go))
+                {
+                    Logger.LogWarn($"[HollowTwitch]: Unable to load GameObject {go_name}");
+                    
+                    continue;
+                }
+
+                InstantiableObjects.Add(name, Spawnable(go, modify));
             }
         }
 
