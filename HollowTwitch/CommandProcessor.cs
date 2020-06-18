@@ -107,6 +107,9 @@ namespace HollowTwitch
             if (enumerated.Length < parameters.Length)
                 return false;
 
+            if (enumerated.Length < parameters.Length)
+                return false;
+
             for (int i = 0; i < parameters.Length; i++)
             {
                 object p = ParseParameter(enumerated[i], parameters[i].ParameterType);
