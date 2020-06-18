@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using HollowTwitch.Commands;
@@ -73,8 +74,8 @@ namespace HollowTwitch
         private void OnMessageReceived(string message)
         {
             Logger.Log("Twitch chat: " + message);
-
-            var trimmed = message.Trim();
+            
+            string trimmed = message.Trim();
             int index = trimmed.IndexOf(_config.Prefix);
 
             if (index != 0) return;
