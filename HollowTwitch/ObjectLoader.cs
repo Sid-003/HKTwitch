@@ -22,6 +22,10 @@ namespace HollowTwitch
                 ("Deepnest_East_11", "Super Spitter")
             },
             {
+                ("Revek", null),
+                ("RestingGrounds_08", "Ghost Battle Revek")
+            },
+            {
                 ("pv", null),
                 ("GG_Hollow_Knight", "Battle Scene/HK Prime")
             },
