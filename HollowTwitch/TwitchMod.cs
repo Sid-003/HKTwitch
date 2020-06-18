@@ -4,6 +4,7 @@ using System.Threading;
 using HollowTwitch.Commands;
 using JetBrains.Annotations;
 using Modding;
+using On.HutongGames.PlayMaker.Actions;
 using UnityEngine;
 using Camera = HollowTwitch.Commands.Camera;
 using Logger = Modding.Logger;
@@ -16,8 +17,9 @@ namespace HollowTwitch
         private Thread _currentThread;
         private TwitchConfig _config = new TwitchConfig();
 
-        private CommandProcessor _proc;
+        public CommandProcessor Processor;
 
+        public static TwitchMod Instance;
         public override ModSettings GlobalSettings
         {
             get => _config;
@@ -26,6 +28,7 @@ namespace HollowTwitch
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
+            Instance = this;
             ObjectLoader.Load(preloadedObjects);
             ObjectLoader.LoadAssets();
             
@@ -46,12 +49,12 @@ namespace HollowTwitch
         {
             if (once) return;
 
-            _proc = new CommandProcessor();
-            _proc.RegisterCommands<Player>();
-            _proc.RegisterCommands<Enemies>();
-            _proc.RegisterCommands<Area>();
-            _proc.RegisterCommands<Camera>();
-            _proc.RegisterCommands<Game>();
+            Processor = new CommandProcessor();
+            Processor.RegisterCommands<Player>();
+            Processor.RegisterCommands<Enemies>();
+            Processor.RegisterCommands<Area>();
+            Processor.RegisterCommands<Camera>();
+            Processor.RegisterCommands<Game>();
             _client = new TwitchClient(_config);
             _client.ChatMessageReceived += OnMessageReceived;
             _currentThread = new Thread(_client.StartReceive);
@@ -71,13 +74,14 @@ namespace HollowTwitch
         {
             Logger.Log("Twitch chat: " + message);
 
-            int index = message.IndexOf(_config.Prefix);
+            var trimmed = message.Trim();
+            int index = trimmed.IndexOf(_config.Prefix);
 
             if (index != 0) return;
             
-            string command = message.Substring(_config.Prefix.Length).Trim();
+            string command = trimmed.Substring(_config.Prefix.Length).Trim();
             
-            _proc.Execute(command);
+            Processor.Execute(command);
         }
     }
 }

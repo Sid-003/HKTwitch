@@ -24,11 +24,8 @@ namespace HollowTwitch.Commands
         public Enemies()
         {
             if (!ModHooks.Instance.LoadedMods.Any(x => x.Contains("PalePrince"))) return;
-
-            Logger.Log("Enemies constructor:");
-            Logger.Log(string.Join(", ", AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().Select(x => x.Name).ToArray()));
-
-            _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince")).GetTypes().FirstOrDefault(x => x.Name == "Prince");
+            
+            _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince"))?.GetTypes()?.FirstOrDefault(x => x.Name == "Prince");
         }
 
         [HKCommand("spawn")]
@@ -41,7 +38,6 @@ namespace HollowTwitch.Commands
                 yield break;
 
             GameObject enemy = Object.Instantiate(go, HeroController.instance.gameObject.transform.position, Quaternion.identity);
-
             yield return new WaitForSecondsRealtime(1);
 
             enemy.SetActive(true);
@@ -262,5 +258,16 @@ namespace HollowTwitch.Commands
                 yield return new WaitForSeconds(0.2f);
             }
         }
+
+
+        
+        [HKCommand("spawnshade")]
+        public void SpawnShade()
+        {
+             Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);
+        }
+        
+        
+        
     }
 }
