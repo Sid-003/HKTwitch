@@ -9,7 +9,6 @@ using Modding;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-using Logger = Modding.Logger;
 
 namespace HollowTwitch.Commands
 {
@@ -27,7 +26,9 @@ namespace HollowTwitch.Commands
 
             IEnumerator GetMaggotPrime()
             {
-                UnityWebRequest www = UnityWebRequestTexture.GetTexture("https://cdn.discordapp.com/attachments/410556297046523905/716824653280313364/hwurmpU.png");
+                const string hwurmpURL = "https://cdn.discordapp.com/attachments/410556297046523905/716824653280313364/hwurmpU.png";
+                
+                UnityWebRequest www = UnityWebRequestTexture.GetTexture(hwurmpURL);
                 
                 yield return www.SendWebRequest();
 
@@ -308,8 +309,10 @@ namespace HollowTwitch.Commands
                 return;
             }
 
+            // ReSharper disable CompareOfFloatsByEqualityOperator
             if (move_direction == 0f && _slippery)
                 move_direction = _lastMoveDir == 0f ? 1f : _lastMoveDir;
+            // ReSharper restore CompareOfFloatsByEqualityOperator
 
             if (_inverted)
                 move_direction = -move_direction;

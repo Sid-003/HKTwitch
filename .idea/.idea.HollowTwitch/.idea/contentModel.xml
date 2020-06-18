@@ -13,6 +13,7 @@
           <e p="Area.cs" t="Include" />
           <e p="Camera.cs" t="Include" />
           <e p="Enemies.cs" t="Include" />
+          <e p="Game.cs" t="Include" />
           <e p="Player.cs" t="Include" />
         </e>
         <e p="Components" t="Include">

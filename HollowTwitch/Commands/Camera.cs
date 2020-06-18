@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
@@ -7,6 +8,7 @@ using JetBrains.Annotations;
 using ModCommon.Util;
 using UnityEngine;
 using UCamera = UnityEngine.Camera;
+using UObject = UnityEngine.Object;
 
 namespace HollowTwitch.Commands
 {
@@ -49,20 +51,25 @@ namespace HollowTwitch.Commands
                 camEffect = values[UnityEngine.Random.Range(0, values.Length)];
             }
 
+            tk2dCamera tk2dCam = GameCameras.instance.tk2dCam;
+            UCamera cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
+
             switch (camEffect)
             {
                 case CameraEffects.Zoom:
                 {
-                    GameCameras.instance.tk2dCam.ZoomFactor = 5f;
+                    tk2dCam.ZoomFactor = 5f;
                     _activeEffects |= camEffect;
+                    
                     yield return new WaitForSecondsRealtime(time);
-                    GameCameras.instance.tk2dCam.ZoomFactor = 1f;
+                    
+                    tk2dCam.ZoomFactor = 1f;
                     _activeEffects &= ~camEffect;
+                    
                     break;
                 }
                 case CameraEffects.Invert:
                 {
-                    UCamera cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
                     ApplyShader ivc = cam.gameObject.GetComponent<ApplyShader>() ?? cam.gameObject.AddComponent<ApplyShader>();
                     
                     ivc.CurrentMaterial = _invertMat;
@@ -76,7 +83,6 @@ namespace HollowTwitch.Commands
                 }
                 case CameraEffects.Pixelate:
                 {
-                    UCamera cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
                     Pixelate pix = cam.gameObject.GetComponent<Pixelate>() ?? cam.gameObject.AddComponent<Pixelate>();
                     
                     pix.mainCamera ??= cam;
@@ -86,6 +92,49 @@ namespace HollowTwitch.Commands
                     
                     pix.enabled = false;
                     
+                    break;
+                }
+                case CameraEffects.Backwards:
+                {
+                    float prev_z = cam.transform.position.z;
+                    float new_z = cam.transform.position.z + 80;
+
+                    /*
+                     * When you get hit, spell control trys to reset the camera.
+                     * This camera reset moves the camera super far back in z
+                     * and as a result you get an unusable black screen.
+                     *
+                     * This prevents that.
+                     */
+                    void PreventCameraReset(On.HutongGames.PlayMaker.Actions.SetPosition.orig_DoSetPosition orig, HutongGames.PlayMaker.Actions.SetPosition self)
+                    {
+                        if (self.Fsm.Name == "Spell Control" && self.Fsm.ActiveState.Name == "Reset Cam Zoom")
+                            return;
+                        
+                        orig(self);
+                    }
+
+                    On.HutongGames.PlayMaker.Actions.SetPosition.DoSetPosition += PreventCameraReset;
+                    
+                    cam.transform.SetPositionZ(new_z);
+
+                    Quaternion prev_rot = cam.transform.rotation;
+                    
+                    // Rotate around the y-axis to flip the vector.
+                    cam.transform.Rotate(Vector3.up, 180);
+                    
+                    _activeEffects |= CameraEffects.Mirror;
+
+                    yield return new WaitForSecondsRealtime(time);
+                    
+                    On.HutongGames.PlayMaker.Actions.SetPosition.DoSetPosition -= PreventCameraReset;
+                    
+                    _activeEffects ^= CameraEffects.Mirror;
+                    
+                    // Reset the camera.
+                    cam.transform.rotation = prev_rot;
+                    cam.transform.SetPositionZ(prev_z);
+
                     break;
                 }
                 default:
@@ -143,10 +192,11 @@ namespace HollowTwitch.Commands
     public enum CameraEffects
     {
         Flip = 1,
-        Nausea = 2,
-        Mirror = 4,
-        Zoom = 8,
-        Invert = 16,
-        Pixelate = 32
+        Nausea = 1 << 1,
+        Mirror = 1 << 2,
+        Zoom = 1 << 3,
+        Invert = 1 << 4,
+        Pixelate = 1 << 5,
+        Backwards = 1 << 6 
     }
 }
