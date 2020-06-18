@@ -82,6 +82,19 @@ namespace HollowTwitch.Commands
             DarknessHelper.Lighten();
         }
 
+        [HKCommand("nopogo")]
+        [Cooldown(60)]
+        public IEnumerator PogoKnockback()
+        {
+            void NoBounce(On.HeroController.orig_Bounce orig, HeroController self) { }
+            
+            On.HeroController.Bounce += NoBounce;
+            
+            yield return new WaitForSecondsRealtime(30);
+
+            On.HeroController.Bounce -= NoBounce;
+        }
+
         [HKCommand("conveyor")]
         [Summary("Conveyor storage.")]
         [Cooldown(60)]
@@ -163,10 +176,10 @@ namespace HollowTwitch.Commands
 
         [HKCommand("wind")]
         [Summary("Make it a windy day.")]
-        [Cooldown(60)]
-        public IEnumerator ChadConveyor()
+        [Cooldown(180)]
+        public IEnumerator Wind()
         {
-            float speed = Random.Range(-30f, 30f);
+            float speed = Random.Range(-10f, 10f);
             
             float prev_s = HeroController.instance.conveyorSpeed;
 
