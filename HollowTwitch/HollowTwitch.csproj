@@ -111,9 +111,14 @@
     <EmbeddedResource Include="shaders" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="Exists('C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight')">
     <Exec Command="@echo on" />
     <Exec Command="echo Copying mod" />
     <Exec Command="xcopy /y &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\&quot;" />
+  </Target>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="Exists('D:\Steam\steamapps\common\Hollow Knight')">
+      <Exec Command="@echo on" />
+      <Exec Command="echo Copying mod" />
+      <Exec Command="xcopy /y &quot;$(TargetPath)&quot; &quot;D:\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\&quot;" />
   </Target>
 </Project>

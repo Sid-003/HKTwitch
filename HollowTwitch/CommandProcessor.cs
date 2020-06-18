@@ -7,7 +7,7 @@ using System.Reflection;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
-using Modding;
+using Logger = Modding.Logger;
 
 namespace HollowTwitch
 {
@@ -24,7 +24,7 @@ namespace HollowTwitch
             _commands = new List<Command>();
             _parsers = new Dictionary<Type, IArgumentParser>();
         }
-        
+
         public void AddTypeParser<T>(T parser, Type t) where T : IArgumentParser
         {
             _parsers.Add(t, parser);
@@ -104,7 +104,9 @@ namespace HollowTwitch
             
             List<object> built = new List<object>();
 
-            
+            if (enumerated.Length < parameters.Length)
+                return false;
+
             for (int i = 0; i < parameters.Length; i++)
             {
                 object p = ParseParameter(enumerated[i], parameters[i].ParameterType);
