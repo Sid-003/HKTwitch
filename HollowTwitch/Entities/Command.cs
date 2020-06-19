@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using HollowTwitch.Entities.Attributes;
 
 namespace HollowTwitch.Entities
 {

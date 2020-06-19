@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker;
@@ -26,8 +27,9 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("setText")]
+        [Summary("Sets every game text to the text provided.")]
         [Cooldown(80)]
-        public IEnumerator Text(string msg)
+        public IEnumerator Text([RemainingText]string msg)
         {
             string OnLangGet(string key, string title)
             {
@@ -42,10 +44,11 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("rng")]
+        [Summary("YUP RNG.")]
         [Cooldown(120)]
         public IEnumerator RNG()
         {
-            void OnWait(On.HutongGames.PlayMaker.Actions.Wait.orig_OnEnter orig, HutongGames.PlayMaker.Actions.Wait self)
+            static void OnWait(On.HutongGames.PlayMaker.Actions.Wait.orig_OnEnter orig, HutongGames.PlayMaker.Actions.Wait self)
             {
                 FsmFloat orig_time = self.time;
 
@@ -55,8 +58,8 @@ namespace HollowTwitch.Commands
 
                 self.time = orig_time;
             }
-            
-            void OnWaitRandom(On.HutongGames.PlayMaker.Actions.WaitRandom.orig_OnEnter orig, HutongGames.PlayMaker.Actions.WaitRandom self)
+
+            static void OnWaitRandom(On.HutongGames.PlayMaker.Actions.WaitRandom.orig_OnEnter orig, HutongGames.PlayMaker.Actions.WaitRandom self)
             {
                 FsmFloat orig_time_min = self.timeMin;
                 FsmFloat orig_time_max = self.timeMax;
@@ -70,7 +73,7 @@ namespace HollowTwitch.Commands
                 self.timeMax = orig_time_max;
             }
 
-            void AnimPlay
+            static void AnimPlay
             (
                 On.tk2dSpriteAnimator.orig_Play_tk2dSpriteAnimationClip_float_float orig,
                 tk2dSpriteAnimator self,
@@ -116,6 +119,7 @@ namespace HollowTwitch.Commands
 
         [HKCommand("sfxRando")]
         [Cooldown(180)]
+        [Summary("Randomizes sfx sounds.")]
         public IEnumerator SfxRando()
         {
             var oneShotHook = new Hook

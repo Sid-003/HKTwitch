@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Linq;
 using HollowTwitch.Components;
-using HollowTwitch.Entities.Attributes;
+ using HollowTwitch.Entities;
+ using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
-using JetBrains.Annotations;
+ using HollowTwitch.Precondition;
+ using JetBrains.Annotations;
 using ModCommon.Util;
 using UnityEngine;
 using UCamera = UnityEngine.Camera;
@@ -33,6 +35,8 @@ namespace HollowTwitch.Commands
         private readonly Material _invertMat = new Material(ObjectLoader.Shaders["Custom/InvertColor"]);
 
         [HKCommand("cameffect")]
+        [Summary("Applies various effects to the camera.\nEffects: Invert, Flip, Nausea, Backwards, Mirror, Pixelate, and Zoom.")]
+        [Cooldown(30, 4)]
         public IEnumerator AddEffect(string effect)
         {
             const float time = 60f;

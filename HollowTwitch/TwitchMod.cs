@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using HollowTwitch.Commands;
+using HollowTwitch.Entities;
+using HollowTwitch.Entities.Attributes;
+using HollowTwitch.Precondition;
 using JetBrains.Annotations;
 using Modding;
 using On.HutongGames.PlayMaker.Actions;
@@ -64,8 +69,10 @@ namespace HollowTwitch
             };
             _currentThread = new Thread(_client.StartReceive);
             _currentThread.Start();
+            #if DEBUG
+                GenerateHelpInfo();
+            #endif
             Logger.Log("started receiving");
-
             once = true;
         }
 
@@ -88,5 +95,29 @@ namespace HollowTwitch
             
             Processor.Execute(command);
         }
+
+        private void GenerateHelpInfo()
+        {
+            var sb = new StringBuilder();
+
+            sb.AppendLine("Twitch Mod Command List.\n");
+            
+            foreach (Command command in Processor.Commands)
+            {
+                string name = command.Name;
+                sb.AppendLine($"Command: {name}");
+
+                var attributes = command.MethodInfo.GetCustomAttributes(false);
+                var args = string.Join(" ", command.Parameters.Select(x => $"[{x.Name}]").ToArray());
+                var cooldown = attributes.OfType<CooldownAttribute>().FirstOrDefault();
+                var summary = attributes.OfType<SummaryAttribute>().FirstOrDefault();
+                sb.AppendLine($"Usage: {_config.Prefix}{name} {args}");
+                sb.AppendLine($"Cooldown: {(cooldown is null ? "This command has no cooldown" : $"{cooldown.MaxUses} use(s) per {cooldown.Reset}.")}");
+                sb.AppendLine($"Summary:\n{(summary?.Summary ?? "No summary provided.")}\n");
+            }
+
+            File.WriteAllText(Application.dataPath + "/Managed/Mods/TwitchCommandList.txt", sb.ToString());
+        }
+        
     }
 }

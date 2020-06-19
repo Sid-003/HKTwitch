@@ -83,6 +83,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("nopogo")]
+        [Summary("Disables pogo.")]
         [Cooldown(60)]
         public IEnumerator PogoKnockback()
         {
@@ -132,7 +133,7 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public IEnumerator Glass()
         {
-            int Damage(ref int hazardtype, int damage)
+            static int Damage(ref int hazardtype, int damage)
             {
                 return 420;
             }
@@ -145,6 +146,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("jumplength")]
+        [Summary("Gives a random jump length.")]
         [Cooldown(60)]
         public IEnumerator JumpLength()
         {
@@ -160,6 +162,7 @@ namespace HollowTwitch.Commands
         }
         
         [HKCommand("jumpspeed")]
+        [Summary("Gives a random jump speed.")]
         [Cooldown(60)]
         public IEnumerator JumpSpeed()
         {
@@ -261,13 +264,13 @@ namespace HollowTwitch.Commands
         [Summary("Changes the timescale of the game for the time specified.")]
         [Cooldown(60 * 2)]
         [SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
-        public IEnumerator ChangeTimescale([EnsureFloat(0.01f, 2f)] float scale, [EnsureFloat(5, 60)] float seconds)
+        public IEnumerator ChangeTimescale([EnsureFloat(0.01f, 2f)] float scale)
         {
             SanicHelper.TimeScale = scale;
 
             Time.timeScale = Time.timeScale == 0 ? 0 : scale;
 
-            yield return new WaitForSecondsRealtime(seconds);
+            yield return new WaitForSecondsRealtime(60);
 
             Time.timeScale = Time.timeScale == 0 ? 0 : 1;
 
@@ -359,6 +362,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("bindings")]
+        [Summary("Enables bindings.")]
         [Cooldown(60 * 5)]
         public IEnumerator EnableBindings()
         {
@@ -377,6 +381,7 @@ namespace HollowTwitch.Commands
         private bool _floorislava;
 
         [HKCommand("floorislava")]
+        [Summary("Makes the floor do damage.")]
         [Cooldown(60 * 2)]
         public IEnumerator FloorIsLava([EnsureFloat(10, 60)] float seconds)
         {
@@ -417,7 +422,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("toggle")]
-        [Summary("Toogles an ability for 45 seconds.")]
+        [Summary("Toggles an ability for 45 seconds.")]
         [Cooldown(60 * 4)]
         public IEnumerator ToggleAbility(string ability)
         {
@@ -426,9 +431,9 @@ namespace HollowTwitch.Commands
             switch (ability)
             {
                 case "dash":
-                    PlayerData.instance.hasDash ^= true;
+                    PlayerData.instance.canDash ^= true;
                     yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.hasDash ^= true;
+                    PlayerData.instance.canDash ^= true;
                     break;
                 case "superdash":
                     PlayerData.instance.hasSuperDash ^= true;

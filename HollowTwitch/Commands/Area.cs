@@ -50,6 +50,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("spikefloor")]
+        [Summary("Spawns spikes.")]
         [RequireSceneChange]
         public IEnumerator SpikeFloor()
         {

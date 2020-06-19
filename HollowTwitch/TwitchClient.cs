@@ -36,9 +36,23 @@ namespace HollowTwitch
                 AutoFlush = true
             };
 
+            if (!_client.Connected)
+            {
+                Reconnect(10000);
+                return;
+            }
+                
             SendMessage($"PASS oauth:{config.Token}");
             SendMessage($"NICK {config.Username}");
             SendMessage($"JOIN #{config.Channel}");
+        }
+
+        private void Reconnect(int delay)
+        {
+            ClientErrored?.Invoke("Reconnrecting........");
+            Dispose();
+            Thread.Sleep(delay);
+            ConnectAndAuthenticate(_config);
         }
 
         private void ProcessMessage(string message)
@@ -75,10 +89,8 @@ namespace HollowTwitch
                 }
                 catch (Exception e)
                 {
-                    ClientErrored?.Invoke(e.ToString());
-                    Thread.Sleep(5);
-                    Dispose();
-                    ConnectAndAuthenticate(_config);
+                    ClientErrored?.Invoke("Error occured trying to read stream: " + e.ToString());
+                    Reconnect(5000);
                 }
                
             }

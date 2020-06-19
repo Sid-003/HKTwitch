@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
@@ -29,6 +30,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("spawn")]
+        [Summary("Spawns an enemy.\nEnemies: aspid")]
         [Cooldown(60, 3)]
         public IEnumerator SpawnEnemy(string name)
         {
@@ -45,6 +47,7 @@ namespace HollowTwitch.Commands
 
 
         [HKCommand("spawnpv")]
+        [Summary("Spawns pure vessel.")]
         [Cooldown(60)]
         public IEnumerator SpawnPureVessel()
         {
@@ -111,89 +114,10 @@ namespace HollowTwitch.Commands
             cp.xMax = x + castRight.distance;
             cp.xMin = x - castLeft.distance;
         }
-
-
-        //very broken need to be fixed i think
-        [HKCommand("spawncg2")]
-        public void SpawnEnragedGuardian()
-        {
-            var position = HeroController.instance.gameObject.transform.position;
-            var cg2 = Object.Instantiate(ObjectLoader.InstantiableObjects["cg2"], position, Quaternion.identity);
-            cg2.SetActive(true);
-            var miner = cg2.LocateMyFSM("Beam Miner");
-            miner.SetState("Battle Init");
-            miner.Fsm.GetFsmFloat("Jump Max X").Value = position.x + 20f;
-            miner.Fsm.GetFsmFloat("Jump Min X").Value = position.x - 20f;
-
-
-            //stolen from EnemyRandomizer by Kerr https://github.com/Kerr1291/EnemyRandomizer, thank you for saving my life.
-            var actions = miner.FsmStates.Where(x => x.Name == "Aim" || x.Name == "Aim Right" || x.Name == "Aim Left").SelectMany(x => x.Actions);
-            foreach (var action in actions)
-            {
-                if (action is GetPosition gp)
-                {
-                    if (gp.gameObject.GameObject.Name == "Beam Point R" || gp.gameObject.GameObject.Name == "Beam Point L")
-                    {
-                        GameObject beamPoint = Object.Instantiate(ObjectLoader.InstantiableObjects[gp.gameObject.GameObject.Name]);
-                        FsmGameObject fsmGO = new FsmGameObject(beamPoint);
-
-                        FsmOwnerDefault fsmOwnerDefault = new FsmOwnerDefault
-                        {
-                            GameObject = fsmGO,
-                            OwnerOption = OwnerDefaultOption.UseOwner
-                        };
-
-                        gp.gameObject = fsmOwnerDefault;
-                    }
-
-                    if (gp.gameObject.GameObject.Name == "Beam Origin")
-                    {
-                        GameObject beamOrigin = cg2.FindGameObjectInChildren("Beam Origin");
-                        FsmGameObject fsmGO = new FsmGameObject(beamOrigin);
-
-                        FsmOwnerDefault fsmOwnerDefault = new FsmOwnerDefault
-                        {
-                            GameObject = fsmGO,
-                            OwnerOption = OwnerDefaultOption.UseOwner
-                        };
-
-                        gp.gameObject = fsmOwnerDefault;
-                    }
-                }
-                else if (action is SetPosition sp)
-                {
-                    if (sp.gameObject.GameObject.Name == "Beam Ball")
-                    {
-                        GameObject beamBall = Object.Instantiate(ObjectLoader.InstantiableObjects[sp.gameObject.GameObject.Name]);
-                        FsmGameObject fsmGO = new FsmGameObject(beamBall);
-
-                        FsmOwnerDefault fsmOwnerDefault = new FsmOwnerDefault
-                        {
-                            GameObject = fsmGO,
-                            OwnerOption = OwnerDefaultOption.UseOwner
-                        };
-
-                        sp.gameObject = fsmOwnerDefault;
-                    }
-
-                    if (sp.gameObject.GameObject.Name == "Beam")
-                    {
-                        GameObject beam = Object.Instantiate(ObjectLoader.InstantiableObjects[sp.gameObject.GameObject.Name]);
-                        FsmGameObject fsmGO = new FsmGameObject(beam);
-
-                        FsmOwnerDefault fsmOwnerDefault = new FsmOwnerDefault
-                        {
-                            GameObject = fsmGO,
-                            OwnerOption = OwnerDefaultOption.UseOwner
-                        };
-
-                        sp.gameObject = fsmOwnerDefault;
-                    }
-                }
-            }
-        }
-
+        
+        
         [HKCommand("revek")]
+        [Summary("Spawns revek to ruin your life.")]
         [Cooldown(120)]
         public IEnumerator Revek()
         {
@@ -241,6 +165,7 @@ namespace HollowTwitch.Commands
 
 
         [HKCommand("duplicateboss")]
+        [Summary("Duplicates the current boss in the room.")]
         public IEnumerator DuplicateBoss()
         {
             if (BossSceneController.Instance == null || BossSceneController.Instance.bosses == null)
@@ -262,6 +187,8 @@ namespace HollowTwitch.Commands
 
         
         [HKCommand("spawnshade")]
+        [Summary("Spawns the shade.")]
+        [Cooldown(60)]
         public void SpawnShade()
         {
              Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);

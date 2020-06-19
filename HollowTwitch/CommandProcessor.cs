@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
@@ -16,12 +17,14 @@ namespace HollowTwitch
     {
         private const char Seperator = ' ';
 
-        private readonly List<Command> _commands;
         private readonly Dictionary<Type, IArgumentParser> _parsers;
+
+
+        public List<Command> Commands { get; }
 
         public CommandProcessor()
         {
-            _commands = new List<Command>();
+            Commands = new List<Command>();
             _parsers = new Dictionary<Type, IArgumentParser>();
         }
 
@@ -34,7 +37,7 @@ namespace HollowTwitch
         {
             string[] pieces = command.Split(Seperator);
 
-            IOrderedEnumerable<Command> found = _commands
+            IOrderedEnumerable<Command> found = Commands
                                                 .Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase))
                                                 .OrderByDescending(x => x.Priority);
 
@@ -98,15 +101,26 @@ namespace HollowTwitch
             string[] enumerated = args.ToArray();
             
             ParameterInfo[] parameters = command.Parameters;
+
+            bool hasRemainder = parameters.Length != 0 && parameters[parameters.Length - 1].GetCustomAttributes(typeof(RemainingTextAttribute), false).Any();
             
-            if (enumerated.Length < parameters.Length)
+            if (enumerated.Length < parameters.Length && !hasRemainder)
                 return false;
             
             List<object> built = new List<object>();
 
             for (int i = 0; i < parameters.Length; i++)
             {
-                object p = ParseParameter(enumerated[i], parameters[i].ParameterType);
+                string toParse = enumerated[i];
+                if (i == parameters.Length - 1)
+                {
+                    if (hasRemainder)
+                    {
+                        toParse = string.Join(Seperator.ToString(), enumerated.Skip(i).Take(enumerated.Length).ToArray());
+                    }
+                }
+                
+                object p = ParseParameter(toParse, parameters[i].ParameterType);
 
                 if (p is null)
                     return false;
@@ -156,7 +170,7 @@ namespace HollowTwitch
                 if (attr == null)
                     continue;
 
-                _commands.Add(new Command(attr.Name, method, instance));
+                Commands.Add(new Command(attr.Name, method, instance));
                 Logger.Log($"Added command: {attr.Name}");
             }
         }

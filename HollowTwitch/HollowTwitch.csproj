@@ -86,6 +86,7 @@
     <Compile Include="Components\ApplyShader.cs" />
     <Compile Include="Components\Pixelate.cs" />
     <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
+    <Compile Include="Entities\Attributes\RemainingTextAttribute.cs" />
     <Compile Include="Entities\Attributes\SummaryAttribute.cs" />
     <Compile Include="ModHelpers\BindingsHelper.cs" />
     <Compile Include="Commands\Enemies.cs" />
@@ -119,6 +120,6 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="Exists('D:\Steam\steamapps\common\Hollow Knight')">
       <Exec Command="@echo on" />
       <Exec Command="echo Copying mod" />
-      <Exec Command="xcopy /y &quot;$(TargetPath)&quot; &quot;D:\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\&quot;" />
+      <Exec Command="xcopy /y &quot;$(TargetPath)&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Mods\&quot;" />
   </Target>
 </Project>
