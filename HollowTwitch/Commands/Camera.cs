@@ -127,7 +127,8 @@ namespace HollowTwitch.Commands
 
                     _activeEffects |= CameraEffects.Mirror;
 
-                    yield return new WaitForSecondsRealtime(time);
+                    // Much shorter than the other effects due to it being a lot harder to play around
+                    yield return new WaitForSecondsRealtime(time / 4);
 
                     On.HutongGames.PlayMaker.Actions.SetPosition.DoSetPosition -= PreventCameraReset;
 
