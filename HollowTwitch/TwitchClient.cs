@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace HollowTwitch
 {
@@ -15,6 +16,8 @@ namespace HollowTwitch
 
         public event Action<string, string> ChatMessageReceived;
         public event Action<string> RawPayload;
+
+        public event Action<string> ClientErrored;
 
         public TwitchClient(TwitchConfig config)
         {
@@ -33,9 +36,23 @@ namespace HollowTwitch
                 AutoFlush = true
             };
 
+            if (!_client.Connected)
+            {
+                Reconnect(10000);
+                return;
+            }
+                
             SendMessage($"PASS oauth:{config.Token}");
             SendMessage($"NICK {config.Username}");
             SendMessage($"JOIN #{config.Channel}");
+        }
+
+        private void Reconnect(int delay)
+        {
+            ClientErrored?.Invoke("Reconnrecting........");
+            Dispose();
+            Thread.Sleep(delay);
+            ConnectAndAuthenticate(_config);
         }
 
         private void ProcessMessage(string message)
@@ -61,14 +78,23 @@ namespace HollowTwitch
         {
             while (true)
             {
-                if (!_client.Connected)
+                try
                 {
-                    Dispose();
-                    ConnectAndAuthenticate(_config);
-                }
+                    if (!_client.Connected)
+                    {
+                        Dispose();
+                        ConnectAndAuthenticate(_config);
+                    }
 
-                string message = _output.ReadLine();
-                RawPayload?.Invoke(message);
+                    string message = _output.ReadLine();
+                    RawPayload?.Invoke(message);
+                }
+                catch (Exception e)
+                {
+                    ClientErrored?.Invoke("Error occured trying to read stream: " + e.ToString());
+                    Reconnect(5000);
+                }
+               
             }
         }
 

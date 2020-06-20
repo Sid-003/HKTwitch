@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
@@ -17,6 +18,7 @@ namespace HollowTwitch
         private const char Seperator = ' ';
 
         internal List<Command> Commands { get; }
+        
         private readonly Dictionary<Type, IArgumentParser> _parsers;
 
         public CommandProcessor()
@@ -100,18 +102,30 @@ namespace HollowTwitch
         {
             parsed = null;
 
-            ParameterInfo[] parameters = command.Parameters;
-            List<object> built = new List<object>();
-
             // Avoid multiple enumerations when indexing
             string[] enumerated = args.ToArray();
+            
+            ParameterInfo[] parameters = command.Parameters;
 
-            if (enumerated.Length < parameters.Length)
+            bool hasRemainder = parameters.Length != 0 && parameters[parameters.Length - 1].GetCustomAttributes(typeof(RemainingTextAttribute), false).Any();
+            
+            if (enumerated.Length < parameters.Length && !hasRemainder)
                 return false;
+            
+            List<object> built = new List<object>();
 
             for (int i = 0; i < parameters.Length; i++)
             {
-                object p = ParseParameter(enumerated[i], parameters[i].ParameterType);
+                string toParse = enumerated[i];
+                if (i == parameters.Length - 1)
+                {
+                    if (hasRemainder)
+                    {
+                        toParse = string.Join(Seperator.ToString(), enumerated.Skip(i).Take(enumerated.Length).ToArray());
+                    }
+                }
+                
+                object p = ParseParameter(toParse, parameters[i].ParameterType);
 
                 if (p is null)
                     return false;

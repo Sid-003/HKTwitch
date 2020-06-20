@@ -1,8 +1,9 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections;
- using HollowTwitch.Components;
+using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
+using HollowTwitch.Precondition;
 using JetBrains.Annotations;
 using ModCommon.Util;
 using UnityEngine;
@@ -32,6 +33,8 @@ namespace HollowTwitch.Commands
         private readonly Material _invertMat = new Material(ObjectLoader.Shaders["Custom/InvertColor"]);
 
         [HKCommand("cameffect")]
+        [Summary("Applies various effects to the camera.\nEffects: Invert, Flip, Nausea, Backwards, Mirror, Pixelate, and Zoom.")]
+        [Cooldown(30, 4)]
         public IEnumerator AddEffect(string effect)
         {
             const float time = 60f;
@@ -59,38 +62,38 @@ namespace HollowTwitch.Commands
                 {
                     tk2dCam.ZoomFactor = 5f;
                     _activeEffects |= camEffect;
-                    
+
                     yield return new WaitForSecondsRealtime(time);
-                    
+
                     tk2dCam.ZoomFactor = 1f;
                     _activeEffects &= ~camEffect;
-                    
+
                     break;
                 }
                 case CameraEffects.Invert:
                 {
                     ApplyShader ivc = cam.gameObject.GetComponent<ApplyShader>() ?? cam.gameObject.AddComponent<ApplyShader>();
-                    
+
                     ivc.CurrentMaterial = _invertMat;
                     ivc.enabled = true;
-                    
+
                     yield return new WaitForSecondsRealtime(time);
-                    
+
                     ivc.enabled = false;
-                    
+
                     break;
                 }
                 case CameraEffects.Pixelate:
                 {
                     Pixelate pix = cam.gameObject.GetComponent<Pixelate>() ?? cam.gameObject.AddComponent<Pixelate>();
-                    
+
                     pix.mainCamera ??= cam;
                     pix.enabled = true;
-                    
+
                     yield return new WaitForSecondsRealtime(time);
-                    
+
                     pix.enabled = false;
-                    
+
                     break;
                 }
                 case CameraEffects.Backwards:
@@ -109,27 +112,27 @@ namespace HollowTwitch.Commands
                     {
                         if (self.Fsm.Name == "Spell Control" && self.Fsm.ActiveState.Name == "Reset Cam Zoom")
                             return;
-                        
+
                         orig(self);
                     }
 
                     On.HutongGames.PlayMaker.Actions.SetPosition.DoSetPosition += PreventCameraReset;
-                    
+
                     cam.transform.SetPositionZ(new_z);
 
                     Quaternion prev_rot = cam.transform.rotation;
-                    
+
                     // Rotate around the y-axis to flip the vector.
                     cam.transform.Rotate(Vector3.up, 180);
-                    
+
                     _activeEffects |= CameraEffects.Mirror;
 
                     yield return new WaitForSecondsRealtime(time);
-                    
+
                     On.HutongGames.PlayMaker.Actions.SetPosition.DoSetPosition -= PreventCameraReset;
-                    
+
                     _activeEffects ^= CameraEffects.Mirror;
-                    
+
                     // Reset the camera.
                     cam.transform.rotation = prev_rot;
                     cam.transform.SetPositionZ(prev_z);
@@ -147,7 +150,7 @@ namespace HollowTwitch.Commands
         private void OnUpdateCameraMatrix(On.tk2dCamera.orig_UpdateCameraMatrix orig, tk2dCamera self)
         {
             orig(self);
-            
+
             // Can't use ?. on a Unity type because they override == to null.
             if (GameCameras.instance == null || GameCameras.instance.tk2dCam == null)
                 return;
@@ -156,9 +159,9 @@ namespace HollowTwitch.Commands
 
             if (cam == null)
                 return;
-            
+
             Matrix4x4 p = cam.projectionMatrix;
-            
+
             if (_activeEffects.HasValue(CameraEffects.Nausea))
             {
                 p.m01 += Mathf.Sin(Time.time * 1.2f) * 1f;
@@ -196,6 +199,6 @@ namespace HollowTwitch.Commands
         Zoom = 1 << 3,
         Invert = 1 << 4,
         Pixelate = 1 << 5,
-        Backwards = 1 << 6 
+        Backwards = 1 << 6
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using HollowTwitch.Entities;
+using HollowTwitch.Entities.Attributes;
 
 namespace HollowTwitch.Precondition
 {

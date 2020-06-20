@@ -69,7 +69,7 @@
       <HintPath>..\..\..\References\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\References\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
       <HintPath>..\..\..\References\UnityEngine.UnityWebRequestModule.dll</HintPath>
@@ -87,6 +87,7 @@
     <Compile Include="Components\ApplyShader.cs" />
     <Compile Include="Components\Pixelate.cs" />
     <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
+    <Compile Include="Entities\Attributes\RemainingTextAttribute.cs" />
     <Compile Include="Entities\Attributes\SummaryAttribute.cs" />
     <Compile Include="ModHelpers\BindingsHelper.cs" />
     <Compile Include="Commands\Enemies.cs" />

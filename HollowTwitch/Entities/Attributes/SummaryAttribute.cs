@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HollowTwitch.Entities
+namespace HollowTwitch.Entities.Attributes
 {
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public sealed class SummaryAttribute : Attribute

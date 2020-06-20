@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HollowTwitch.Entities
+namespace HollowTwitch.Entities.Attributes
 {
     [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
     public abstract class PreconditionAttribute : Attribute
