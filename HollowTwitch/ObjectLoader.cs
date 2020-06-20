@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using Logger = Modding.Logger;
+using Logger = HollowTwitch.Logger;
 using Object = UnityEngine.Object;
 
 namespace HollowTwitch

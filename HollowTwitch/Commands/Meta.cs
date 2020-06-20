@@ -5,7 +5,7 @@ using System.Linq;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
 using UnityEngine;
-using Logger = Modding.Logger;
+using Logger = HollowTwitch.Logger;
 
 namespace HollowTwitch.Commands
 {

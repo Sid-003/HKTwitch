@@ -7,7 +7,7 @@ using System.Reflection;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
-using Logger = Modding.Logger;
+using Logger = HollowTwitch.Logger;
 
 namespace HollowTwitch
 {

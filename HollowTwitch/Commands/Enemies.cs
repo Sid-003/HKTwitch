@@ -9,7 +9,7 @@ using ModCommon.Util;
 using Modding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Logger = Modding.Logger;
+using Logger = HollowTwitch.Logger;
 using Object = UnityEngine.Object;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
