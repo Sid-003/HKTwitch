@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker;

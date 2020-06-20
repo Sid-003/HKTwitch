@@ -1,5 +1,4 @@
-﻿using HollowTwitch.Entities;
-using HollowTwitch.Entities.Attributes;
+﻿using HollowTwitch.Entities.Attributes;
 
 namespace HollowTwitch.Precondition
 {

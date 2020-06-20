@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using GlobalEnums;
-using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.ModHelpers;
 using HollowTwitch.Precondition;
