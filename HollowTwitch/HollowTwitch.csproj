@@ -62,6 +62,9 @@
     <Reference Include="UnityEngine.JSONSerializeModule">
       <HintPath>..\..\..\References\UnityEngine.JSONSerializeModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\References\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Physics2DModule">
       <HintPath>..\..\..\References\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
@@ -85,6 +88,7 @@
     <Compile Include="Commands\Game.cs" />
     <Compile Include="Commands\Meta.cs" />
     <Compile Include="Components\ApplyShader.cs" />
+    <Compile Include="Components\BetterSpawnJarControl.cs" />
     <Compile Include="Components\Pixelate.cs" />
     <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
     <Compile Include="Entities\Attributes\RemainingTextAttribute.cs" />

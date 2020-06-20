@@ -15,7 +15,7 @@ namespace HollowTwitch.Commands
     [UsedImplicitly]
     public class Game
     {
-        private readonly AudioClip[] _clips;
+        static internal AudioClip[] _clips;
 
         public Game()
         {
@@ -23,6 +23,11 @@ namespace HollowTwitch.Commands
             Resources.LoadAll("");
 
             _clips = Resources.FindObjectsOfTypeAll<AudioClip>();
+
+            foreach (AudioClip clip in _clips)
+            {
+                HollowTwitch.Logger.Log(clip.name);
+            }
         }
 
         [HKCommand("setText")]

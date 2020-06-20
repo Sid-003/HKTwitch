@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
+using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
@@ -9,8 +10,8 @@ using ModCommon.Util;
 using Modding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Logger = HollowTwitch.Logger;
 using Object = UnityEngine.Object;
+using Random = System.Random;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace HollowTwitch.Commands
@@ -22,7 +23,7 @@ namespace HollowTwitch.Commands
         public Enemies()
         {
             if (!ModHooks.Instance.LoadedMods.Any(x => x.Contains("PalePrince"))) return;
-            
+
             _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince"))?.GetTypes()?.FirstOrDefault(x => x.Name == "Prince");
         }
 
@@ -37,12 +38,64 @@ namespace HollowTwitch.Commands
                 yield break;
 
             GameObject enemy = Object.Instantiate(go, HeroController.instance.gameObject.transform.position, Quaternion.identity);
-            
+
             yield return new WaitForSecondsRealtime(1);
 
             enemy.SetActive(true);
         }
 
+        [HKCommand("jars")]
+        [Cooldown(60)]
+        public IEnumerator Jars()
+        {
+            const string path = "_GameCameras/CameraParent/tk2dCamera/SceneParticlesController/town_particle_set/Particle System";
+
+            string[] enemies = {"roller", "aspid", "buzzer"};
+
+            AudioClip shatter_clip = Game._clips.First(x => x.name == "globe_break_larger");
+
+            Vector3 pos = HeroController.instance.transform.position;
+
+            GameObject break_jar = ObjectLoader.InstantiableObjects["prefab_jar"];
+
+            for (int i = -2; i <= 2; i++)
+            {
+                // Spawn the jar
+                GameObject go = Object.Instantiate
+                (
+                    ObjectLoader.InstantiableObjects["jar"],
+                    pos + new Vector3(i * 7, 10, 0),
+                    Quaternion.identity
+                );
+
+                go.AddComponent<CircleCollider2D>().radius = .3f;
+                go.AddComponent<NonThunker>();
+                go.AddComponent<Rigidbody2D>();
+                go.AddComponent<DamageHero>().damageDealt = 1;
+                go.AddComponent<AudioSource>();
+
+                var ctrl = go.AddComponent<BetterSpawnJarControl>();
+
+                var ps = GameObject.Find(path).GetComponent<ParticleSystem>();
+
+                ctrl.Clip = shatter_clip;
+
+                ctrl.ParticleBreak = break_jar.GetChild("Pt Glass L").GetComponent<ParticleSystem>();
+                ctrl.ParticleBreakSouth = break_jar.GetChild("Pt Glass S").GetComponent<ParticleSystem>();
+
+                ctrl.ReadyDust = ctrl.Trail = ps;
+                
+                // TODO: Implement this maybe
+                ctrl.StrikeNailReaction = new GameObject();
+
+                ctrl.EnemyPrefab = ObjectLoader.InstantiableObjects[enemies[UnityEngine.Random.Range(0, enemies.Length)]];
+                ctrl.EnemyHP = 10;
+
+                yield return new WaitForSeconds(0.1f);
+
+                go.SetActive(true);
+            }
+        }
 
         [HKCommand("spawnpv")]
         [Summary("Spawns pure vessel.")]
@@ -112,8 +165,8 @@ namespace HollowTwitch.Commands
             cp.xMax = x + castRight.distance;
             cp.xMin = x - castLeft.distance;
         }
-        
-        
+
+
         [HKCommand("revek")]
         [Summary("Spawns revek to ruin your life.")]
         [Cooldown(120)]
@@ -125,18 +178,18 @@ namespace HollowTwitch.Commands
                 HeroController.instance.gameObject.transform.position,
                 Quaternion.identity
             );
-            
+
             yield return new WaitForSecondsRealtime(1);
 
             Object.DontDestroyOnLoad(revek);
-            
+
             revek.SetActive(true);
-            
+
             PlayMakerFSM ctrl = revek.LocateMyFSM("Control");
 
             // Make sure init gets to run.
             yield return null;
-            
+
             // Actually spawn.
             ctrl.SetState("Appear Pause");
 
@@ -146,24 +199,24 @@ namespace HollowTwitch.Commands
             void OnLoad(Scene a, Scene b)
             {
                 revek.SetActive(true);
-                
+
                 ctrl.SetState("Appear Pause");
             }
-            
+
             GameManager.instance.UnloadingLevel += OnUnload;
             USceneManager.activeSceneChanged += OnLoad;
-            
+
             yield return new WaitForSecondsRealtime(30);
-            
+
             Object.Destroy(revek);
-            
+
             GameManager.instance.UnloadingLevel -= OnUnload;
             USceneManager.activeSceneChanged -= OnLoad;
         }
 
-
         [HKCommand("duplicateboss")]
         [Summary("Duplicates the current boss in the room.")]
+        [Cooldown(160, 2)]
         public IEnumerator DuplicateBoss()
         {
             if (BossSceneController.Instance == null || BossSceneController.Instance.bosses == null)
@@ -177,7 +230,7 @@ namespace HollowTwitch.Commands
                     boss.gameObject.transform.position,
                     boss.gameObject.transform.rotation
                 );
-                
+
                 yield return new WaitForSeconds(0.2f);
             }
         }
@@ -187,7 +240,7 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public void SpawnShade()
         {
-             Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);
+            Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);
         }
     }
 }

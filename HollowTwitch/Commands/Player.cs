@@ -1,13 +1,19 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using GlobalEnums;
+using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.ModHelpers;
 using HollowTwitch.Precondition;
+using HutongGames.PlayMaker;
 using Modding;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
+using UObject = UnityEngine.Object;
 
 namespace HollowTwitch.Commands
 {
@@ -44,7 +50,7 @@ namespace HollowTwitch.Commands
                 _maggot.AddComponent<SpriteRenderer>().sprite = maggotPrime;
                 _maggot.SetActive(false);
 
-                Object.DontDestroyOnLoad(_maggot);
+                UObject.DontDestroyOnLoad(_maggot);
             }
 
             GameManager.instance.StartCoroutine(GetMaggotPrime());
@@ -159,26 +165,46 @@ namespace HollowTwitch.Commands
             }
         }
 
-        [HKCommand("overflowsoul")]
-        [Cooldown(40)]
-        public IEnumerator OverflowSoul()
+        [HKCommand("godmode")]
+        [Cooldown(60)]
+        public IEnumerator Godmode()
         {
-            // Max soul
-            HeroController.instance.AddMPChargeSpa(33);
-
-            void TakeMP(On.HeroController.orig_TakeMP orig, HeroController self, int amount) {}
-            void TakeMPQuick(On.HeroController.orig_TakeMPQuick orig, HeroController self, int amount) {}
-            void TakeReserveMP(On.HeroController.orig_TakeReserveMP orig, HeroController self, int amount) { }
+            static int TakeHealth(int damage) => 0;
             
-            On.HeroController.TakeMP += TakeMP;
-            On.HeroController.TakeMPQuick += TakeMPQuick;
-            On.HeroController.TakeReserveMP += TakeReserveMP;
+            static HitInstance HitInstance(Fsm owner, HitInstance hit)
+            {
+                hit.DamageDealt = 1 << 8;
+                
+                return hit;
+            }
 
-            yield return new WaitForSeconds(10f);
+            ModHooks.Instance.TakeHealthHook += TakeHealth;
+            ModHooks.Instance.HitInstanceHook += HitInstance;
+
+            yield return new WaitForSeconds(15f);
+
+            ModHooks.Instance.TakeHealthHook -= TakeHealth;
+            ModHooks.Instance.HitInstanceHook -= HitInstance;
+        }
+
+        [HKCommand("sleep")]
+        [Cooldown(60)]
+        public IEnumerator Sleep()
+        {
+            const string SLEEP_CLIP = "Wake Up Ground";
             
-            On.HeroController.TakeMP -= TakeMP;
-            On.HeroController.TakeMPQuick -= TakeMPQuick;
-            On.HeroController.TakeReserveMP -= TakeReserveMP;
+            HeroController hc = HeroController.instance;
+            var anim = hc.GetComponent<HeroAnimationController>();
+
+            anim.PlayClip(SLEEP_CLIP);
+            
+            hc.StopAnimationControl();
+            hc.RelinquishControl();
+            
+            yield return new WaitForSeconds(anim.GetClipDuration(SLEEP_CLIP));
+            
+            hc.StartAnimationControl();
+            hc.RegainControl();
         }
 
         [HKCommand("limitSoul")]
@@ -443,7 +469,7 @@ namespace HollowTwitch.Commands
         [Cooldown(60 * 5)]
         public IEnumerator EnableMaggotPrimeSkin()
         {
-            GameObject go = Object.Instantiate(_maggot, HeroController.instance.transform);
+            GameObject go = UObject.Instantiate(_maggot, HeroController.instance.transform);
             go.SetActive(true);
 
             var renderer = HeroController.instance.GetComponent<MeshRenderer>();
@@ -451,7 +477,7 @@ namespace HollowTwitch.Commands
 
             yield return new WaitForSecondsRealtime(60 * 2);
 
-            Object.DestroyImmediate(go);
+            UObject.DestroyImmediate(go);
 
             renderer.enabled = true;
         }

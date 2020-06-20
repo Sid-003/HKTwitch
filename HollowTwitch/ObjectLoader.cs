@@ -34,13 +34,19 @@ namespace HollowTwitch
                 ("Room_Colosseum_Bronze", "Colosseum Manager/Ground Spikes/Colosseum Spike")
             },
             {
-                ("cg2", (GameObject obj) => { obj.LocateMyFSM("Beam Miner").SetState("Battle Init"); }), ("Mines_18_boss", "Mega Zombie Beam Miner (1)")
+                ("jar", null), ("GG_Collector", "Spawn Jar")
             },
             {
-                ("Beam Point R", null), ("Mines_18_boss", "Beam Point R")
+                ("roller", null), ("Crossroads_ShamanTemple", "_Enemies/Roller")
             },
             {
-                ("Beam Point L", null), ("Mines_18_boss", "Beam Point L")
+                ("buzzer", null), ("Crossroads_ShamanTemple", "_Enemies/Buzzer")
+            },
+            {
+                ("prefab_jar", null), ("Ruins2_11", "Break Jar (6)")
+            },
+            {
+                ("grub_jar", null), ("Crossroads_03", "_Props/Grub Bottle")
             },
             {
                 ("Beam", null), ("Mines_18_boss", "Beam")
