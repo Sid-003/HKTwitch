@@ -38,6 +38,7 @@ namespace HollowTwitch.Commands
                 yield break;
 
             GameObject enemy = Object.Instantiate(go, HeroController.instance.gameObject.transform.position, Quaternion.identity);
+            
             yield return new WaitForSecondsRealtime(1);
 
             enemy.SetActive(true);
@@ -259,15 +260,10 @@ namespace HollowTwitch.Commands
             }
         }
 
-
-        
         [HKCommand("spawnshade")]
         public void SpawnShade()
         {
              Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);
         }
-        
-        
-        
     }
 }

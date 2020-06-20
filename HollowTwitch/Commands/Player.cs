@@ -158,7 +158,60 @@ namespace HollowTwitch.Commands
 
             hc.JUMP_STEPS = prev_steps;
         }
+
+        [HKCommand("lifeblood")]
+        [Cooldown(40)]
+        public IEnumerator Lifeblood()
+        {
+            int r = Random.Range(1, 10);
+            
+            for (int i = 0; i < r; i++)
+            {
+                yield return null;
+                
+                EventRegister.SendEvent("ADD BLUE HEALTH");
+
+                yield return null;
+            }
+        }
+
+        [HKCommand("overflowsoul")]
+        [Cooldown(40)]
+        public IEnumerator OverflowSoul()
+        {
+            // Max soul
+            HeroController.instance.AddMPChargeSpa(99);
+
+            void TakeMP(On.HeroController.orig_TakeMP orig, HeroController self, int amount) {}
+            void TakeMPQuick(On.HeroController.orig_TakeMPQuick orig, HeroController self, int amount) {}
+            void TakeReserveMP(On.HeroController.orig_TakeReserveMP orig, HeroController self, int amount) { }
+            
+            On.HeroController.TakeMP += TakeMP;
+            On.HeroController.TakeMPQuick += TakeMPQuick;
+            On.HeroController.TakeReserveMP += TakeReserveMP;
+
+            yield return new WaitForSeconds(10f);
+            
+            On.HeroController.TakeMP -= TakeMP;
+            On.HeroController.TakeMPQuick -= TakeMPQuick;
+            On.HeroController.TakeReserveMP -= TakeReserveMP;
+        }
+
+        [HKCommand("limitSoul")]
+        [Cooldown(60)]
+        public IEnumerator LimitSoul()
+        {
+            // If they're already limited I don't want to just free them
+            bool orig_val = PlayerData.instance.soulLimited;
+            
+            PlayerData.instance.soulLimited = true;
+
+            yield return new WaitForSeconds(30f);
+            
+            PlayerData.instance.soulLimited = orig_val;
+        }
         
+
         [HKCommand("jumpspeed")]
         [Cooldown(60)]
         public IEnumerator JumpSpeed()
@@ -307,7 +360,7 @@ namespace HollowTwitch.Commands
 
         [HKCommand("slippery")]
         [Summary("Makes the floor have no friction at all. Lasts for 60 seconds.")]
-        public IEnumerator Slipery()
+        public IEnumerator Slippery()
         {
             _slippery = true;
             yield return new WaitForSecondsRealtime(60);
@@ -345,7 +398,7 @@ namespace HollowTwitch.Commands
 
         [HKCommand("nailscale")]
         [Summary("Makes the nail huge or tiny.")]
-        public IEnumerator NailScale([EnsureFloat(1f, 5f)] float nailScale)
+        public IEnumerator NailScale([EnsureFloat(.3f, 5f)] float nailScale)
         {
             _nailScale = nailScale;
             yield return new WaitForSecondsRealtime(30f);
@@ -444,6 +497,9 @@ namespace HollowTwitch.Commands
                     PlayerData.instance.hasDoubleJump ^= true;
                     yield return new WaitForSecondsRealtime(time);
                     PlayerData.instance.hasDoubleJump ^= true;
+                    break;
+                case "nail":
+                    ReflectionHelper.SetAttr(HeroController.instance, "attack_cooldown", 15f);
                     break;
             }
         }
