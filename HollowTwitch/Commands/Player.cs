@@ -127,23 +127,6 @@ namespace HollowTwitch.Commands
             hc.GetComponent<ConveyorMovementHero>().StopConveyorMove();
         }
 
-        [HKCommand("glass")]
-        [Summary("Die in one hit for a short period of time.")]
-        [Cooldown(60)]
-        public IEnumerator Glass()
-        {
-            static int Damage(ref int hazardtype, int damage)
-            {
-                return 420;
-            }
-
-            ModHooks.Instance.TakeDamageHook += Damage;
-            
-            yield return new WaitForSecondsRealtime(8);
-            
-            ModHooks.Instance.TakeDamageHook -= Damage;
-        }
-
         [HKCommand("jumplength")]
         [Summary("Gives a random jump length.")]
         [Cooldown(60)]
