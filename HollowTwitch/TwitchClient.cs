@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace HollowTwitch
 {
-    class TwitchClient : IDisposable
+    internal class TwitchClient : IDisposable
     {
         private TcpClient _client;
         private StreamReader _output;
@@ -13,7 +13,7 @@ namespace HollowTwitch
 
         private readonly TwitchConfig _config;
 
-        public event Action<string> ChatMessageReceived;
+        public event Action<string, string> ChatMessageReceived;
         public event Action<string> RawPayload;
 
         public TwitchClient(TwitchConfig config)
@@ -50,8 +50,10 @@ namespace HollowTwitch
             }
             else if (message.Contains("PRIVMSG"))
             {
+                string user = message.Substring(1, message.IndexOf("!") - 1);
                 string cleaned = message.Split(':').Last();
-                ChatMessageReceived?.Invoke(cleaned);
+                
+                ChatMessageReceived?.Invoke(user, cleaned);
             }
         }
 

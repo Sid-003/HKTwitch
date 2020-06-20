@@ -83,6 +83,7 @@
     <Compile Include="Commands\Area.cs" />
     <Compile Include="Commands\Camera.cs" />
     <Compile Include="Commands\Game.cs" />
+    <Compile Include="Commands\Meta.cs" />
     <Compile Include="Components\ApplyShader.cs" />
     <Compile Include="Components\Pixelate.cs" />
     <Compile Include="Entities\Attributes\EnsureParameterAttribute.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="ObjectLoader.cs" />
     <Compile Include="Precondition\CooldownAttribute.cs" />
     <Compile Include="Precondition\EnsureFloatAttribute.cs" />
+    <Compile Include="Precondition\OwnerOnlyAttribute.cs" />
     <Compile Include="Precondition\RequireSceneChangeAttribute.cs" />
     <Compile Include="TwitchConfig.cs" />
     <Compile Include="TwitchMod.cs" />

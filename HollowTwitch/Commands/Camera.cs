@@ -1,7 +1,6 @@
 ﻿﻿using System;
 using System.Collections;
-using System.Linq;
-using HollowTwitch.Components;
+ using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using JetBrains.Annotations;

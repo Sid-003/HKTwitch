@@ -180,7 +180,7 @@ namespace HollowTwitch.Commands
         public IEnumerator OverflowSoul()
         {
             // Max soul
-            HeroController.instance.AddMPChargeSpa(99);
+            HeroController.instance.AddMPChargeSpa(33);
 
             void TakeMP(On.HeroController.orig_TakeMP orig, HeroController self, int amount) {}
             void TakeMPQuick(On.HeroController.orig_TakeMPQuick orig, HeroController self, int amount) {}

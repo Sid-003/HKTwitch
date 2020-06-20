@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;

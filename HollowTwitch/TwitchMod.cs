@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using HollowTwitch.Commands;
-using JetBrains.Annotations;
 using Modding;
-using On.HutongGames.PlayMaker.Actions;
 using UnityEngine;
 using Camera = HollowTwitch.Commands.Camera;
-using Logger = Modding.Logger;
 
 namespace HollowTwitch
 {
@@ -16,20 +12,23 @@ namespace HollowTwitch
     {
         private TwitchClient _client;
         private Thread _currentThread;
-        private TwitchConfig _config = new TwitchConfig();
+        
+        internal TwitchConfig Config = new TwitchConfig();
 
-        public CommandProcessor Processor;
+        internal CommandProcessor Processor { get; private set; }
 
         public static TwitchMod Instance;
+        
         public override ModSettings GlobalSettings
         {
-            get => _config;
-            set => _config = value as TwitchConfig;
+            get => Config;
+            set => Config = value as TwitchConfig;
         }
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
             Instance = this;
+            
             ObjectLoader.Load(preloadedObjects);
             ObjectLoader.LoadAssets();
             
@@ -51,16 +50,21 @@ namespace HollowTwitch
             if (once) return;
 
             Processor = new CommandProcessor();
+            
             Processor.RegisterCommands<Player>();
             Processor.RegisterCommands<Enemies>();
             Processor.RegisterCommands<Area>();
             Processor.RegisterCommands<Camera>();
             Processor.RegisterCommands<Game>();
-            _client = new TwitchClient(_config);
+            Processor.RegisterCommands<Meta>();
+            
+            _client = new TwitchClient(Config);
             _client.ChatMessageReceived += OnMessageReceived;
+            
             _currentThread = new Thread(_client.StartReceive);
             _currentThread.Start();
-            Logger.Log("started receiving");
+            
+            Log("Started receiving.");
 
             once = true;
         }
@@ -71,18 +75,18 @@ namespace HollowTwitch
             _client.Dispose();
         }
 
-        private void OnMessageReceived(string message)
+        private void OnMessageReceived(string user, string message)
         {
-            Logger.Log("Twitch chat: " + message);
+            Log($"Twitch chat: [{user}: {message}]");
             
             string trimmed = message.Trim();
-            int index = trimmed.IndexOf(_config.Prefix);
+            int index = trimmed.IndexOf(Config.Prefix);
 
             if (index != 0) return;
             
-            string command = trimmed.Substring(_config.Prefix.Length).Trim();
+            string command = trimmed.Substring(Config.Prefix.Length).Trim();
             
-            Processor.Execute(command);
+            Processor.Execute(user, command, Config);
         }
     }
 }

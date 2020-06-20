@@ -16,12 +16,12 @@ namespace HollowTwitch
     {
         private const char Seperator = ' ';
 
-        private readonly List<Command> _commands;
+        internal List<Command> Commands { get; }
         private readonly Dictionary<Type, IArgumentParser> _parsers;
 
         public CommandProcessor()
         {
-            _commands = new List<Command>();
+            Commands = new List<Command>();
             _parsers = new Dictionary<Type, IArgumentParser>();
         }
 
@@ -30,11 +30,14 @@ namespace HollowTwitch
             _parsers.Add(t, parser);
         }
 
-        public void Execute(string command)
+        public void Execute(string user, string command, TwitchConfig config)
         {
             string[] pieces = command.Split(Seperator);
 
-            IOrderedEnumerable<Command> found = _commands
+            if (config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase))
+                return;
+
+            IOrderedEnumerable<Command> found = Commands
                                                 .Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase))
                                                 .OrderByDescending(x => x.Priority);
 
@@ -43,11 +46,14 @@ namespace HollowTwitch
                 // if (!c.Preconditions.All(x => x.Check()))
                 //     continue;
 
+                if (config.BlacklistedCommands.Contains(c.Name, StringComparer.OrdinalIgnoreCase))
+                    continue;
+
                 bool allGood = true;
 
                 foreach (PreconditionAttribute p in c.Preconditions)
                 {
-                    if (p.Check()) continue;
+                    if (p.Check(user)) continue;
 
                     allGood = false;
 
@@ -155,7 +161,8 @@ namespace HollowTwitch
                 if (attr == null)
                     continue;
 
-                _commands.Add(new Command(attr.Name, method, instance));
+                Commands.Add(new Command(attr.Name, method, instance));
+                
                 Logger.Log($"Added command: {attr.Name}");
             }
         }
