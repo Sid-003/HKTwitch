@@ -18,14 +18,25 @@ namespace HollowTwitch.Commands
         public Area()
         {
             _spikePool = new List<GameObject>();
+            
+            GameObject cave_spike = ObjectLoader.InstantiableObjects["cave_spikes"];
+
+            var orig_tink = cave_spike.GetComponent<TinkEffect>();
 
             for (int i = 0; i < SPIKE_COUNT; i++)
             {
                 GameObject spike = Object.Instantiate(ObjectLoader.InstantiableObjects["spike"]);
+
+                var tink = spike.AddComponent<TinkEffect>();
+
+                tink.blockEffect = orig_tink.blockEffect;
+                
+                spike.AddComponent<AudioSource>();
+                
                 Object.DontDestroyOnLoad(spike);
+                
                 _spikePool.Add(spike);
             }
-
 
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnActiveSceneChanged;
         }
@@ -67,6 +78,7 @@ namespace HollowTwitch.Commands
             foreach (GameObject spike in _spikePool)
             {
                 spike.SetActive(true);
+                
                 spike.LocateMyFSM("Control").SendEvent("EXPAND");
             }
             

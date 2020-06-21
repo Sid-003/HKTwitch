@@ -15,14 +15,14 @@ namespace HollowTwitch.Commands
     [UsedImplicitly]
     public class Game
     {
-        internal static AudioClip[] _clips;
+        internal static AudioClip[] Clips { get; private set; }
 
         public Game()
         {
             // Just for the side effects.
             Resources.LoadAll("");
 
-            _clips = Resources.FindObjectsOfTypeAll<AudioClip>();
+            Clips = Resources.FindObjectsOfTypeAll<AudioClip>();
         }
 
         [HKCommand("setText")]
@@ -159,14 +159,14 @@ namespace HollowTwitch.Commands
 
         private void PlayOneShot(Action<AudioSource, AudioClip, float> orig, AudioSource self, AudioClip clip, float volumeScale)
         {
-            orig(self, _clips[Random.Range(0, _clips.Length - 1)], volumeScale);
+            orig(self, Clips[Random.Range(0, Clips.Length - 1)], volumeScale);
         }
 
         private void Play(Action<AudioSource> orig, AudioSource self)
         {
             AudioClip orig_clip = self.clip;
 
-            self.clip = _clips[Random.Range(0, _clips.Length - 1)];
+            self.clip = Clips[Random.Range(0, Clips.Length - 1)];
 
             orig(self);
 
