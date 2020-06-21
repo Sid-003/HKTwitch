@@ -62,11 +62,8 @@ namespace HollowTwitch
                 ("zap", go => go.LocateMyFSM("Mega Jellyfish").GetAction<SpawnObjectFromGlobalPool>("Gen", 2).gameObject.Value), ("GG_Uumuu", "Mega Jellyfish GG")
             },
             {
-                ("Beam", null), ("Mines_18_boss", "Beam")
+                ("Laser Turret", null), ("Mines_31", "Laser Turret")
             },
-            {
-                ("Beam Ball", null), ("Mines_18_boss", "Beam Ball")
-            }
         };
 
         public static Dictionary<string, GameObject> InstantiableObjects { get; } = new Dictionary<string, GameObject>();
