@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
@@ -8,10 +10,11 @@ using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
 using ModCommon.Util;
 using Modding;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
-using Random = System.Random;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace HollowTwitch.Commands
@@ -22,10 +25,14 @@ namespace HollowTwitch.Commands
 
         public Enemies()
         {
+          
             if (!ModHooks.Instance.LoadedMods.Any(x => x.Contains("PalePrince"))) return;
 
             _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince"))?.GetTypes()?.FirstOrDefault(x => x.Name == "Prince");
         }
+
+        
+
 
         [HKCommand("spawn")]
         [Summary("Spawns an enemy.\nEnemies: aspid")]
@@ -242,5 +249,20 @@ namespace HollowTwitch.Commands
         {
             Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);
         }
+
+       
+        [HKCommand("zap")]
+        public IEnumerator StartZapping()
+        {
+            var prefab = ObjectLoader.InstantiableObjects["zap"];
+            
+            for (int i = 0; i < 8; i++)
+            {
+                var zap = Object.Instantiate(prefab, HeroController.instance.transform.position, Quaternion.identity);
+                zap.SetActive(true);
+                yield return  new WaitForSeconds(0.5f);
+            }
+        }
+        
     }
 }

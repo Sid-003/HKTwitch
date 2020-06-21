@@ -188,12 +188,14 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("sleep")]
-        [Cooldown(60)]
+       // [Cooldown(60)]
         public IEnumerator Sleep()
         {
             const string SLEEP_CLIP = "Wake Up Ground";
             
             HeroController hc = HeroController.instance;
+            
+            yield return new WaitForEndOfFrame();
             var anim = hc.GetComponent<HeroAnimationController>();
 
             anim.PlayClip(SLEEP_CLIP);
@@ -469,7 +471,7 @@ namespace HollowTwitch.Commands
         [Cooldown(60 * 5)]
         public IEnumerator EnableMaggotPrimeSkin()
         {
-            GameObject go = UObject.Instantiate(_maggot, HeroController.instance.transform);
+            GameObject go = UObject.Instantiate(_maggot, HeroController.instance.transform.position + new Vector3(0, 0, -1f), Quaternion.identity);
             go.SetActive(true);
 
             var renderer = HeroController.instance.GetComponent<MeshRenderer>();

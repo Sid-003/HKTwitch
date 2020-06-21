@@ -15,7 +15,7 @@ namespace HollowTwitch.Commands
     [UsedImplicitly]
     public class Game
     {
-        static internal AudioClip[] _clips;
+        internal static AudioClip[] _clips;
 
         public Game()
         {

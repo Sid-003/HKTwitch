@@ -10,16 +10,18 @@ namespace HollowTwitch.Commands
 {
     public class Area
     {
+        private const int SPIKE_COUNT = 20;
+        
+        
         private readonly List<GameObject> _spikePool;
 
         public Area()
         {
             _spikePool = new List<GameObject>();
 
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < SPIKE_COUNT; i++)
             {
                 GameObject spike = Object.Instantiate(ObjectLoader.InstantiableObjects["spike"]);
-                spike.SetActive(false);
                 Object.DontDestroyOnLoad(spike);
                 _spikePool.Add(spike);
             }
@@ -36,11 +38,10 @@ namespace HollowTwitch.Commands
                 spike.SetActive(false);
         }
 
-        private IEnumerator AddSpikes(float x, float y, float angle, int n, float spacing)
+        private IEnumerator AddSpikes(float x, float y, float angle, int start, float spacing)
         {
-            for (int i = 0; i < n; i++)
+            for (int i = start; i < start + (_spikePool.Count / 2); i++)
             {
-                _spikePool[i].SetActive(true);
                 _spikePool[i].transform.SetPosition2D(x, y);
                 x += spacing;
             }
@@ -60,11 +61,16 @@ namespace HollowTwitch.Commands
             if (hit)
                 y -= hit.distance;
 
-            GameManager.instance.StartCoroutine(AddSpikes(x, y, 0, 10, 2));
-            GameManager.instance.StartCoroutine(AddSpikes(x, y, 0, 10, -2));
-            
+            GameManager.instance.StartCoroutine(AddSpikes(x, y + 2f, 0, 0, 2));
+            GameManager.instance.StartCoroutine(AddSpikes(x, y + 2f, 0, 10, -2));
+
             foreach (GameObject spike in _spikePool)
+            {
+                spike.SetActive(true);
                 spike.LocateMyFSM("Control").SendEvent("EXPAND");
+            }
+            
+            Logger.Log("done epic gamer moment");
                 
             yield break;
         }

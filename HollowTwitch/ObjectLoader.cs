@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using HollowTwitch.Components;
+using HutongGames.PlayMaker.Actions;
+using ModCommon.Util;
 using UnityEngine;
 using Logger = HollowTwitch.Logger;
 using Object = UnityEngine.Object;
@@ -11,13 +14,14 @@ namespace HollowTwitch
 {
     internal static class ObjectLoader
     {
-        public static readonly Dictionary<(string, Action<GameObject>), (string, string)> ObjectList = new Dictionary<(string, Action<GameObject>), (string, string)>
+        public static readonly Dictionary<(string, Func<GameObject, GameObject>), (string, string)> ObjectList = new Dictionary<(string, Func<GameObject, GameObject>), (string, string)>
         {
             {
                 ("aspid", (GameObject obj) =>
                 {
                     obj.LocateMyFSM("spitter").SetState("Init");
                     Object.Destroy(obj.GetComponent<PersistentBoolItem>());
+                    return obj;
                 }),
                 ("Deepnest_East_11", "Super Spitter")
             },
@@ -30,7 +34,11 @@ namespace HollowTwitch
                 ("GG_Hollow_Knight", "Battle Scene/HK Prime")
             },
             {
-                ("spike", (GameObject obj) => { obj.AddComponent<DamageHero>().damageDealt = 1; }),
+                ("spike", (GameObject obj) => 
+                {
+                    obj.AddComponent<DamageHero>().damageDealt = 1;
+                    return obj;
+                }),
                 ("Room_Colosseum_Bronze", "Colosseum Manager/Ground Spikes/Colosseum Spike")
             },
             {
@@ -49,6 +57,13 @@ namespace HollowTwitch
                 ("grub_jar", null), ("Crossroads_03", "_Props/Grub Bottle")
             },
             {
+                ("zap", (GameObject go) =>
+                {
+                    var zap = go.LocateMyFSM("Mega Jellyfish").GetAction<SpawnObjectFromGlobalPool>("Gen", 2).gameObject.Value;
+                    return zap;
+                }), ("GG_Uumuu", "Mega Jellyfish GG")
+            },
+            {
                 ("Beam", null), ("Mines_18_boss", "Beam")
             },
             {
@@ -62,10 +77,10 @@ namespace HollowTwitch
 
         public static void Load(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
-            static GameObject Spawnable(GameObject obj, Action<GameObject> modify)
+            static GameObject Spawnable(GameObject obj, Func<GameObject, GameObject> modify)
             {
                 GameObject go = Object.Instantiate(obj);
-                modify?.Invoke(go);
+                go = modify?.Invoke(go) ?? go;
                 Object.DontDestroyOnLoad(go);
                 go.SetActive(false);
                 return go;
