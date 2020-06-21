@@ -521,19 +521,19 @@ namespace HollowTwitch.Commands
             {
                 case "dash":
                     PlayerData.instance.canDash ^= true;
-                    yield return new SaveDefer(time, pd => { pd.canDash ^= true; });
+                    yield return new SaveDefer(time, pd => pd.canDash ^= true);
                     break;
                 case "superdash":
                     PlayerData.instance.hasSuperDash ^= true;
-                    yield return new SaveDefer(time, pd => { pd.hasSuperDash ^= true; });
+                    yield return new SaveDefer(time, pd => pd.hasSuperDash ^= true);
                     break;
                 case "claw":
                     PlayerData.instance.hasWalljump ^= true;
-                    yield return new SaveDefer(time, pd => { pd.hasWalljump ^= true; });
+                    yield return new SaveDefer(time, pd => pd.hasWalljump ^= true);
                     break;
                 case "wings":
                     PlayerData.instance.hasDoubleJump ^= true;
-                    yield return new SaveDefer(time, pd => { pd.hasWalljump ^= true; });
+                    yield return new SaveDefer(time, pd => pd.hasDoubleJump ^= true);
                     break;
                 case "nail":
                     ReflectionHelper.SetAttr(HeroController.instance, "attack_cooldown", 15f);
