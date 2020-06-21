@@ -57,11 +57,7 @@ namespace HollowTwitch
                 ("grub_jar", null), ("Crossroads_03", "_Props/Grub Bottle")
             },
             {
-                ("zap", (GameObject go) =>
-                {
-                    var zap = go.LocateMyFSM("Mega Jellyfish").GetAction<SpawnObjectFromGlobalPool>("Gen", 2).gameObject.Value;
-                    return zap;
-                }), ("GG_Uumuu", "Mega Jellyfish GG")
+                ("zap", (GameObject go) => go.LocateMyFSM("Mega Jellyfish").GetAction<SpawnObjectFromGlobalPool>("Gen", 2).gameObject.Value), ("GG_Uumuu", "Mega Jellyfish GG")
             },
             {
                 ("Beam", null), ("Mines_18_boss", "Beam")
