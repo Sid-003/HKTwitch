@@ -188,14 +188,13 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("sleep")]
-       // [Cooldown(60)]
+        [Cooldown(60)]
         public IEnumerator Sleep()
         {
             const string SLEEP_CLIP = "Wake Up Ground";
             
             HeroController hc = HeroController.instance;
             
-            yield return new WaitForEndOfFrame();
             var anim = hc.GetComponent<HeroAnimationController>();
 
             anim.PlayClip(SLEEP_CLIP);
@@ -297,16 +296,27 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public IEnumerator DashVector()
         {
-            static Vector2 VectorHook(Vector2 change)
+            Vector2? vec = null;
+            Vector2? orig = null;
+            
+            Vector2 VectorHook(Vector2 change)
             {
+                if (
+                    orig == change
+                    && vec is Vector2 v
+                )
+                    return v;
+                
                 const float factor = 4f;
+
+                orig = change;
                 
                 float mag = change.magnitude;
 
                 float x = factor * Random.Range(-mag, mag);
                 float y = factor * Random.Range(-mag, mag);
                 
-                return new Vector2(x, y);
+                return (Vector2) (vec = new Vector2(x, y));
             }
             
             ModHooks.Instance.DashVectorHook += VectorHook;
@@ -316,11 +326,48 @@ namespace HollowTwitch.Commands
             ModHooks.Instance.DashVectorHook -= VectorHook;
         }
 
+        [HKCommand("triplejump")]
+        public IEnumerator TripleJump()
+        {
+            bool triple_jump = false;
+            
+            void Triple(On.HeroController.orig_DoDoubleJump orig, HeroController self)
+            {
+                orig(self);
+
+                if (!triple_jump)
+                {
+                    ReflectionHelper.SetAttr(self, "doubleJumped", false);
+
+                    triple_jump = true;
+                }
+                else
+                {
+                    triple_jump = false;
+                }
+            };
+            
+            On.HeroController.DoDoubleJump += Triple;
+
+            yield return new WaitForSeconds(30);
+            
+            On.HeroController.DoDoubleJump -= Triple;
+        }
+
         private static void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
         {
             if (HeroController.instance == null) return;
 
             DarknessHelper.Darken();
+        }
+        
+        [HKCommand("overflow")]
+        [Cooldown(40)]
+        public void OverflowSoul()
+        {
+            HeroController.instance.AddMPChargeSpa(99 * 2);
+            
+            PlayerData.instance.MPCharge += 99;
         }
 
         [HKCommand("timescale")]
