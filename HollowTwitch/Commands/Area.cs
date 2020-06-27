@@ -6,6 +6,7 @@ using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
 using ModCommon;
 using ModCommon.Util;
+using Modding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -68,12 +69,28 @@ namespace HollowTwitch.Commands
         {
             Vector3 pos = HeroController.instance.transform.position;
             
+            RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, 500, 1 << 8);
+
+            // Take the minimum so that we go from the floor
+            if (hit && hit.point.y < pos.y)
+            {
+                pos = hit.point;
+            }
+
+            hit = Physics2D.Raycast(pos, Vector2.up, 500, 1 << 8);
+
+            float add_y = 10;
+
+            // If the ceiling is above where we're going to spawn, put it right beneath the ceiling.
+            if (hit.point.y > pos.y + 10)
+                add_y = hit.point.y - pos.y - 0.5f;
+
             for (int i = -2; i <= 2; i++)
             {
                 GameObject turret = Object.Instantiate
                 (
                     ObjectLoader.InstantiableObjects["Laser Turret"],
-                    pos + new Vector3(i * 5, 10, 0),
+                    pos + new Vector3(i * 5, add_y, 0),
                     Quaternion.Euler(0, 0, 180 + Random.Range(-30f, 30f))
                 );
 

@@ -58,11 +58,8 @@ namespace HollowTwitch.Components
             _sprite.enabled = true;
         }
 
-        private void OnCollisionEnter2D(Collision2D other)
+        private void OnCollisionEnter2D()
         {
-            // if (other.otherCollider.gameObject.layer != (int) GlobalEnums.PhysLayers.PLAYER && other.gameObject.layer != (int) GlobalEnums.PhysLayers.TERRAIN) 
-            //     return;
-            
             GameCameras.instance.cameraShakeFSM.SendEvent("EnemyKillShake");
 
             Trail.Stop();
@@ -81,8 +78,18 @@ namespace HollowTwitch.Components
             _as.volume = GameManager.instance.gameSettings.soundVolume / 100f;
             _as.PlayOneShot(Clip);
 
-            GameObject go = Instantiate(EnemyPrefab, transform.position, Quaternion.identity);
+            Vector3 pos = transform.position;
+            
+            RaycastHit2D hit = Physics2D.Raycast(pos, Vector3.down, 20, 1 << 8);
 
+            if (hit)
+            {
+                pos = hit.point;
+                pos += new Vector3(0, 0.6f);
+            }
+
+            GameObject go = Instantiate(EnemyPrefab, pos, Quaternion.identity);
+            
             go.SetActive(true);
 
             go.GetComponent<HealthManager>().hp = EnemyHP;
