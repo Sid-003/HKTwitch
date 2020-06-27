@@ -39,6 +39,8 @@ namespace HollowTwitch.Utils
             {
                 if (Time.realtimeSinceStartup - _start < _len && !_quit)
                     return true;
+                
+                ModHooks.Instance.BeforeSavegameSaveHook -= BeforeSave;
 
                 if (!_quit)
                 {

@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
+using ModCommon;
 using ModCommon.Util;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,7 +14,6 @@ namespace HollowTwitch.Commands
     public class Area
     {
         private const int SPIKE_COUNT = 20;
-
 
         private readonly List<GameObject> _spikePool;
 
