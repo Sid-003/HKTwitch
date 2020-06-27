@@ -1,8 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
+using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using ModCommon;
 using ModCommon.Util;
@@ -63,12 +66,52 @@ namespace HollowTwitch.Commands
             yield break;
         }
 
+        [HKCommand("bees")]
+        [Cooldown(100)]
+        public void Bees()
+        {
+            Vector3 pos = HeroController.instance.transform.position;
+            
+            RaycastHit2D floorHit = Physics2D.Raycast(pos, Vector2.down, 500, 1 << 8);
+
+            if (floorHit && floorHit.point.y < pos.y)
+                pos = floorHit.point;
+
+            for (int i = 0; i < 7; i++)
+            {
+                GameObject bee = Object.Instantiate
+                (
+                    ObjectLoader.InstantiableObjects["bee"],
+                    Vector3.zero,
+                    Quaternion.Euler(0, 0, 180)
+                );
+
+                bee.SetActive(true);
+
+                PlayMakerFSM ctrl = bee.LocateMyFSM("Control");
+
+                // Set reset vars so they recycle properly
+                ctrl.Fsm.GetFsmFloat("X Left").Value = pos.x - 10;
+                ctrl.Fsm.GetFsmFloat("X Right").Value = pos.x + 10;
+                ctrl.Fsm.GetFsmFloat("Start Y").Value = pos.y + 17 + Random.Range(-3f, 3f);
+
+                // Despawn y
+                ctrl.GetAction<FloatCompare>("Swarm", 3).float2.Value = pos.y - 5f;
+                
+                // Recycle after going oob
+                ctrl.ChangeTransition("Reset", "FINISHED", "Pause");
+                
+                // Start the swarming
+                ctrl.SendEvent("SWARM");
+            }
+        }
+
         [HKCommand("lasers")]
         [Cooldown(60)]
         public void Lasers()
         {
             Vector3 pos = HeroController.instance.transform.position;
-            
+
             RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, 500, 1 << 8);
 
             // Take the minimum so that we go from the floor
@@ -94,12 +137,16 @@ namespace HollowTwitch.Commands
                     Quaternion.Euler(0, 0, 180 + Random.Range(-30f, 30f))
                 );
 
-                turret.LocateMyFSM("Laser Bug").AddAction("Init", new WaitRandom()
-                {
-                    timeMax = .75f,
-                    timeMin = 0
-                });
-                
+                turret.LocateMyFSM("Laser Bug").AddAction
+                (
+                    "Init",
+                    new WaitRandom
+                    {
+                        timeMax = .75f,
+                        timeMin = 0
+                    }
+                );
+
                 turret.SetActive(true);
             }
         }

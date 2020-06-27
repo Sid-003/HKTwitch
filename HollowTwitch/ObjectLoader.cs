@@ -64,6 +64,9 @@ namespace HollowTwitch
             {
                 ("Laser Turret", null), ("Mines_31", "Laser Turret")
             },
+            {
+                ("bee", null), ("GG_Hive_Knight", "Battle Scene/Droppers/Bee Dropper")
+            }
         };
 
         public static Dictionary<string, GameObject> InstantiableObjects { get; } = new Dictionary<string, GameObject>();
