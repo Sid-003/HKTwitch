@@ -27,9 +27,6 @@ namespace HollowTwitch.Commands
             _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince"))?.GetTypes()?.FirstOrDefault(x => x.Name == "Prince");
         }
 
-        
-
-
         [HKCommand("spawn")]
         [Summary("Spawns an enemy.\nEnemies: aspid")]
         [Cooldown(60, 3)]

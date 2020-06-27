@@ -492,6 +492,23 @@ namespace HollowTwitch.Commands
             return touching;
         }
 
+        [HKCommand("float")]
+        [Cooldown(180)]
+        public IEnumerator Float()
+        {
+            static void NoOp(On.HeroController.orig_AffectedByGravity orig, HeroController self, bool gravityapplies) {}
+            
+            HeroController.instance.AffectedByGravity(false);
+
+            On.HeroController.AffectedByGravity += NoOp;
+
+            yield return new WaitForSeconds(30);
+            
+            On.HeroController.AffectedByGravity -= NoOp;
+            
+            HeroController.instance.AffectedByGravity(true);
+        }
+
         [HKCommand("hwurmpU")]
         [Summary("I don't even know honestly.")]
         [Cooldown(60 * 5)]
