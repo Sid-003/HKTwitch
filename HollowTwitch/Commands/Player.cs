@@ -509,6 +509,15 @@ namespace HollowTwitch.Commands
             HeroController.instance.AffectedByGravity(true);
         }
 
+        [HKCommand("Salubra")]
+        [Cooldown(30)]
+        public void Salubra()
+        {
+            GameObject bg = GameObject.Find("Blessing Ghost");
+
+            bg.LocateMyFSM("Blessing Control").SetState("Start Blessing");
+        }
+
         [HKCommand("hwurmpU")]
         [Summary("I don't even know honestly.")]
         [Cooldown(60 * 5)]
