@@ -120,20 +120,24 @@ namespace HollowTwitch.Commands
                 pos = hit.point;
             }
 
-            hit = Physics2D.Raycast(pos, Vector2.up, 500, 1 << 8);
-
-            float add_y = 10;
-
-            // If the ceiling is above where we're going to spawn, put it right beneath the ceiling.
-            if (hit.point.y > pos.y + 10)
-                add_y = hit.point.y - pos.y - 0.5f;
+            const float MAX_ADD = 10;
 
             for (int i = -2; i <= 2; i++)
             {
+                Vector3 turret_pos = pos + new Vector3(i * 5, MAX_ADD, 0);
+
+                RaycastHit2D up = Physics2D.Raycast(pos, (turret_pos - pos).normalized, 500, 1 << 8);
+
+                // If the ceiling is above where we're going to spawn, put it right beneath the ceiling.
+                if (up.point.y > pos.y + 10)
+                {
+                    turret_pos = up.point + new Vector2(0, -0.5f);
+                }
+
                 GameObject turret = Object.Instantiate
                 (
                     ObjectLoader.InstantiableObjects["Laser Turret"],
-                    pos + new Vector3(i * 5, add_y, 0),
+                    turret_pos,
                     Quaternion.Euler(0, 0, 180 + Random.Range(-30f, 30f))
                 );
 
