@@ -67,8 +67,11 @@ namespace HollowTwitch
             _client.ChatMessageReceived += OnMessageReceived;
 
             _client.ClientErrored += s => Log($"An error occured while receiving messages.\nError: {s}");
-            
-            _currentThread = new Thread(_client.StartReceive);
+
+            _currentThread = new Thread(_client.StartReceive)
+            {
+                IsBackground = true
+            };
             _currentThread.Start();
             
             #if DEBUG
