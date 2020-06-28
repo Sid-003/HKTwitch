@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
@@ -10,8 +8,6 @@ using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
 using ModCommon.Util;
 using Modding;
-using Mono.Cecil.Cil;
-using MonoMod.Cil;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
@@ -30,9 +26,6 @@ namespace HollowTwitch.Commands
 
             _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince"))?.GetTypes()?.FirstOrDefault(x => x.Name == "Prince");
         }
-
-        
-
 
         [HKCommand("spawn")]
         [Summary("Spawns an enemy.\nEnemies: aspid")]
@@ -59,7 +52,7 @@ namespace HollowTwitch.Commands
 
             string[] enemies = {"roller", "aspid", "buzzer"};
 
-            AudioClip shatter_clip = Game._clips.First(x => x.name == "globe_break_larger");
+            AudioClip shatter_clip = Game.Clips.First(x => x.name == "globe_break_larger");
 
             Vector3 pos = HeroController.instance.transform.position;
 

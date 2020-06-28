@@ -7,7 +7,6 @@ using System.Reflection;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
-using Logger = HollowTwitch.Logger;
 
 namespace HollowTwitch
 {
@@ -80,15 +79,30 @@ namespace HollowTwitch
                 {
                     Logger.Log($"Built arguments for command {command}.");
 
-                    if (c.MethodInfo.ReturnType == typeof(IEnumerator))
+                    IEnumerator RunCommand()
                     {
-                        var t = c.MethodInfo.Invoke(c.ClassInstance, parsed) as IEnumerator;
-                        GameManager.instance.StartCoroutine(t);
+                        /*
+                         * We have to wait a frame in order to make Unity itself call
+                         * the MoveNext on the IEnumerator
+                         *
+                         * This forces it to run on the main thread, so Unity doesn't break.
+                         *
+                         * I hate Unity.
+                         */
+                        yield return null;
+                        
+                        if (c.MethodInfo.ReturnType == typeof(IEnumerator))
+                        {
+                            yield return c.MethodInfo.Invoke(c.ClassInstance, parsed) as IEnumerator;
+                        }
+                        else
+                        {
+                            c.MethodInfo.Invoke(c.ClassInstance, parsed);
+                        }
                     }
-                    else
-                    {
-                        c.MethodInfo.Invoke(c.ClassInstance, parsed);
-                    }
+
+                    GameManager.instance.StartCoroutine(RunCommand());
+
                 }
                 catch (Exception e)
                 {

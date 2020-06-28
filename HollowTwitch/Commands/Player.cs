@@ -1,12 +1,10 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using GlobalEnums;
-using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.ModHelpers;
 using HollowTwitch.Precondition;
+using HollowTwitch.Utils;
 using HutongGames.PlayMaker;
 using Modding;
 using UnityEngine;
@@ -32,9 +30,9 @@ namespace HollowTwitch.Commands
             IEnumerator GetMaggotPrime()
             {
                 const string hwurmpURL = "https://cdn.discordapp.com/attachments/410556297046523905/716824653280313364/hwurmpU.png";
-                
+
                 UnityWebRequest www = UnityWebRequestTexture.GetTexture(hwurmpURL);
-                
+
                 yield return www.SendWebRequest();
 
                 Texture texture = DownloadHandlerTexture.GetContent(www);
@@ -56,23 +54,6 @@ namespace HollowTwitch.Commands
             GameManager.instance.StartCoroutine(GetMaggotPrime());
         }
 
-        [HKCommand("naildamage")]
-        [Summary("Allows users to set the nail damage for 30 seconds.")]
-        [Cooldown(60)]
-        public IEnumerator SetNailDamage(int d)
-        {
-            int defNailDamage = PlayerData.instance.nailDamage;
-
-            PlayerData.instance.nailDamage = d;
-            PlayMakerFSM.BroadcastEvent("UPDATE NAIL DAMANGE");
-
-            yield return new WaitForSecondsRealtime(30);
-
-            PlayerData.instance.nailDamage = defNailDamage;
-            PlayMakerFSM.BroadcastEvent("UPDATE NAIL DAMANGE");
-        }
-
-
         [HKCommand("ax2uBlind")]
         [Summary("Enables darkness for some time.")]
         [Cooldown(60)]
@@ -93,9 +74,9 @@ namespace HollowTwitch.Commands
         public IEnumerator PogoKnockback()
         {
             void NoBounce(On.HeroController.orig_Bounce orig, HeroController self) { }
-            
+
             On.HeroController.Bounce += NoBounce;
-            
+
             yield return new WaitForSecondsRealtime(30);
 
             On.HeroController.Bounce -= NoBounce;
@@ -129,7 +110,7 @@ namespace HollowTwitch.Commands
                 hc.cState.onConveyorV = false;
             else
                 hc.cState.onConveyor = false;
-            
+
             hc.GetComponent<ConveyorMovementHero>().StopConveyorMove();
         }
 
@@ -143,7 +124,7 @@ namespace HollowTwitch.Commands
             int prev_steps = hc.JUMP_STEPS;
 
             hc.JUMP_STEPS = Random.Range(hc.JUMP_STEPS / 2, hc.JUMP_STEPS * 8);
-            
+
             yield return new WaitForSecondsRealtime(30);
 
             hc.JUMP_STEPS = prev_steps;
@@ -154,11 +135,11 @@ namespace HollowTwitch.Commands
         public IEnumerator Lifeblood()
         {
             int r = Random.Range(1, 10);
-            
+
             for (int i = 0; i < r; i++)
             {
                 yield return null;
-                
+
                 EventRegister.SendEvent("ADD BLUE HEALTH");
 
                 yield return null;
@@ -170,11 +151,11 @@ namespace HollowTwitch.Commands
         public IEnumerator Godmode()
         {
             static int TakeHealth(int damage) => 0;
-            
+
             static HitInstance HitInstance(Fsm owner, HitInstance hit)
             {
                 hit.DamageDealt = 1 << 8;
-                
+
                 return hit;
             }
 
@@ -188,23 +169,22 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("sleep")]
-       // [Cooldown(60)]
+        [Cooldown(60)]
         public IEnumerator Sleep()
         {
             const string SLEEP_CLIP = "Wake Up Ground";
-            
+
             HeroController hc = HeroController.instance;
-            
-            yield return new WaitForEndOfFrame();
+
             var anim = hc.GetComponent<HeroAnimationController>();
 
             anim.PlayClip(SLEEP_CLIP);
-            
+
             hc.StopAnimationControl();
             hc.RelinquishControl();
-            
+
             yield return new WaitForSeconds(anim.GetClipDuration(SLEEP_CLIP));
-            
+
             hc.StartAnimationControl();
             hc.RegainControl();
         }
@@ -215,14 +195,12 @@ namespace HollowTwitch.Commands
         {
             // If they're already limited I don't want to just free them
             bool orig_val = PlayerData.instance.soulLimited;
-            
+
             PlayerData.instance.soulLimited = true;
 
-            yield return new WaitForSeconds(30f);
-            
-            PlayerData.instance.soulLimited = orig_val;
+            yield return new SaveDefer(30f, pd => { pd.soulLimited = orig_val; });
         }
-        
+
 
         [HKCommand("jumpspeed")]
         [Summary("Gives a random jump speed.")]
@@ -234,7 +212,7 @@ namespace HollowTwitch.Commands
             float prev_speed = hc.JUMP_SPEED;
 
             hc.JUMP_SPEED = Random.Range(hc.JUMP_SPEED / 4f, hc.JUMP_SPEED * 4f);
-            
+
             yield return new WaitForSecondsRealtime(30);
 
             hc.JUMP_SPEED = prev_speed;
@@ -246,7 +224,7 @@ namespace HollowTwitch.Commands
         public IEnumerator Wind()
         {
             float speed = Random.Range(-10f, 10f);
-            
+
             float prev_s = HeroController.instance.conveyorSpeed;
 
             HeroController.instance.cState.inConveyorZone = true;
@@ -256,7 +234,7 @@ namespace HollowTwitch.Commands
 
             HeroController.instance.cState.inConveyorZone = false;
             HeroController.instance.conveyorSpeed = prev_s;
-        }    
+        }
 
         [HKCommand("dashSpeed")]
         [Summary("Change dash speed.")]
@@ -269,12 +247,12 @@ namespace HollowTwitch.Commands
             float orig_dash = hc.DASH_SPEED;
 
             hc.DASH_SPEED = len;
-            
+
             yield return new WaitForSecondsRealtime(30);
 
             hc.DASH_SPEED = orig_dash;
         }
-        
+
         [HKCommand("dashLength")]
         [Summary("Change dash length.")]
         [Cooldown(60)]
@@ -284,9 +262,9 @@ namespace HollowTwitch.Commands
 
             float len = Random.Range(.25f * hc.DASH_TIME, hc.DASH_TIME * 12f);
             float orig_dash = hc.DASH_TIME;
-            
+
             hc.DASH_TIME = len;
-            
+
             yield return new WaitForSecondsRealtime(30);
 
             hc.DASH_TIME = orig_dash;
@@ -297,23 +275,62 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public IEnumerator DashVector()
         {
-            static Vector2 VectorHook(Vector2 change)
+            Vector2? vec = null;
+            Vector2? orig = null;
+
+            Vector2 VectorHook(Vector2 change)
             {
+                if (
+                    orig == change
+                    && vec is Vector2 v
+                )
+                    return v;
+
                 const float factor = 4f;
-                
+
+                orig = change;
+
                 float mag = change.magnitude;
 
                 float x = factor * Random.Range(-mag, mag);
                 float y = factor * Random.Range(-mag, mag);
-                
-                return new Vector2(x, y);
+
+                return (Vector2) (vec = new Vector2(x, y));
             }
-            
+
             ModHooks.Instance.DashVectorHook += VectorHook;
-            
+
             yield return new WaitForSecondsRealtime(30f);
-            
+
             ModHooks.Instance.DashVectorHook -= VectorHook;
+        }
+
+        [HKCommand("triplejump")]
+        public IEnumerator TripleJump()
+        {
+            bool triple_jump = false;
+
+            void Triple(On.HeroController.orig_DoDoubleJump orig, HeroController self)
+            {
+                orig(self);
+
+                if (!triple_jump)
+                {
+                    ReflectionHelper.SetAttr(self, "doubleJumped", false);
+
+                    triple_jump = true;
+                }
+                else
+                {
+                    triple_jump = false;
+                }
+            }
+
+            On.HeroController.DoDoubleJump += Triple;
+
+            yield return new WaitForSeconds(30);
+
+            On.HeroController.DoDoubleJump -= Triple;
         }
 
         private static void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
@@ -321,6 +338,15 @@ namespace HollowTwitch.Commands
             if (HeroController.instance == null) return;
 
             DarknessHelper.Darken();
+        }
+
+        [HKCommand("overflow")]
+        [Cooldown(40)]
+        public void OverflowSoul()
+        {
+            HeroController.instance.AddMPChargeSpa(99 * 2);
+
+            PlayerData.instance.MPCharge += 99;
         }
 
         [HKCommand("timescale")]
@@ -466,6 +492,32 @@ namespace HollowTwitch.Commands
             return touching;
         }
 
+        [HKCommand("float")]
+        [Cooldown(180)]
+        public IEnumerator Float()
+        {
+            static void NoOp(On.HeroController.orig_AffectedByGravity orig, HeroController self, bool gravityapplies) {}
+            
+            HeroController.instance.AffectedByGravity(false);
+
+            On.HeroController.AffectedByGravity += NoOp;
+
+            yield return new WaitForSeconds(30);
+            
+            On.HeroController.AffectedByGravity -= NoOp;
+            
+            HeroController.instance.AffectedByGravity(true);
+        }
+
+        [HKCommand("Salubra")]
+        [Cooldown(30)]
+        public void Salubra()
+        {
+            GameObject bg = GameObject.Find("Blessing Ghost");
+
+            bg.LocateMyFSM("Blessing Control").SetState("Start Blessing");
+        }
+
         [HKCommand("hwurmpU")]
         [Summary("I don't even know honestly.")]
         [Cooldown(60 * 5)]
@@ -495,23 +547,19 @@ namespace HollowTwitch.Commands
             {
                 case "dash":
                     PlayerData.instance.canDash ^= true;
-                    yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.canDash ^= true;
+                    yield return new SaveDefer(time, pd => pd.canDash ^= true);
                     break;
                 case "superdash":
                     PlayerData.instance.hasSuperDash ^= true;
-                    yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.hasSuperDash ^= true;
+                    yield return new SaveDefer(time, pd => pd.hasSuperDash ^= true);
                     break;
                 case "claw":
                     PlayerData.instance.hasWalljump ^= true;
-                    yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.hasWalljump ^= true;
+                    yield return new SaveDefer(time, pd => pd.hasWalljump ^= true);
                     break;
                 case "wings":
                     PlayerData.instance.hasDoubleJump ^= true;
-                    yield return new WaitForSecondsRealtime(time);
-                    PlayerData.instance.hasDoubleJump ^= true;
+                    yield return new SaveDefer(time, pd => pd.hasDoubleJump ^= true);
                     break;
                 case "nail":
                     ReflectionHelper.SetAttr(HeroController.instance, "attack_cooldown", 15f);
@@ -529,7 +577,5 @@ namespace HollowTwitch.Commands
             yield return new WaitForSecondsRealtime(30);
             ModHooks.Instance.TakeDamageHook -= InstanceOnTakeDamageHook;
         }
-
-       
     }
 }

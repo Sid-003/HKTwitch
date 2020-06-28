@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using HollowTwitch.Components;
 using HutongGames.PlayMaker.Actions;
 using ModCommon.Util;
 using UnityEngine;
-using Logger = HollowTwitch.Logger;
 using Object = UnityEngine.Object;
 
 namespace HollowTwitch
@@ -17,10 +15,12 @@ namespace HollowTwitch
         public static readonly Dictionary<(string, Func<GameObject, GameObject>), (string, string)> ObjectList = new Dictionary<(string, Func<GameObject, GameObject>), (string, string)>
         {
             {
-                ("aspid", (GameObject obj) =>
+                ("aspid", obj =>
                 {
                     obj.LocateMyFSM("spitter").SetState("Init");
+                    
                     Object.Destroy(obj.GetComponent<PersistentBoolItem>());
+                    
                     return obj;
                 }),
                 ("Deepnest_East_11", "Super Spitter")
@@ -34,12 +34,17 @@ namespace HollowTwitch
                 ("GG_Hollow_Knight", "Battle Scene/HK Prime")
             },
             {
-                ("spike", (GameObject obj) => 
+                ("spike", obj => 
                 {
                     obj.AddComponent<DamageHero>().damageDealt = 1;
+                    
                     return obj;
                 }),
                 ("Room_Colosseum_Bronze", "Colosseum Manager/Ground Spikes/Colosseum Spike")
+            },
+            {
+                ("cave_spikes", null),
+                ("Tutorial_01", "_Props/Cave Spikes")
             },
             {
                 ("jar", null), ("GG_Collector", "Spawn Jar")
@@ -54,20 +59,13 @@ namespace HollowTwitch
                 ("prefab_jar", null), ("Ruins2_11", "Break Jar (6)")
             },
             {
-                ("grub_jar", null), ("Crossroads_03", "_Props/Grub Bottle")
+                ("zap", go => go.LocateMyFSM("Mega Jellyfish").GetAction<SpawnObjectFromGlobalPool>("Gen", 2).gameObject.Value), ("GG_Uumuu", "Mega Jellyfish GG")
             },
             {
-                ("zap", (GameObject go) =>
-                {
-                    var zap = go.LocateMyFSM("Mega Jellyfish").GetAction<SpawnObjectFromGlobalPool>("Gen", 2).gameObject.Value;
-                    return zap;
-                }), ("GG_Uumuu", "Mega Jellyfish GG")
+                ("Laser Turret", null), ("Mines_31", "Laser Turret")
             },
             {
-                ("Beam", null), ("Mines_18_boss", "Beam")
-            },
-            {
-                ("Beam Ball", null), ("Mines_18_boss", "Beam Ball")
+                ("bee", null), ("GG_Hive_Knight", "Battle Scene/Droppers/Bee Dropper")
             }
         };
 
