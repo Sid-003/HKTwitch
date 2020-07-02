@@ -3,10 +3,9 @@ using HutongGames.PlayMaker;
 
 namespace HollowTwitch.ModHelpers
 {
+    // Stolen from Darkness mod by Katie and 56 again https://github.com/fifty-six/HollowKnight.Darkenss
     public static class DarknessHelper
     {
-        // Stolen from Darkness mod by Katie and 56 again https://github.com/fifty-six/HollowKnight.Darkenss
-
         private static readonly Dictionary<(string Name, string EventName), string> _originalTransitions = new Dictionary<(string Name, string EventName), string>();
 
         public static void Lighten()
@@ -27,7 +26,6 @@ namespace HollowTwitch.ModHelpers
 
             HeroController.instance.vignette.enabled = false;
         }
-
 
         public static void Darken()
         {
@@ -64,6 +62,5 @@ namespace HollowTwitch.ModHelpers
             HeroController.instance.vignetteFSM.SetState("Dark 2");
             HeroController.instance.vignette.enabled = true;
         }
-
     }
 }

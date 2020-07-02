@@ -1,29 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
-using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using ModCommon;
 using ModCommon.Util;
-using Modding;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace HollowTwitch.Commands
 {
     public class Area
     {
-        public Area()
-        {
-
-        }
-
-        
-
         [HKCommand("bees")]
         [Cooldown(100)]
         public void Bees()
@@ -152,7 +139,7 @@ namespace HollowTwitch.Commands
             
             GameManager.instance.StartCoroutine(AddSpikes(x, y, 5, -5));
 
-            yield return  new WaitForSeconds(0.55f);
+            yield return new WaitForSeconds(0.55f);
             
             foreach (GameObject spike in spikes)
             {
@@ -167,8 +154,6 @@ namespace HollowTwitch.Commands
             }
             
             Logger.Log("done epic gamer moment");
-
-            yield break;
         }
     }
 }

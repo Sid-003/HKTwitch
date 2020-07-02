@@ -49,7 +49,7 @@ namespace HollowTwitch
 
         private void Reconnect(int delay)
         {
-            ClientErrored?.Invoke("Reconnrecting........");
+            ClientErrored?.Invoke("Reconnecting........");
             Dispose();
             Thread.Sleep(delay);
             ConnectAndAuthenticate(_config);
@@ -91,13 +91,13 @@ namespace HollowTwitch
                 }
                 catch (Exception e)
                 {
-                    ClientErrored?.Invoke("Error occured trying to read stream: " + e.ToString());
+                    ClientErrored?.Invoke("Error occured trying to read stream: " + e);
                     Reconnect(5000);
                 }
                
             }
+            // ReSharper disable once FunctionNeverReturns
         }
-
 
         private void SendMessage(string message) => _input.WriteLine(message);
 

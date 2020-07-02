@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace HollowTwitch.Components
 {

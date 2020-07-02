@@ -6,7 +6,9 @@ using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using JetBrains.Annotations;
 using ModCommon.Util;
+using On.HutongGames.PlayMaker.Actions;
 using UnityEngine;
+using Random = UnityEngine.Random;
 using UCamera = UnityEngine.Camera;
 using UObject = UnityEngine.Object;
 
@@ -50,7 +52,7 @@ namespace HollowTwitch.Commands
             {
                 CameraEffects[] values = (CameraEffects[]) Enum.GetValues(typeof(CameraEffects));
 
-                camEffect = values[UnityEngine.Random.Range(0, values.Length)];
+                camEffect = values[Random.Range(0, values.Length)];
             }
 
             tk2dCamera tk2dCam = GameCameras.instance.tk2dCam;
@@ -108,7 +110,7 @@ namespace HollowTwitch.Commands
                      *
                      * This prevents that.
                      */
-                    void PreventCameraReset(On.HutongGames.PlayMaker.Actions.SetPosition.orig_DoSetPosition orig, HutongGames.PlayMaker.Actions.SetPosition self)
+                    void PreventCameraReset(SetPosition.orig_DoSetPosition orig, HutongGames.PlayMaker.Actions.SetPosition self)
                     {
                         if (self.Fsm.Name == "Spell Control" && self.Fsm.ActiveState.Name == "Reset Cam Zoom")
                             return;
@@ -116,7 +118,7 @@ namespace HollowTwitch.Commands
                         orig(self);
                     }
 
-                    On.HutongGames.PlayMaker.Actions.SetPosition.DoSetPosition += PreventCameraReset;
+                    SetPosition.DoSetPosition += PreventCameraReset;
 
                     cam.transform.SetPositionZ(new_z);
 
@@ -130,7 +132,7 @@ namespace HollowTwitch.Commands
                     // Much shorter than the other effects due to it being a lot harder to play around
                     yield return new WaitForSecondsRealtime(time / 4);
 
-                    On.HutongGames.PlayMaker.Actions.SetPosition.DoSetPosition -= PreventCameraReset;
+                    SetPosition.DoSetPosition -= PreventCameraReset;
 
                     _activeEffects ^= CameraEffects.Mirror;
 

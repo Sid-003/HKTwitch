@@ -11,6 +11,7 @@ using Modding;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace HollowTwitch.Commands
@@ -88,7 +89,7 @@ namespace HollowTwitch.Commands
                 // TODO: Implement this maybe
                 ctrl.StrikeNailReaction = new GameObject();
 
-                ctrl.EnemyPrefab = ObjectLoader.InstantiableObjects[enemies[UnityEngine.Random.Range(0, enemies.Length)]];
+                ctrl.EnemyPrefab = ObjectLoader.InstantiableObjects[enemies[Random.Range(0, enemies.Length)]];
                 ctrl.EnemyHP = 10;
 
                 yield return new WaitForSeconds(0.1f);

@@ -2,7 +2,7 @@ using System;
 
 namespace HollowTwitch.Entities.Attributes
 {
-    [AttributeUsage(AttributeTargets.Parameter, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Parameter)]
     public class RemainingTextAttribute : Attribute { }
 
 }

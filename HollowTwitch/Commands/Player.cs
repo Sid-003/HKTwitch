@@ -10,7 +10,6 @@ using Modding;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
-using Random = UnityEngine.Random;
 using UObject = UnityEngine.Object;
 
 namespace HollowTwitch.Commands

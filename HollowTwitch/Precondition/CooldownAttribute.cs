@@ -4,21 +4,17 @@ using HollowTwitch.Entities.Attributes;
 
 namespace HollowTwitch.Precondition
 {
-    //barebones cooldown
     public class CooldownAttribute : PreconditionAttribute
     {
-        public int MaxUses { get; private set; }
+        public int MaxUses { get; }
 
         private int _uses;
 
-        public int Uses
-        {
-            get => _uses;
-        }
+        public int Uses => _uses;
 
         public DateTimeOffset ResetTime { get; private set; }
 
-        public TimeSpan Reset { get; private set; }
+        public TimeSpan Reset { get; }
 
         public CooldownAttribute(double seconds, int maxUses = 1) => (Reset, ResetTime, MaxUses) = (TimeSpan.FromSeconds(seconds), DateTimeOffset.Now + Reset, maxUses);
 

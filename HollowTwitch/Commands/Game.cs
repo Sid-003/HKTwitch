@@ -6,6 +6,7 @@ using HutongGames.PlayMaker;
 using JetBrains.Annotations;
 using Modding;
 using MonoMod.RuntimeDetour;
+using On.HutongGames.PlayMaker.Actions;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using UObject = UnityEngine.Object;
@@ -65,7 +66,7 @@ namespace HollowTwitch.Commands
         [Cooldown(120)]
         public IEnumerator RNG()
         {
-            static void OnWait(On.HutongGames.PlayMaker.Actions.Wait.orig_OnEnter orig, HutongGames.PlayMaker.Actions.Wait self)
+            static void OnWait(Wait.orig_OnEnter orig, HutongGames.PlayMaker.Actions.Wait self)
             {
                 FsmFloat orig_time = self.time;
 
@@ -76,7 +77,7 @@ namespace HollowTwitch.Commands
                 self.time = orig_time;
             }
 
-            static void OnWaitRandom(On.HutongGames.PlayMaker.Actions.WaitRandom.orig_OnEnter orig, HutongGames.PlayMaker.Actions.WaitRandom self)
+            static void OnWaitRandom(WaitRandom.orig_OnEnter orig, HutongGames.PlayMaker.Actions.WaitRandom self)
             {
                 FsmFloat orig_time_min = self.timeMin;
                 FsmFloat orig_time_max = self.timeMax;
@@ -108,8 +109,8 @@ namespace HollowTwitch.Commands
                 clip.fps = orig_fps;
             }
 
-            On.HutongGames.PlayMaker.Actions.Wait.OnEnter += OnWait;
-            On.HutongGames.PlayMaker.Actions.WaitRandom.OnEnter += OnWaitRandom;
+            Wait.OnEnter += OnWait;
+            WaitRandom.OnEnter += OnWaitRandom;
             On.tk2dSpriteAnimator.Play_tk2dSpriteAnimationClip_float_float += AnimPlay;
 
             for (int i = 0; i < 12; i++)
@@ -128,8 +129,8 @@ namespace HollowTwitch.Commands
                 yield return new WaitForSeconds(4f);
             }
             
-            On.HutongGames.PlayMaker.Actions.Wait.OnEnter -= OnWait;
-            On.HutongGames.PlayMaker.Actions.WaitRandom.OnEnter -= OnWaitRandom;
+            Wait.OnEnter -= OnWait;
+            WaitRandom.OnEnter -= OnWaitRandom;
             On.tk2dSpriteAnimator.Play_tk2dSpriteAnimationClip_float_float -= AnimPlay;
         }
 

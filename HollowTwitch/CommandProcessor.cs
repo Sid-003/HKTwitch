@@ -21,7 +21,7 @@ namespace HollowTwitch
         
         private readonly Dictionary<Type, IArgumentParser> _parsers;
         
-        private MonoBehaviour _coroutineRunner;
+        private readonly MonoBehaviour _coroutineRunner;
 
         public CommandProcessor()
         {
@@ -96,8 +96,6 @@ namespace HollowTwitch
                          * the MoveNext on the IEnumerator
                          *
                          * This forces it to run on the main thread, so Unity doesn't break.
-                         *
-                         * I hate Unity.
                          */
                         yield return null;
                         
