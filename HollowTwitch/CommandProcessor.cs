@@ -7,6 +7,8 @@ using System.Reflection;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
+using UnityEngine;
+using UObject = UnityEngine.Object;
 
 namespace HollowTwitch
 {
@@ -18,11 +20,19 @@ namespace HollowTwitch
         internal List<Command> Commands { get; }
         
         private readonly Dictionary<Type, IArgumentParser> _parsers;
+        
+        private MonoBehaviour _coroutineRunner;
 
         public CommandProcessor()
         {
             Commands = new List<Command>();
             _parsers = new Dictionary<Type, IArgumentParser>();
+
+            var go = new GameObject();
+
+            UObject.DontDestroyOnLoad(go);
+
+            _coroutineRunner = go.AddComponent<NonBouncer>();
         }
 
         public void AddTypeParser<T>(T parser, Type t) where T : IArgumentParser
@@ -101,7 +111,7 @@ namespace HollowTwitch
                         }
                     }
 
-                    GameManager.instance.StartCoroutine(RunCommand());
+                    _coroutineRunner.StartCoroutine(RunCommand());
 
                 }
                 catch (Exception e)
