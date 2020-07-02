@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
+using ModCommon;
 using ModCommon.Util;
 using UnityEngine;
 
@@ -102,58 +104,69 @@ namespace HollowTwitch.Commands
 
         [HKCommand("spikefloor")]
         [Summary("Spawns spikes.")]
-        //[RequireSceneChange]
         public IEnumerator SpikeFloor()
         {
-            (float x, float y, _) = HeroController.instance.transform.position;
+            Vector3 hero_pos = HeroController.instance.transform.position;
 
-            List<GameObject> spikes = new List<GameObject>();
+            var audio_player = new GameObject().AddComponent<AudioSource>();
+
+            audio_player.volume = GameManager.instance.GetImplicitCinematicVolume();
+
+            var spike_fsms = new List<PlayMakerFSM>();
+
+            const float SPACING = 2.5f;
  
-            Logger.Log("lmao got here but at what cost");
-            
-            yield return null;
-
-            Logger.Log("the shitty spike is null: " + (ObjectLoader.InstantiableObjects["nkgspike"] == null));
-
-            IEnumerator AddSpikes(float xPos, float yPos, int count, float spacing)
+            for (int i = -8; i <= 8; i++)
             {
-                for (int i = 0; i < count; i++)
-                {
-                    GameObject spike = Object.Instantiate(ObjectLoader.InstantiableObjects["nkgspike"]);
-                    RaycastHit2D hit = Physics2D.Raycast(new Vector2(xPos, yPos), Vector2.down, 500, 1 << 8);
-                    
-                    spike.transform.SetPosition2D(xPos, hit? yPos - hit.distance : yPos);
-                    xPos += spacing;
+                GameObject spike = Object.Instantiate(ObjectLoader.InstantiableObjects["nkgspike"]);
 
-                    spikes.Add(spike);
-                    
-                    var fsm = spike.LocateMyFSM("Control");
-                    fsm.SendEvent("SPIKES READY");
-                }
+                spike.SetActive(true);
+
+                Vector3 pos = hero_pos + new Vector3(i * SPACING, 0);
                 
-                yield break;
+                RaycastHit2D hit = Physics2D.Raycast(pos, Vector2.down, 500, 1 << 8);
+                
+                pos.y -= hit ? hit.distance : 0;
+                
+                spike.transform.position = pos;
+
+                PlayMakerFSM ctrl = spike.LocateMyFSM("Control");
+                
+                spike_fsms.Add(ctrl);
+                
+                ctrl.SendEvent("SPIKES READY");
             }
             
+            audio_player.PlayOneShot(Game.Clips.FirstOrDefault(x => x.name == "grimm_spikes_pt_1_grounded"));
             
-            GameManager.instance.StartCoroutine(AddSpikes(x, y, 5, 5));
-            
-            GameManager.instance.StartCoroutine(AddSpikes(x, y, 5, -5));
-
             yield return new WaitForSeconds(0.55f);
             
-            foreach (GameObject spike in spikes)
+            foreach (PlayMakerFSM spike in spike_fsms)
             {
-                spike.LocateMyFSM("Control").SendEvent("SPIKES UP");
+                spike.SendEvent("SPIKES UP");
             }
             
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.15f);
+            
+            GameCameras.instance.cameraShakeFSM.SendEvent("EnemyKillShake");
+            
+            audio_player.PlayOneShot(Game.Clips.FirstOrDefault(x => x.name == "grimm_spikes_pt_2_shoot_up"));
+            
+            yield return new WaitForSeconds(0.45f);
+            
+            foreach (PlayMakerFSM spike in spike_fsms)
+            {
+                spike.SendEvent("SPIKES DOWN");
+            }
+            
+            audio_player.PlayOneShot(Game.Clips.FirstOrDefault(x => x.name == "grimm_spikes_pt_3_shrivel_back"));
+            
+            yield return new WaitForSeconds(0.5f);
 
-            foreach (var spike in spikes)
+            foreach (GameObject go in spike_fsms.Select(x => x.gameObject))
             {
-                spike.LocateMyFSM("Control").SendEvent("SPIKES DOWN");
+                Object.Destroy(go);
             }
-            
-            Logger.Log("done epic gamer moment");
         }
     }
 }
