@@ -536,6 +536,27 @@ namespace HollowTwitch.Commands
             renderer.enabled = true;
         }
 
+        [HKCommand("slaphand")]
+        [Cooldown(120)]
+        public IEnumerator SlapHand()
+        {
+            void SlashHit(Collider2D col, GameObject gameobject)
+            {
+                Vector3 dir = (col.transform.position - HeroController.instance.transform.position).normalized;
+
+                if (!(col.gameObject.GetComponent<Rigidbody2D>() is Rigidbody2D rb2d)) return;
+                
+                rb2d.velocity = 40 * dir;
+                rb2d.drag = 6;
+            }
+            
+            ModHooks.Instance.SlashHitHook += SlashHit;
+
+            yield return new WaitForSeconds(60f);
+            
+            ModHooks.Instance.SlashHitHook -= SlashHit;
+        }
+
         [HKCommand("toggle")]
         [Summary("Toggles an ability for 45 seconds.")]
         [Cooldown(60 * 4)]
