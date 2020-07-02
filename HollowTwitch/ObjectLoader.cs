@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using HollowTwitch.Extensions;
 using HutongGames.PlayMaker.Actions;
 using ModCommon.Util;
 using UnityEngine;
@@ -18,9 +19,9 @@ namespace HollowTwitch
                 ("aspid", obj =>
                 {
                     obj.LocateMyFSM("spitter").SetState("Init");
-                    
+
                     Object.Destroy(obj.GetComponent<PersistentBoolItem>());
-                    
+
                     return obj;
                 }),
                 ("Deepnest_East_11", "Super Spitter")
@@ -34,10 +35,10 @@ namespace HollowTwitch
                 ("GG_Hollow_Knight", "Battle Scene/HK Prime")
             },
             {
-                ("spike", obj => 
+                ("spike", obj =>
                 {
                     obj.AddComponent<DamageHero>().damageDealt = 1;
-                    
+
                     return obj;
                 }),
                 ("Room_Colosseum_Bronze", "Colosseum Manager/Ground Spikes/Colosseum Spike")
@@ -72,13 +73,14 @@ namespace HollowTwitch
                 {
                     go.SetActive(true);
                     var spike = Object.Instantiate(go.GetComponentsInChildren<Transform>(true).First(x => x.name.Contains("Nightmare Spike")).gameObject);
-                    
+
                     Object.DontDestroyOnLoad(spike);
-                  
+
                     spike.LocateMyFSM("Control").ChangeTransition("Dormant", "SPIKE READY", "Ready");
                     go.SetActive(false);
                     return spike;
-                })), ("GG_Grimm_Nightmare", "Grimm Spike Holder")
+                })),
+                ("GG_Grimm_Nightmare", "Grimm Spike Holder")
             }
         };
 
@@ -97,15 +99,12 @@ namespace HollowTwitch
                 return go;
             }
 
-            foreach (var kvp in ObjectList)
+            foreach ((var (name, modify), var (room, go_name)) in ObjectList)
             {
-                var (name, modify) = kvp.Key;
-                var (room, go_name) = kvp.Value;
-
                 if (!preloadedObjects[room].TryGetValue(go_name, out GameObject go))
                 {
                     Logger.LogWarn($"[HollowTwitch]: Unable to load GameObject {go_name}");
-                    
+
                     continue;
                 }
 
@@ -126,7 +125,7 @@ namespace HollowTwitch
 
             Shader[] shaders = assetBundle.LoadAllAssets<Shader>();
 
-            if (shaders == null || shaders?.Count() == 0) return;
+            if (shaders == null || shaders.Length == 0) return;
 
             foreach (Shader shader in shaders)
             {
