@@ -66,6 +66,19 @@ namespace HollowTwitch
             },
             {
                 ("bee", null), ("GG_Hive_Knight", "Battle Scene/Droppers/Bee Dropper")
+            },
+            {
+                ("nkgspike", (go =>
+                {
+                    go.SetActive(true);
+                    var spike = Object.Instantiate(go.GetComponentsInChildren<Transform>(true).First(x => x.name.Contains("Nightmare Spike")).gameObject);
+                    
+                    Object.DontDestroyOnLoad(spike);
+                  
+                    spike.LocateMyFSM("Control").ChangeTransition("Dormant", "SPIKE READY", "Ready");
+                    go.SetActive(false);
+                    return spike;
+                })), ("GG_Grimm_Nightmare", "Grimm Spike Holder")
             }
         };
 
