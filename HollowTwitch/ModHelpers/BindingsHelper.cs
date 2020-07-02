@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using JetBrains.Annotations;
 using MonoMod.RuntimeDetour;
 using UnityEngine;
@@ -10,6 +12,8 @@ namespace HollowTwitch.ModHelpers
     {
         // Stolen 100% from https://github.com/fifty-six/HollowKnight.Bindings
         private static readonly List<Detour> _detours =  new List<Detour>();
+
+        private static List<int> _prevCharms;
 
         [UsedImplicitly]
         public static bool True() => true;
@@ -96,6 +100,9 @@ namespace HollowTwitch.ModHelpers
                 GameManager.instance.SetPlayerDataBool($"equippedCharm_{charm}", false);
             }
 
+            // ToList for a copy
+            _prevCharms = PlayerData.instance.equippedCharms.ToList();
+
             PlayerData.instance.equippedCharms.Clear();
         }
 
@@ -117,6 +124,13 @@ namespace HollowTwitch.ModHelpers
                 d.Dispose();
 
             _detours.Clear();
+            
+            foreach (int charm in _prevCharms)
+                PlayerData.instance.SetBool($"equippedCharm_{charm}", true);
+            
+            PlayerData.instance.equippedCharms.AddRange(_prevCharms);
+
+            _prevCharms.Clear();
 
             On.BossSceneController.RestoreBindings -= NoOp;
             On.GGCheckBoundSoul.OnEnter -= CheckBoundSoulEnter;
