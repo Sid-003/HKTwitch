@@ -40,6 +40,11 @@ namespace HollowTwitch
 
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
 
+            if (Config.Token is null)
+            {              
+                Logger.Log("Token not found, relaunch the game with the fields in settings populated.");
+                return;
+            }
             ReceiveCommands();
         }
 
