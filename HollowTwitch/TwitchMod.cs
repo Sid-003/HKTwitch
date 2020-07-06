@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using HollowTwitch.Clients;
 using HollowTwitch.Commands;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
@@ -13,9 +14,9 @@ using Camera = HollowTwitch.Commands.Camera;
 
 namespace HollowTwitch
 {
-    public class TwitchMod : Mod
+    public class TwitchMod : Mod, ITogglableMod
     {
-        private TwitchClient _client;
+        private IClient _client;
         private Thread _currentThread;
 
         internal TwitchConfig Config = new TwitchConfig();
@@ -37,23 +38,15 @@ namespace HollowTwitch
             ObjectLoader.Load(preloadedObjects);
             ObjectLoader.LoadAssets();
 
-            ModHooks.Instance.AfterSavegameLoadHook += OnSaveGameLoad;
-            ModHooks.Instance.NewGameHook += OnNewGame;
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
+
+            ReceiveCommands();
         }
 
         public override List<(string, string)> GetPreloadNames() => ObjectLoader.ObjectList.Values.ToList();
 
-        private void OnSaveGameLoad(SaveGameData data) => ReceiveCommands();
-
-        private void OnNewGame() => ReceiveCommands();
-
-        private static bool once;
-
         private void ReceiveCommands()
         {
-            if (once) return;
-
             Processor = new CommandProcessor();
 
             Processor.RegisterCommands<Player>();
@@ -79,8 +72,6 @@ namespace HollowTwitch
             #endif
             
             Log("Started receiving");
-
-            once = true;
         }
 
         private void OnQuit()
@@ -125,5 +116,8 @@ namespace HollowTwitch
 
             File.WriteAllText(Application.dataPath + "/Managed/Mods/TwitchCommandList.txt", sb.ToString());
         }
+
+        public void Unload() => OnQuit();
+        
     }
 }

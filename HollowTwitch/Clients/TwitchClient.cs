@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace HollowTwitch
+namespace HollowTwitch.Clients
 {
-    internal class TwitchClient : IDisposable
+    internal class TwitchClient : IClient
     {
         private TcpClient _client;
         private StreamReader _output;

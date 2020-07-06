@@ -250,7 +250,7 @@ namespace HollowTwitch.Commands
         {
             var prefab = ObjectLoader.InstantiableObjects["zap"];
             
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 12; i++)
             {
                 var zap = Object.Instantiate(prefab, HeroController.instance.transform.position, Quaternion.identity);
                 zap.SetActive(true);
