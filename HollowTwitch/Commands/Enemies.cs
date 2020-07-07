@@ -9,6 +9,7 @@ using HutongGames.PlayMaker.Actions;
 using ModCommon.Util;
 using Modding;
 using UnityEngine;
+using UnityEngine.Collections;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -244,6 +245,28 @@ namespace HollowTwitch.Commands
             Object.Instantiate(GameManager.instance.sm.hollowShadeObject, HeroController.instance.transform.position, Quaternion.identity);
         }
 
+        [HKCommand("communism")]
+        [Summary("Makes all enemies the highest HP enemy in the scene")]
+        [Cooldown(120)]
+        public void Communism()
+        {
+            HealthManager[] hms = Object.FindObjectsOfType<HealthManager>();
+
+            HealthManager max = hms.OrderByDescending(x => x.hp).First();
+
+            foreach (HealthManager hm in hms)
+            {
+                if (hm == max)
+                    continue;
+
+                Vector3 pos = hm.transform.position;
+                
+                Object.Destroy(hm.gameObject);
+
+                Object.Instantiate(max.gameObject, pos, max.gameObject.transform.rotation);
+            }
+        }
+        
        
         [HKCommand("zap")]
         public IEnumerator StartZapping()

@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Reflection;
 using GlobalEnums;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.ModHelpers;
@@ -538,6 +540,144 @@ namespace HollowTwitch.Commands
             renderer.enabled = true;
         }
 
+        [HKCommand("walkspeed")]
+        [Cooldown(180)]
+        public IEnumerator WalkSpeed([EnsureFloat(0.3f, 10f)] float speed)
+        {
+            float prev_speed = HeroController.instance.WALK_SPEED;
+
+            HeroController.instance.RUN_SPEED *= speed;
+
+            yield return new WaitForSeconds(20f);
+
+            HeroController.instance.RUN_SPEED = prev_speed;
+        }
+
+        [HKCommand("geo")]
+        [Cooldown(400)]
+        public void Geo()
+        {
+            GameObject[] geos = Resources.FindObjectsOfTypeAll<GameObject>().Where(x => x.name.StartsWith("Geo")).ToArray();
+            
+            GameObject large = geos.First(x => x.name.Contains("Large"));
+            GameObject medium = geos.First(x => x.name.Contains("Med"));
+            GameObject small = geos.First(x => x.name.Contains("Small"));
+            
+            small.SetActive(true);
+            medium.SetActive(true);
+            large.SetActive(true);
+            
+            HeroController.instance.proxyFSM.SendEvent("HeroCtrl-HeroDamaged");
+            HeroController.instance.StartCoroutine(
+                (IEnumerator) typeof(HeroController)
+                              .GetMethod("StartRecoil", BindingFlags.NonPublic | BindingFlags.Instance)
+                              ?.Invoke(HeroController.instance, new object[] { CollisionSide.left, true, 0 })
+            );
+            
+            SpawnGeo(Random.Range(200, 4000), small, medium, large);
+        }
+
+        [HKCommand("respawn")]
+        [Cooldown(120)]
+        [Summary("Hazard respawn")]
+        public void HazardRespawn() => HeroController.instance.StartCoroutine(HeroController.instance.HazardRespawn());
+
+        [HKCommand("knockback")]
+        [Cooldown(40)]
+        public void Knockback(string dirStr)
+        {
+            CollisionSide dir = dirStr switch
+            {
+                "left" => CollisionSide.left,
+                "right" => CollisionSide.right,
+                "up" => CollisionSide.top,
+                "top" => CollisionSide.top,
+                "down" => CollisionSide.bottom,
+                "bottom" => CollisionSide.bottom,
+                _ => CollisionSide.other
+            };
+            
+            HeroController.instance.proxyFSM.SendEvent("HeroCtrl-HeroDamaged");
+            HeroController.instance.StartCoroutine(
+                (IEnumerator) typeof(HeroController)
+                              .GetMethod("StartRecoil", BindingFlags.NonPublic | BindingFlags.Instance)
+                              ?.Invoke(HeroController.instance, new object[] { dir, true, 0 })
+            );
+        }
+
+        private static void SpawnGeo(int amount, GameObject smallGeoPrefab, GameObject mediumGeoPrefab, GameObject largeGeoPrefab)
+        {
+            if (amount <= 0) return;
+
+            if (smallGeoPrefab == null || mediumGeoPrefab == null || largeGeoPrefab == null)
+            {
+                HeroController.instance.AddGeo(amount);
+                
+                return;
+            }
+
+            var random = new System.Random();
+
+            int smallNum = random.Next(0, amount / 10);
+            amount -= smallNum;
+
+            int largeNum = random.Next(amount / (25 * 2), amount / 25 + 1);
+            amount -= largeNum * 25;
+
+            int medNum = amount / 5;
+            amount -= medNum * 5;
+
+            smallNum += amount;
+
+            FlingUtils.SpawnAndFling
+            (
+                new FlingUtils.Config
+                {
+                    Prefab = smallGeoPrefab,
+                    AmountMin = smallNum,
+                    AmountMax = smallNum,
+                    SpeedMin = 15f,
+                    SpeedMax = 30f,
+                    AngleMin = 80f,
+                    AngleMax = 115f
+                },
+                HeroController.instance.transform,
+                new Vector3(0f, 0f, 0f)
+            );
+            
+            FlingUtils.SpawnAndFling
+            (
+                new FlingUtils.Config
+                {
+                    Prefab = mediumGeoPrefab,
+                    AmountMin = medNum,
+                    AmountMax = medNum,
+                    SpeedMin = 15f,
+                    SpeedMax = 30f,
+                    AngleMin = 80f,
+                    AngleMax = 115f
+                },
+                HeroController.instance.transform,
+                new Vector3(0f, 0f, 0f)
+            );
+            
+            FlingUtils.SpawnAndFling
+            (
+                new FlingUtils.Config
+                {
+                    Prefab = largeGeoPrefab,
+                    AmountMin = largeNum,
+                    AmountMax = largeNum,
+                    SpeedMin = 15f,
+                    SpeedMax = 30f,
+                    AngleMin = 80f,
+                    AngleMax = 115f
+                },
+                HeroController.instance.transform,
+                new Vector3(0f, 0f, 0f)
+            );
+        }
+        
         [HKCommand("slaphand")]
         [Cooldown(120)]
         public IEnumerator SlapHand()
