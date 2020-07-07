@@ -13,7 +13,7 @@ namespace HollowTwitch
 
         public string Channel;
 
-        public string Prefix;
+        public string Prefix = "!";
 
         public List<string> BlacklistedCommands;
 

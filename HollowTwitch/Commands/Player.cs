@@ -523,6 +523,9 @@ namespace HollowTwitch.Commands
         public IEnumerator EnableMaggotPrimeSkin()
         {
             GameObject go = UObject.Instantiate(_maggot, HeroController.instance.transform.position + new Vector3(0, 0, -1f), Quaternion.identity);
+
+            go.transform.parent = HeroController.instance.transform;
+            
             go.SetActive(true);
 
             var renderer = HeroController.instance.GetComponent<MeshRenderer>();

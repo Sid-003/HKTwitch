@@ -72,9 +72,7 @@ namespace HollowTwitch
             };
             _currentThread.Start();
             
-            #if DEBUG
             GenerateHelpInfo();
-            #endif
             
             Log("Started receiving");
         }
