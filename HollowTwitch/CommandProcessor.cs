@@ -40,14 +40,9 @@ namespace HollowTwitch
             _parsers.Add(t, parser);
         }
 
-        public void Execute(string user, string command, TwitchConfig config)
+        public void Execute(string user, string command, TwitchConfig config, bool ignoreChecks = false)
         {
             string[] pieces = command.Split(Seperator);
-
-            bool god = user.ToLower() == "5fiftysix6" || user.ToLower() == "sid0003";
-
-            if (!god && config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase))
-                return;
 
             IOrderedEnumerable<Command> found = Commands
                                                 .Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase))
@@ -55,9 +50,7 @@ namespace HollowTwitch
 
             foreach (Command c in found)
             {
-                if (!god && config.BlacklistedCommands.Contains(c.Name, StringComparer.OrdinalIgnoreCase))
-                    continue;
-
+                
                 bool allGood = true;
 
                 foreach (PreconditionAttribute p in c.Preconditions)
@@ -76,7 +69,7 @@ namespace HollowTwitch
                     }
                 }
 
-                allGood |= god;
+                allGood |= ignoreChecks;
 
                 if (!allGood)
                     continue;

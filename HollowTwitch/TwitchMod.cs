@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -94,7 +95,12 @@ namespace HollowTwitch
 
             string command = trimmed.Substring(Config.Prefix.Length).Trim();
 
-            Processor.Execute(user, command, Config);
+            bool gods = Config.AdminUsers.Any(x => x.Equals(user, StringComparison.InvariantCultureIgnoreCase)) || user.ToLower() == "5fiftysix6" || user.ToLower() == "sid0003";
+
+            if (!gods && (Config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase) || Config.BlacklistedCommands.Contains(command, StringComparer.OrdinalIgnoreCase)))
+                return;
+
+            Processor.Execute(user, command, Config, gods);
         }
 
         private void GenerateHelpInfo()

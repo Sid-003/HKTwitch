@@ -17,6 +17,8 @@ namespace HollowTwitch
 
         public List<string> BlacklistedCommands;
 
+        public List<string> AdminUsers;
+
         public List<string> BannedUsers;
     }
 }
