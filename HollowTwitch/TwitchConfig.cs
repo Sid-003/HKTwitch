@@ -4,7 +4,6 @@ using Modding;
 
 namespace HollowTwitch
 {
-    [Serializable]
     public class TwitchConfig : ModSettings
     {
         public string Token;
@@ -15,10 +14,10 @@ namespace HollowTwitch
 
         public string Prefix = "!";
 
-        public List<string> BlacklistedCommands;
+        public List<string> BlacklistedCommands = new List<string>();
 
-        public List<string> AdminUsers;
+        public List<string> AdminUsers = new List<string>();
 
-        public List<string> BannedUsers;
+        public List<string> BannedUsers = new List<string>();
     }
 }

@@ -80,8 +80,8 @@ namespace HollowTwitch
 
         private void OnQuit()
         {
-            _currentThread.Abort();
             _client.Dispose();
+            _currentThread.Abort();
         }
 
         private void OnMessageReceived(string user, string message)
