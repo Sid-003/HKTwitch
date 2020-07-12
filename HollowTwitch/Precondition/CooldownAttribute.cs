@@ -14,7 +14,7 @@ namespace HollowTwitch.Precondition
 
         public DateTimeOffset ResetTime { get; private set; }
 
-        public TimeSpan Reset { get; }
+        public TimeSpan Reset { get; internal set; }
 
         public CooldownAttribute(double seconds, int maxUses = 1) => (Reset, ResetTime, MaxUses) = (TimeSpan.FromSeconds(seconds), DateTimeOffset.Now + Reset, maxUses);
 

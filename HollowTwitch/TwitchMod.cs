@@ -40,12 +40,7 @@ namespace HollowTwitch
             ObjectLoader.LoadAssets();
 
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
-
-            if (Config.Token is null)
-            {              
-                Logger.Log("Token not found, relaunch the game with the fields in settings populated.");
-                return;
-            }
+            
             ReceiveCommands();
         }
 
@@ -62,6 +57,14 @@ namespace HollowTwitch
             Processor.RegisterCommands<Game>();
             Processor.RegisterCommands<Meta>();
 
+            ConfigureCooldowns();
+
+            if (Config.Token is null)
+            {              
+                Logger.Log("Token not found, relaunch the game with the fields in settings populated.");
+                return;
+            }
+
             _client = new TwitchClient(Config);
             _client.ChatMessageReceived += OnMessageReceived;
 
@@ -76,6 +79,35 @@ namespace HollowTwitch
             GenerateHelpInfo();
             
             Log("Started receiving");
+        }
+
+        private void ConfigureCooldowns()
+        {
+            // No cooldowns configured, let's populate the dictionary.
+            if (Config.Cooldowns.Count == 0)
+            {
+                foreach (Command c in Processor.Commands)
+                {
+                    CooldownAttribute cd = c.Preconditions.OfType<CooldownAttribute>().FirstOrDefault();
+
+                    if (cd == null)
+                        continue;
+
+                    Config.Cooldowns[c.Name] = (int) cd.Reset.TotalSeconds;
+                }
+                
+                return;
+            }
+
+            foreach (Command c in Processor.Commands)
+            {
+                if (!Config.Cooldowns.TryGetValue(c.Name, out int time))
+                    continue;
+
+                CooldownAttribute cd = c.Preconditions.OfType<CooldownAttribute>().First();
+
+                cd.Reset = TimeSpan.FromSeconds(time);
+            }
         }
 
         private void OnQuit()

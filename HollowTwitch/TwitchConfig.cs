@@ -4,6 +4,7 @@ using Modding;
 
 namespace HollowTwitch
 {
+    [Serializable]
     public class TwitchConfig : ModSettings
     {
         public string Token;
@@ -19,5 +20,7 @@ namespace HollowTwitch
         public List<string> AdminUsers = new List<string>();
 
         public List<string> BannedUsers = new List<string>();
+
+        public Dictionary<string, int> Cooldowns = new Dictionary<string, int>();
     }
 }
