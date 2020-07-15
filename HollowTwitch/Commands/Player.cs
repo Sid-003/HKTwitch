@@ -224,14 +224,27 @@ namespace HollowTwitch.Commands
         [Cooldown(180)]
         public IEnumerator Wind()
         {
-            float speed = Random.Range(-10f, 10f);
+            float speed = Random.Range(-6f, 6f);
 
             float prev_s = HeroController.instance.conveyorSpeed;
-
+            
             HeroController.instance.cState.inConveyorZone = true;
             HeroController.instance.conveyorSpeed = speed;
+            
+            void BeforePlayerDead()
+            {
+                HeroController.instance.cState.inConveyorZone = false;
+                HeroController.instance.conveyorSpeed = prev_s;
+                
+                ModHooks.Instance.BeforePlayerDeadHook -= BeforePlayerDead;
+            }
+
+            // Prevent wind from pushing you OOB on respawn.
+            ModHooks.Instance.BeforePlayerDeadHook += BeforePlayerDead;
 
             yield return new WaitForSecondsRealtime(30);
+            
+            ModHooks.Instance.BeforePlayerDeadHook -= BeforePlayerDead;
 
             HeroController.instance.cState.inConveyorZone = false;
             HeroController.instance.conveyorSpeed = prev_s;
@@ -700,7 +713,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("toggle")]
-        [Summary("Toggles an ability for 45 seconds.")]
+        [Summary("Toggles an ability for 45 seconds. Options: [dash, superdash, claw, wings, nail, tear, dnail]")]
         [Cooldown(60 * 4)]
         public IEnumerator ToggleAbility(string ability)
         {
@@ -723,6 +736,14 @@ namespace HollowTwitch.Commands
                 case "wings":
                     PlayerData.instance.hasDoubleJump ^= true;
                     yield return new SaveDefer(time, pd => pd.hasDoubleJump ^= true);
+                    break;
+                case "tear":
+                    PlayerData.instance.hasAcidArmour ^= true;
+                    yield return new SaveDefer(time, pd => pd.hasAcidArmour ^= true);
+                    break;
+                case "dnail":
+                    PlayerData.instance.hasDreamNail ^= true;
+                    yield return new SaveDefer(time, pd => pd.hasDreamNail ^= true);
                     break;
                 case "nail":
                     ReflectionHelper.SetAttr(HeroController.instance, "attack_cooldown", 15f);

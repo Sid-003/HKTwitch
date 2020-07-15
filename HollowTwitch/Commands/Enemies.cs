@@ -11,6 +11,7 @@ using Modding;
 using UnityEngine;
 using UnityEngine.Collections;
 using UnityEngine.SceneManagement;
+using InvokeMethod = ModCommon.Util.InvokeMethod;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;
@@ -30,7 +31,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("spawn")]
-        [Summary("Spawns an enemy.\nEnemies: aspid")]
+        [Summary("Spawns an enemy.\nEnemies: [aspid, buzzer, roller]")]
         [Cooldown(60, 3)]
         public IEnumerator SpawnEnemy(string name)
         {
@@ -47,6 +48,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("jars")]
+        [Summary("Summons 5 collector jars from the ceiling.")]
         [Cooldown(60)]
         public IEnumerator Jars()
         {
@@ -100,8 +102,8 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("spawnpv")]
-        [Summary("Spawns pure vessel.")]
-        [Cooldown(60)]
+        [Summary("Spawns pure vessel with one-fourth the hp.")]
+        [Cooldown(360)]
         public IEnumerator SpawnPureVessel()
         {
             // stolen from https://github.com/SalehAce1/PathOfPureVessel
@@ -116,6 +118,8 @@ namespace HollowTwitch.Commands
                 HeroController.instance.gameObject.transform.position + new Vector3(0, 2.6f),
                 Quaternion.identity
             );
+
+            pv.GetComponent<HealthManager>().hp /= 4;
 
             pv.SetActive(true);
             //    if (!(_palePrince is null)) pv.AddComponent(_palePrince);  //sad gamer moment
@@ -163,15 +167,15 @@ namespace HollowTwitch.Commands
             );
             control.RemoveAction("HUD Out", 0);
 
-            ConstrainPosition cp = pv.GetComponent<ConstrainPosition>();
+            var cp = pv.GetComponent<ConstrainPosition>();
             cp.xMax = x + castRight.distance;
             cp.xMin = x - castLeft.distance;
         }
 
 
         [HKCommand("revek")]
-        [Summary("Spawns revek to ruin your life.")]
-        [Cooldown(120)]
+        [Summary("Spawns revek. Goes away after 30s or one parry.")]
+        [Cooldown(240)]
         public IEnumerator Revek()
         {
             GameObject revek = Object.Instantiate
@@ -194,15 +198,25 @@ namespace HollowTwitch.Commands
 
             // Actually spawn.
             ctrl.SetState("Appear Pause");
+            
+            // ReSharper disable once ImplicitlyCapturedClosure (ctrl)
+            ctrl.AddAction("Hit", new InvokeMethod(() => Object.Destroy(revek)));
 
-            // ReSharper disable once ImplicitlyCapturedClosure
+            // ReSharper disable once ImplicitlyCapturedClosure (ctrl)
             void OnUnload() => revek.SetActive(false);
 
             void OnLoad(Scene a, Scene b)
             {
-                revek.SetActive(true);
+                try
+                {
+                    revek.SetActive(true);
 
-                ctrl.SetState("Appear Pause");
+                    ctrl.SetState("Appear Pause");
+                }
+                catch
+                {
+                    Object.Destroy(revek);
+                }
             }
 
             GameManager.instance.UnloadingLevel += OnUnload;
@@ -217,7 +231,7 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("duplicateboss")]
-        [Summary("Duplicates the current boss in the room.")]
+        [Summary("Duplicates the current boss in the room. Mostly Godhome only.")]
         [Cooldown(160, 2)]
         public IEnumerator DuplicateBoss()
         {
@@ -246,29 +260,33 @@ namespace HollowTwitch.Commands
         }
 
         [HKCommand("communism")]
-        [Summary("Makes all enemies the highest HP enemy in the scene")]
+        [Summary("Makes all enemies the median HP enemy in the scene")]
         [Cooldown(120)]
         public void Communism()
         {
             HealthManager[] hms = Object.FindObjectsOfType<HealthManager>();
 
-            HealthManager max = hms.OrderByDescending(x => x.hp).First();
+            HealthManager[] sorted = hms.OrderByDescending(x => x.hp).ToArray();
+
+            HealthManager median = sorted[sorted.Length / 2];
 
             foreach (HealthManager hm in hms)
             {
-                if (hm == max)
+                if (hm == median)
                     continue;
 
                 Vector3 pos = hm.transform.position;
                 
                 Object.Destroy(hm.gameObject);
 
-                Object.Instantiate(max.gameObject, pos, max.gameObject.transform.rotation);
+                Object.Instantiate(median.gameObject, pos, median.gameObject.transform.rotation);
             }
         }
         
        
         [HKCommand("zap")]
+        [Summary("Uumuu's lightning trail attack.")]
+        [Cooldown(30)]
         public IEnumerator StartZapping()
         {
             var prefab = ObjectLoader.InstantiableObjects["zap"];

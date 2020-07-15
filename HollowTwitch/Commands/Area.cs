@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using HollowTwitch.Entities.Attributes;
-using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
-using ModCommon;
 using ModCommon.Util;
 using UnityEngine;
 
@@ -14,7 +12,7 @@ namespace HollowTwitch.Commands
     public class Area
     {
         [HKCommand("bees")]
-        [Cooldown(100)]
+        [Cooldown(120)]
         public void Bees()
         {
             Vector3 pos = HeroController.instance.transform.position;

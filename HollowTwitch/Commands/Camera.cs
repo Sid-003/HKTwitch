@@ -50,7 +50,7 @@ namespace HollowTwitch.Commands
             // Couldn't parse the effect, we'll go with a random one (at least for now).
             catch (ArgumentException)
             {
-                CameraEffects[] values = (CameraEffects[]) Enum.GetValues(typeof(CameraEffects));
+                var values = (CameraEffects[]) Enum.GetValues(typeof(CameraEffects));
 
                 camEffect = values[Random.Range(0, values.Length)];
             }
@@ -65,7 +65,7 @@ namespace HollowTwitch.Commands
                     tk2dCam.ZoomFactor = 5f;
                     _activeEffects |= camEffect;
 
-                    yield return new WaitForSecondsRealtime(time);
+                    yield return new WaitForSecondsRealtime(time / 6);
 
                     tk2dCam.ZoomFactor = 1f;
                     _activeEffects &= ~camEffect;
