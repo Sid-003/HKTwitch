@@ -12,6 +12,7 @@ namespace HollowTwitch.Commands
     {
         [OwnerOnly]
         [HKCommand("blacklist")]
+        [Summary("Disable a command's usage.")]
         public void Blacklist(string command)
         {
             Logger.Log($"Requested blacklist of command {command}");
@@ -32,6 +33,7 @@ namespace HollowTwitch.Commands
 
         [OwnerOnly]
         [HKCommand("allowCommand")]
+        [Summary("Re-enable a command's usage after having blacklisted it.")]
         public void AllowCommand(string command)
         {
             List<string> blacklist = TwitchMod.Instance.Config.BlacklistedCommands;
@@ -51,6 +53,7 @@ namespace HollowTwitch.Commands
 
         [OwnerOnly]
         [HKCommand("ban")]
+        [Summary("Prevent a user from using commands.")]
         public void Ban(string user)
         {
             Logger.Log($"Banning user {user}.");
@@ -63,6 +66,7 @@ namespace HollowTwitch.Commands
 
         [OwnerOnly]
         [HKCommand("unban")]
+        [Summary("Re-allow a user to use commands.")]
         public void Unban(string user)
         {
             Logger.Log($"Unbanning user {user}.");
@@ -81,6 +85,7 @@ namespace HollowTwitch.Commands
         
         [OwnerOnly]
         [HKCommand("timeout")]
+        [Summary("Timeout a user or command for a specified time (seconds).")]
         public IEnumerator Timeout(string item, float time)
         {
             bool is_command = CommandExists(item);
