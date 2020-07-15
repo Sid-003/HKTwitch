@@ -93,7 +93,7 @@ namespace HollowTwitch
                     if (cd == null)
                         continue;
 
-                    Config.Cooldowns[c.Name] = (int) cd.Reset.TotalSeconds;
+                    Config.Cooldowns[c.Name] = (int) cd.Cooldown.TotalSeconds;
                 }
                 
                 return;
@@ -106,7 +106,7 @@ namespace HollowTwitch
 
                 CooldownAttribute cd = c.Preconditions.OfType<CooldownAttribute>().First();
 
-                cd.Reset = TimeSpan.FromSeconds(time);
+                cd.Cooldown = TimeSpan.FromSeconds(time);
             }
         }
 
@@ -151,7 +151,7 @@ namespace HollowTwitch
                 var cooldown = attributes.OfType<CooldownAttribute>().FirstOrDefault();
                 var summary = attributes.OfType<SummaryAttribute>().FirstOrDefault();
                 sb.AppendLine($"Usage: {Config.Prefix}{name} {args}");
-                sb.AppendLine($"Cooldown: {(cooldown is null ? "This command has no cooldown" : $"{cooldown.MaxUses} use(s) per {cooldown.Reset}.")}");
+                sb.AppendLine($"Cooldown: {(cooldown is null ? "This command has no cooldown" : $"{cooldown.MaxUses} use(s) per {cooldown.Cooldown}.")}");
                 sb.AppendLine($"Summary:\n{(summary?.Summary ?? "No summary provided.")}\n");
             }
 

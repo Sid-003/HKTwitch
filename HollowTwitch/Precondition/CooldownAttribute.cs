@@ -8,33 +8,30 @@ namespace HollowTwitch.Precondition
     {
         public int MaxUses { get; }
 
-        private int _uses;
-
-        public int Uses => _uses;
+        public int Uses { get; private set; }
 
         public DateTimeOffset ResetTime { get; private set; }
 
-        public TimeSpan Reset { get; internal set; }
+        public TimeSpan Cooldown { get; internal set; }
 
-        public CooldownAttribute(double seconds, int maxUses = 1) => (Reset, ResetTime, MaxUses) = (TimeSpan.FromSeconds(seconds), DateTimeOffset.Now + Reset, maxUses);
+        public CooldownAttribute(double seconds, int maxUses = 1) => (Cooldown, ResetTime, MaxUses) = (TimeSpan.FromSeconds(seconds), DateTimeOffset.Now + Cooldown, maxUses);
 
         public override bool Check(string user)
         {
-            if (DateTimeOffset.Now > ResetTime)
-            {
-                ResetTime = DateTimeOffset.Now + Reset;
+            return Uses < MaxUses && DateTimeOffset.Now >= ResetTime;
+        }
 
-                // In case i mess with threads in the future, not necessary rn with corotines.
-                Interlocked.Exchange(ref _uses, 0);
-            }
-
-            if (Uses >= MaxUses) return false;
+        public override void Use()
+        {
+            Uses++;
             
-            // Same thing here
-            Interlocked.Increment(ref _uses);
+            // If we're beyond the cooldown time, reset it.
+            if (DateTimeOffset.Now <= ResetTime) 
+                return;
             
-            return true;
+            ResetTime = DateTimeOffset.Now + Cooldown;
 
+            Uses = 0;
         }
     }
 }

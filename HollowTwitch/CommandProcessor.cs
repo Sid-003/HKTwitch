@@ -78,6 +78,11 @@ namespace HollowTwitch
 
                 if (!BuildArguments(args, c, out object[] parsed))
                     continue;
+                
+                foreach (PreconditionAttribute precond in c.Preconditions)
+                {
+                    precond.Use();
+                }
 
                 try
                 {
