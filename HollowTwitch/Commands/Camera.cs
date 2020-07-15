@@ -104,7 +104,7 @@ namespace HollowTwitch.Commands
                     float new_z = cam.transform.position.z + 80;
 
                     /*
-                     * When you get hit, spell control trys to reset the camera.
+                     * When you get hit, spell control tries to reset the camera.
                      * This camera reset moves the camera super far back in z
                      * and as a result you get an unusable black screen.
                      *
