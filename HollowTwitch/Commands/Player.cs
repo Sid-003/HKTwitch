@@ -25,7 +25,6 @@ namespace HollowTwitch.Commands
         {
             On.HeroController.Move += InvertControls;
             On.NailSlash.StartSlash += ChangeNailScale;
-            On.HeroController.CheckTouchingGround += OnTouchingGround;
             ModHooks.Instance.DashVectorHook += OnDashVector;
 
             IEnumerator GetMaggotPrime()
@@ -335,18 +334,11 @@ namespace HollowTwitch.Commands
                 }
             }
             
-            bool HasWings(string orig)
-            {
-                return orig == nameof(PlayerData.instance.hasDoubleJump) || PlayerData.instance.GetBoolInternal(orig);
-            }
-
             On.HeroController.DoDoubleJump += Triple;
-            ModHooks.Instance.GetPlayerBoolHook += HasWings;
 
-            yield return new WaitForSeconds(30);
+            yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasDoubleJump), true, 30);
                                                         
             On.HeroController.DoDoubleJump -= Triple;
-            ModHooks.Instance.GetPlayerBoolHook -= HasWings;
         }
 
         private static void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
@@ -482,31 +474,6 @@ namespace HollowTwitch.Commands
             yield return new WaitForSecondsRealtime(60);
 
             BindingsHelper.Unload();
-        }
-
-        private bool _floorislava;
-
-        [HKCommand("floorislava")]
-        [Summary("Makes the floor do damage.")]
-        [Cooldown(60 * 2)]
-        public IEnumerator FloorIsLava([EnsureFloat(10, 60)] float seconds)
-        {
-            // Stolen from zaliant
-            _floorislava = true;
-
-            yield return new WaitForSecondsRealtime(seconds);
-
-            _floorislava = false;
-        }
-
-        private bool OnTouchingGround(On.HeroController.orig_CheckTouchingGround orig, HeroController self)
-        {
-            bool touching = orig(self);
-
-            if (touching && _floorislava && !GameManager.instance.IsInSceneTransition)
-                self.TakeDamage(null, CollisionSide.bottom, 1, 69420);
-
-            return touching;
         }
 
         [HKCommand("float")]
