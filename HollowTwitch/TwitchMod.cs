@@ -151,10 +151,11 @@ namespace HollowTwitch
                 string name = command.Name;
                 sb.AppendLine($"Command: {name}");
 
-                var attributes = command.MethodInfo.GetCustomAttributes(false);
-                var args = string.Join(" ", command.Parameters.Select(x => $"[{x.Name}]").ToArray());
-                var cooldown = attributes.OfType<CooldownAttribute>().FirstOrDefault();
-                var summary = attributes.OfType<SummaryAttribute>().FirstOrDefault();
+                object[]           attributes = command.MethodInfo.GetCustomAttributes(false);
+                string             args       = string.Join(" ", command.Parameters.Select(x => $"[{x.Name}]").ToArray());
+                CooldownAttribute  cooldown   = attributes.OfType<CooldownAttribute>().FirstOrDefault();
+                SummaryAttribute   summary    = attributes.OfType<SummaryAttribute>().FirstOrDefault();
+                
                 sb.AppendLine($"Usage: {Config.Prefix}{name} {args}");
                 sb.AppendLine($"Cooldown: {(cooldown is null ? "This command has no cooldown" : $"{cooldown.MaxUses} use(s) per {cooldown.Cooldown}.")}");
                 sb.AppendLine($"Summary:\n{(summary?.Summary ?? "No summary provided.")}\n");

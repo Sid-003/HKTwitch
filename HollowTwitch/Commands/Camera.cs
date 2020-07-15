@@ -185,7 +185,9 @@ namespace HollowTwitch.Commands
 
             if (_activeEffects.HasValue(CameraEffects.Zoom))
             {
+                // ReSharper disable once SuggestVarOrType_DeconstructionDeclarations
                 var (x, y, _) = HeroController.instance.gameObject.transform.position;
+                
                 GameManager.instance.cameraCtrl.SnapTo(x, y);
             }
 

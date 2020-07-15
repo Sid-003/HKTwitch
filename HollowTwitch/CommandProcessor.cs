@@ -131,7 +131,7 @@ namespace HollowTwitch
             if (enumerated.Length < parameters.Length && !hasRemainder)
                 return false;
             
-            List<object> built = new List<object>();
+            var built = new List<object>();
 
             for (int i = 0; i < parameters.Length; i++)
             {

@@ -280,12 +280,14 @@ namespace HollowTwitch.Commands
         [Cooldown(30)]
         public IEnumerator StartZapping()
         {
-            var prefab = ObjectLoader.InstantiableObjects["zap"];
+            GameObject prefab = ObjectLoader.InstantiableObjects["zap"];
             
             for (int i = 0; i < 12; i++)
             {
-                var zap = Object.Instantiate(prefab, HeroController.instance.transform.position, Quaternion.identity);
+                GameObject zap = Object.Instantiate(prefab, HeroController.instance.transform.position, Quaternion.identity);
+                
                 zap.SetActive(true);
+                
                 yield return  new WaitForSeconds(0.5f);
             }
         }
