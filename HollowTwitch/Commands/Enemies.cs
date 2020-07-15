@@ -22,9 +22,14 @@ namespace HollowTwitch.Commands
         [Cooldown(60, 3)]
         public IEnumerator SpawnEnemy(string name)
         {
+            var enemies = new[] {"aspid", "buzzer", "roller"};
+            
             Logger.Log($"Trying to spawn enemy {name}");
 
             if (!ObjectLoader.InstantiableObjects.TryGetValue(name, out GameObject go))
+                yield break;
+            
+            if (!enemies.Contains(name))
                 yield break;
 
             GameObject enemy = Object.Instantiate(go, HeroController.instance.gameObject.transform.position, Quaternion.identity);
