@@ -20,6 +20,7 @@ namespace HollowTwitch.Commands
         public Camera()
         {
             On.tk2dCamera.UpdateCameraMatrix += OnUpdateCameraMatrix;
+            
             UnityEngine.SceneManagement.SceneManager.activeSceneChanged += (s1, s2) =>
             {
                 if (s2.name == "Main_Menu")

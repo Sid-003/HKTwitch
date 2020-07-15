@@ -23,10 +23,6 @@ namespace HollowTwitch.Commands
 
         public Player()
         {
-            On.HeroController.Move += InvertControls;
-            On.NailSlash.StartSlash += ChangeNailScale;
-            ModHooks.Instance.DashVectorHook += OnDashVector;
-
             IEnumerator GetMaggotPrime()
             {
                 const string hwurmpURL = "https://cdn.discordapp.com/attachments/410556297046523905/716824653280313364/hwurmpU.png";
@@ -392,71 +388,86 @@ namespace HollowTwitch.Commands
         }
 
 
-        private bool _inverted;
-        private bool _slippery;
-        private float _lastMoveDir;
-
         [HKCommand("invertcontrols")]
         [Summary("Inverts the move direction of the player.")]
         [Cooldown(60)]
         public IEnumerator InvertControls()
         {
-            _inverted = true;
+            void Invert(On.HeroController.orig_Move orig, HeroController self, float dir)
+            {
+                if (HeroController.instance.transitionState != HeroTransitionState.WAITING_TO_TRANSITION)
+                {
+                    orig(self, dir);
+                    
+                    return;
+                }
+
+                orig(self, -dir);
+            }
+            
+            Vector2 InvertDash(Vector2 change)
+            {
+                return -change;
+            }
+
+            On.HeroController.Move += Invert;
+            ModHooks.Instance.DashVectorHook += InvertDash;
+            
             yield return new WaitForSecondsRealtime(60);
-            _inverted = false;
+            
+            On.HeroController.Move -= Invert;
+            ModHooks.Instance.DashVectorHook -= InvertDash;
         }
 
         [HKCommand("slippery")]
         [Summary("Makes the floor have no friction at all. Lasts for 60 seconds.")]
         public IEnumerator Slippery()
         {
-            _slippery = true;
-            yield return new WaitForSecondsRealtime(60);
-            _slippery = false;
-        }
+            float last_move_dir = 0;
 
-        private void InvertControls(On.HeroController.orig_Move orig, HeroController self, float move_direction)
-        {
-            if (HeroController.instance.transitionState != HeroTransitionState.WAITING_TO_TRANSITION)
+            void Slip(On.HeroController.orig_Move orig, HeroController self, float move_direction)
             {
+                if (HeroController.instance.transitionState != HeroTransitionState.WAITING_TO_TRANSITION)
+                {
+                    orig(self, move_direction);
+                    
+                    return;
+                }
+
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (move_direction == 0f)
+                {
+                    move_direction = last_move_dir;
+                }
+
                 orig(self, move_direction);
-                return;
+
+                last_move_dir = move_direction;
             }
+            
+            On.HeroController.Move += Slip;
 
-            // ReSharper disable CompareOfFloatsByEqualityOperator
-            if (move_direction == 0f && _slippery)
-                move_direction = _lastMoveDir == 0f ? 1f : _lastMoveDir;
-            // ReSharper restore CompareOfFloatsByEqualityOperator
-
-            if (_inverted)
-                move_direction = -move_direction;
-            orig(self, move_direction);
-
-            _lastMoveDir = move_direction;
+            yield return new WaitForSecondsRealtime(60);
+            
+            On.HeroController.Move -= Slip;
         }
-
-        private Vector2 OnDashVector(Vector2 change)
-        {
-            if (_inverted)
-                return -1 * change;
-            return change;
-        }
-
-        private float _nailScale = 1f;
 
         [HKCommand("nailscale")]
         [Summary("Makes the nail huge or tiny. Scale limit: [.3, 5]")]
         public IEnumerator NailScale([EnsureFloat(.3f, 5f)] float nailScale)
         {
-            _nailScale = nailScale;
-            yield return new WaitForSecondsRealtime(30f);
-            _nailScale = 1f;
-        }
+            void ChangeNailScale(On.NailSlash.orig_StartSlash orig, NailSlash self)
+            {
+                orig(self);
+                
+                self.transform.localScale *= nailScale;
+            }
 
-        private void ChangeNailScale(On.NailSlash.orig_StartSlash orig, NailSlash self)
-        {
-            orig(self);
-            self.transform.localScale *= _nailScale;
+            On.NailSlash.StartSlash += ChangeNailScale;
+
+            yield return new WaitForSecondsRealtime(30f);
+            
+            On.NailSlash.StartSlash -= ChangeNailScale;
         }
 
         [HKCommand("bindings")]
