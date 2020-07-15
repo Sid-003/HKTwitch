@@ -40,17 +40,16 @@ namespace HollowTwitch
             _parsers.Add(t, parser);
         }
 
-        public void Execute(string user, string command, TwitchConfig config, bool ignoreChecks = false)
+        public void Execute(string user, string command, bool ignoreChecks = false)
         {
             string[] pieces = command.Split(Seperator);
 
             IOrderedEnumerable<Command> found = Commands
                                                 .Where(x => x.Name.Equals(pieces[0], StringComparison.InvariantCultureIgnoreCase))
                                                 .OrderByDescending(x => x.Priority);
-
+            
             foreach (Command c in found)
             {
-                
                 bool allGood = true;
 
                 foreach (PreconditionAttribute p in c.Preconditions)

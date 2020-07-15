@@ -40,7 +40,7 @@ namespace HollowTwitch
             ObjectLoader.LoadAssets();
 
             ModHooks.Instance.ApplicationQuitHook += OnQuit;
-            
+
             ReceiveCommands();
         }
 
@@ -60,7 +60,7 @@ namespace HollowTwitch
             ConfigureCooldowns();
 
             if (Config.Token is null)
-            {              
+            {
                 Logger.Log("Token not found, relaunch the game with the fields in settings populated.");
                 return;
             }
@@ -75,9 +75,9 @@ namespace HollowTwitch
                 IsBackground = true
             };
             _currentThread.Start();
-            
+
             GenerateHelpInfo();
-            
+
             Log("Started receiving");
         }
 
@@ -95,7 +95,7 @@ namespace HollowTwitch
 
                     Config.Cooldowns[c.Name] = (int) cd.Cooldown.TotalSeconds;
                 }
-                
+
                 return;
             }
 
@@ -127,12 +127,17 @@ namespace HollowTwitch
 
             string command = trimmed.Substring(Config.Prefix.Length).Trim();
 
-            bool gods = Config.AdminUsers.Any(x => x.Equals(user, StringComparison.InvariantCultureIgnoreCase)) || user.ToLower() == "5fiftysix6" || user.ToLower() == "sid0003";
+            bool admin = Config.AdminUsers.Contains(user, StringComparer.OrdinalIgnoreCase)
+                || user.ToLower() == "5fiftysix6"
+                || user.ToLower() == "sid0003";
 
-            if (!gods && (Config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase) || Config.BlacklistedCommands.Contains(command, StringComparer.OrdinalIgnoreCase)))
+            bool banned = Config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase);
+            bool blacklisted = Config.BlacklistedCommands.Contains(command, StringComparer.OrdinalIgnoreCase);
+
+            if (!admin && (banned || blacklisted))
                 return;
 
-            Processor.Execute(user, command, Config, gods);
+            Processor.Execute(user, command, admin);
         }
 
         private void GenerateHelpInfo()
@@ -159,6 +164,5 @@ namespace HollowTwitch
         }
 
         public void Unload() => OnQuit();
-        
     }
 }
