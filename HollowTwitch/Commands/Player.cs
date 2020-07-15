@@ -194,14 +194,8 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public IEnumerator LimitSoul()
         {
-            // If they're already limited I don't want to just free them
-            bool orig_val = PlayerData.instance.soulLimited;
-
-            PlayerData.instance.soulLimited = true;
-
-            yield return new SaveDefer(30f, pd => { pd.soulLimited = orig_val; });
+            yield return PlayerDataUtil.FakeSet(nameof(PlayerData.soulLimited), false, 30);
         }
-
 
         [HKCommand("jumpspeed")]
         [Summary("Gives a random jump speed.")]
@@ -340,12 +334,19 @@ namespace HollowTwitch.Commands
                     triple_jump = false;
                 }
             }
+            
+            bool HasWings(string orig)
+            {
+                return orig == nameof(PlayerData.instance.hasDoubleJump) || PlayerData.instance.GetBoolInternal(orig);
+            }
 
             On.HeroController.DoDoubleJump += Triple;
+            ModHooks.Instance.GetPlayerBoolHook += HasWings;
 
             yield return new WaitForSeconds(30);
                                                         
             On.HeroController.DoDoubleJump -= Triple;
+            ModHooks.Instance.GetPlayerBoolHook -= HasWings;
         }
 
         private static void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
@@ -562,7 +563,7 @@ namespace HollowTwitch.Commands
         [Summary("Gain a random walk speed. Limit: [0.3, 10]")]
         public IEnumerator WalkSpeed([EnsureFloat(0.3f, 10f)] float speed)
         {
-            float prev_speed = HeroController.instance.WALK_SPEED;
+            float prev_speed = HeroController.instance.RUN_SPEED;
 
             HeroController.instance.RUN_SPEED *= speed;
 
@@ -599,7 +600,14 @@ namespace HollowTwitch.Commands
         [HKCommand("respawn")]
         [Cooldown(120)]
         [Summary("Hazard respawn")]
-        public void HazardRespawn() => HeroController.instance.StartCoroutine(HeroController.instance.HazardRespawn());
+        public void HazardRespawn()
+        {
+            // Don't trigger during transitions or anything
+            if (HeroController.instance.transitionState != HeroTransitionState.WAITING_TO_TRANSITION)
+                return;
+            
+            HeroController.instance.StartCoroutine(HeroController.instance.HazardRespawn());
+        }
 
         [HKCommand("knockback")]
         [Cooldown(40)]
@@ -726,31 +734,27 @@ namespace HollowTwitch.Commands
         {
             const float time = 45;
 
+            PlayerData pd = PlayerData.instance;
+
             switch (ability)
             {
                 case "dash":
-                    PlayerData.instance.canDash ^= true;
-                    yield return new SaveDefer(time, pd => pd.canDash ^= true);
+                    yield return PlayerDataUtil.FakeSet(nameof(PlayerData.canDash), pd.canDash ^ true, time);
                     break;
                 case "superdash":
-                    PlayerData.instance.hasSuperDash ^= true;
-                    yield return new SaveDefer(time, pd => pd.hasSuperDash ^= true);
+                    yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasSuperDash), pd.hasSuperDash ^ true, time);
                     break;
                 case "claw":
-                    PlayerData.instance.hasWalljump ^= true;
-                    yield return new SaveDefer(time, pd => pd.hasWalljump ^= true);
+                    yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasWalljump), pd.hasWalljump ^ true, time);
                     break;
                 case "wings":
-                    PlayerData.instance.hasDoubleJump ^= true;
-                    yield return new SaveDefer(time, pd => pd.hasDoubleJump ^= true);
+                    yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasDoubleJump), pd.hasDoubleJump ^ true, time);
                     break;
                 case "tear":
-                    PlayerData.instance.hasAcidArmour ^= true;
-                    yield return new SaveDefer(time, pd => pd.hasAcidArmour ^= true);
+                    yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasAcidArmour), pd.hasAcidArmour ^ true, time);
                     break;
                 case "dnail":
-                    PlayerData.instance.hasDreamNail ^= true;
-                    yield return new SaveDefer(time, pd => pd.hasDreamNail ^= true);
+                    yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasDreamNail), pd.hasDreamNail ^ true, time);
                     break;
                 case "nail":
                     ReflectionHelper.SetAttr(HeroController.instance, "attack_cooldown", 15f);

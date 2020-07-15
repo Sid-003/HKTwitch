@@ -114,7 +114,7 @@
     <Compile Include="TwitchMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Clients\TwitchClient.cs" />
-    <Compile Include="Utils\SaveDefer.cs" />
+    <Compile Include="Utils\PlayerDataUtil.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
