@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Linq;
 using HollowTwitch.Components;
 using HollowTwitch.Entities.Attributes;
@@ -7,9 +6,7 @@ using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
 using ModCommon.Util;
-using Modding;
 using UnityEngine;
-using UnityEngine.Collections;
 using UnityEngine.SceneManagement;
 using InvokeMethod = ModCommon.Util.InvokeMethod;
 using Object = UnityEngine.Object;
@@ -20,16 +17,6 @@ namespace HollowTwitch.Commands
 {
     public class Enemies
     {
-        private readonly Type _palePrince;
-
-        public Enemies()
-        {
-          
-            if (!ModHooks.Instance.LoadedMods.Any(x => x.Contains("PalePrince"))) return;
-
-            _palePrince = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Pale_Prince"))?.GetTypes()?.FirstOrDefault(x => x.Name == "Prince");
-        }
-
         [HKCommand("spawn")]
         [Summary("Spawns an enemy.\nEnemies: [aspid, buzzer, roller]")]
         [Cooldown(60, 3)]
@@ -122,7 +109,6 @@ namespace HollowTwitch.Commands
             pv.GetComponent<HealthManager>().hp /= 4;
 
             pv.SetActive(true);
-            //    if (!(_palePrince is null)) pv.AddComponent(_palePrince);  //sad gamer moment
 
             RaycastHit2D castLeft = Physics2D.Raycast(new Vector2(x, y), Vector2.left, 1000, 1 << 8);
             RaycastHit2D castRight = Physics2D.Raycast(new Vector2(x, y), Vector2.right, 1000, 1 << 8);
