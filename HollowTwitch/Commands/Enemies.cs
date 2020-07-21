@@ -194,12 +194,21 @@ namespace HollowTwitch.Commands
             ctrl.AddAction("Hit", new InvokeMethod(() => Object.Destroy(revek)));
 
             // ReSharper disable once ImplicitlyCapturedClosure (ctrl)
-            void OnUnload() => revek.SetActive(false);
+            void OnUnload()
+            {
+                if (revek == null)
+                    return;
+                
+                revek.SetActive(false);
+            }
 
             void OnLoad(Scene a, Scene b)
             {
                 try
                 {
+                    if (revek == null)
+                        return;
+                    
                     revek.SetActive(true);
 
                     ctrl.SetState("Appear Pause");
