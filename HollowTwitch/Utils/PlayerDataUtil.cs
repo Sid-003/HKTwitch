@@ -12,7 +12,7 @@ namespace HollowTwitch.Utils
             {
                 return orig == name 
                     ? val 
-                    : PlayerData.instance.GetBoolInternal(name);
+                    : PlayerData.instance.GetBoolInternal(orig);
             }
             
             ModHooks.Instance.GetPlayerBoolHook += GetBool;
