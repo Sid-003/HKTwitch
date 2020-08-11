@@ -84,6 +84,26 @@ namespace HollowTwitch
                     return spike;
                 })),
                 ("GG_Grimm_Nightmare", "Grimm Spike Holder")
+            },
+            {
+                ("AbsOrb",abs =>
+                {
+                    var fsm = abs.LocateMyFSM("Attack Commands");
+                    var spwanAction = fsm.GetAction<SpawnObjectFromGlobalPool>("Spawn Fireball", 1);
+                    var orbPre = spwanAction.gameObject.Value;
+                    var ShotCharge = abs.transform.Find("Shot Charge").gameObject;
+                    var ShotCharge2 = abs.transform.Find("Shot Charge 2").gameObject;
+
+                    GameObject orb = new GameObject("AbsOrb");
+                    orbPre.transform.SetParent(orb.transform);
+                    ShotCharge.transform.SetParent(orb.transform);
+                    ShotCharge2.transform.SetParent(orb.transform);
+
+                    GameObject.DontDestroyOnLoad(orb);
+                    GameObject.Destroy(abs);
+                    return orb;
+                }),
+                ("GG_Radiance","Boss Control/Absolute Radiance")
             }
         };
 
