@@ -168,5 +168,64 @@ namespace HollowTwitch.Commands
                 Object.Destroy(go);
             }
         }
+
+        [HKCommand("absorb")]
+        [Cooldown(2)]
+        [Summary("Spawns an abs orb.")]
+        public IEnumerator SpawnAbsOrb()
+        {
+            if (HeroController.instance == null)
+                yield break;
+
+            var orbgroup = ObjectLoader.InstantiableObjects["AbsOrb"]; // get an go contains orb and it's effect
+
+            var orbPre = orbgroup.transform.Find("Radiant Orb").gameObject;
+            var ShotCharge_Pre = orbgroup.transform.Find("Shot Charge").gameObject; //get charge effect
+            var ShotCharge2_Pre = orbgroup.transform.Find("Shot Charge 2").gameObject;
+
+            var x = HeroController.instance.transform.position.x + Random.Range(-7f, 8f);
+            var y = HeroController.instance.transform.position.y + Random.Range(4f, 8f);
+            var spawnPoint = new Vector3(x, y);
+
+            //spawn first Orb
+            var ShotCharge = GameObject.Instantiate(ShotCharge_Pre);
+            var ShotCharge2 = GameObject.Instantiate(ShotCharge2_Pre);
+            ShotCharge.transform.position = spawnPoint;
+            ShotCharge2.transform.position = spawnPoint;
+            ShotCharge.SetActive(true);
+            ShotCharge2.SetActive(true);
+            var em = ShotCharge.GetComponent<ParticleSystem>().emission;
+            var em2 = ShotCharge2.GetComponent<ParticleSystem>().emission;
+            em.enabled = true;  // emit some effect 
+            em2.enabled = true;
+            yield return new WaitForSeconds(1);
+            var orb = orbPre.Spawn(spawnPoint); // Spawn Orb
+            orb.GetComponent<Rigidbody2D>().isKinematic = false;
+            orb.LocateMyFSM("Orb Control").SetState("Chase Hero");
+            em.enabled = false;
+            em2.enabled = false;
+
+
+            x = HeroController.instance.transform.position.x + Random.Range(-7f, 8f);
+            y = HeroController.instance.transform.position.y + Random.Range(4f, 8f);
+            spawnPoint = new Vector3(x, y);
+
+            //spawn another one
+            ShotCharge.transform.position = spawnPoint;
+            ShotCharge2.transform.position = spawnPoint;
+            em = ShotCharge.GetComponent<ParticleSystem>().emission;
+            em2 = ShotCharge2.GetComponent<ParticleSystem>().emission;
+            em.enabled = true;
+            em2.enabled = true;
+            yield return new WaitForSeconds(1);
+            orb = orbPre.Spawn(spawnPoint); // Spawn Orb
+            orb.GetComponent<Rigidbody2D>().isKinematic = false;
+            orb.LocateMyFSM("Orb Control").SetState("Chase Hero");
+            em.enabled = false;
+            em2.enabled = false;
+
+            GameObject.Destroy(ShotCharge);
+            GameObject.Destroy(ShotCharge2);
+        }
     }
 }
