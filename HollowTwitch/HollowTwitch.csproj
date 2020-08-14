@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Hollow Knight\hollow_knight_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\References\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="ModCommon">
       <HintPath>..\..\..\References\Mods\ModCommon.dll</HintPath>
@@ -82,9 +82,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clients\BiliBiliClient.cs" />
+    <Compile Include="Clients\LocalClient.cs" />
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="Commands\Area.cs" />
     <Compile Include="Commands\Camera.cs" />
+    <Compile Include="Commands\ChineseCommand.cs" />
     <Compile Include="Commands\Game.cs" />
     <Compile Include="Commands\Meta.cs" />
     <Compile Include="Components\ApplyShader.cs" />
