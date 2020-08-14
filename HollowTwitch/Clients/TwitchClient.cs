@@ -42,8 +42,8 @@ namespace HollowTwitch.Clients
                 return;
             }
                 
-            SendMessage($"PASS oauth:{config.Token}");
-            SendMessage($"NICK {config.Username}");
+            SendMessage($"PASS oauth:{config.TwitchToken}");
+            SendMessage($"NICK {config.TwitchUsername}");
             SendMessage($"JOIN #{config.TwitchChannel}");
         }
 

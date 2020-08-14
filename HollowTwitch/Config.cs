@@ -14,9 +14,11 @@ namespace HollowTwitch
         [JsonConverter(typeof(StringEnumConverter))]
         public ClientType Client = ClientType.Twitch;
         
-        public string Token;
+        [FormerlySerializedAs("Token")]
+        public string TwitchToken;
 
-        public string Username;
+        [FormerlySerializedAs("Username")]
+        public string TwitchUsername;
 
         [FormerlySerializedAs("Channel")]
         public string TwitchChannel;

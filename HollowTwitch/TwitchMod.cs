@@ -60,7 +60,7 @@ namespace HollowTwitch
 
             ConfigureCooldowns();
 
-            if (Config.Token is null)
+            if (Config.TwitchToken is null)
             {
                 Logger.Log("Token not found, relaunch the game with the fields in settings populated.");
                 return;
