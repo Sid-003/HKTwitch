@@ -11,7 +11,13 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using HollowTwitch.Commands;
 using UnityEngine;
-
+/// <summary>
+/// To Change Client To BiliBili Platform
+/// You can change this code "_client = new TwitchClient(Config);" to "_client = new BiliBiliClient(Config);"
+/// And the Configuration File you just need to set up two variables
+/// Channel is the room id in your channel
+/// UserName is your nickname
+/// </summary>
 namespace HollowTwitch.Clients
 {
     public struct Message
