@@ -11,7 +11,15 @@ using System.Security.Cryptography.X509Certificates;
 using DanmuJson;
 using HollowTwitch.Commands;
 using HollowTwitch.Extensions;
-
+using UnityEngine;
+    
+/// <summary>
+/// To Change Client To BiliBili Platform
+/// You can change this code "_client = new TwitchClient(Config);" to "_client = new BiliBiliClient(Config);"
+/// And the Configuration File you just need to set up two variables
+/// Channel is the room id in your channel
+/// UserName is your nickname
+/// </summary>
 namespace HollowTwitch.Clients
 {
     public readonly struct Message
@@ -22,54 +30,62 @@ namespace HollowTwitch.Clients
 
         public Message(string nickname, string timeline, string text)
         {
-            user = nickname;
-            time = timeline;
-            
-            string tmp = text;
-
-            tmp = tmp?.Trim().Replace("@", "!").Replace("！", "!").Replace("+", " ");
-
-            if (tmp != null && tmp.Length > 1 && tmp.StartsWith(TwitchMod.Instance.Config.Prefix))
-            {
-                foreach ((string key, string value) in ChineseCommand.CmdTranslation.Where(kv => tmp.Contains(kv.Key)))
-                {
-                    tmp = tmp.Replace(key, value);
-                }
-
-                this.text = tmp;
-            }
-            else
-            {
-                this.text = text;
-            }
+            this.user = nickname;
+            this.time = timeline;
+            this.text = text;
         }
     }
 
     internal class BiliBiliClient : IClient
     {
-        private readonly string url;
-        private readonly Dictionary<string, string> data;
         private readonly List<Message> log = new List<Message>();
-        private readonly Dictionary<string, int> userid = new Dictionary<string, int>();
         public event Action<string, string> ChatMessageReceived;
-        public event Action<string>         ClientErrored;
-        public event Action<string>         RawPayload;
-        private static TwitchConfig _config;
-
-        public BiliBiliClient(TwitchConfig config)
-        {
-            url = "https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory";
-            data = new Dictionary<string, string>
+        public event Action<string> ClientErrored;
+        public event Action<string> RawPayload;
+        private static BiliBiliConfig _config;
+        private readonly string url = "https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory";
+        private readonly Dictionary<string, string> data = new Dictionary<string, string>
             {
-                { "roomid", "22102251" },
-                { "csrf_token", "" },
-                { "csrf", "" },
-                { "visit_id", "" },
+                {"roomid","PUT YOUR ROOM ID HERE" },
+                {"csrf_token","" },
+                {"csrf","" },
+                {"visit_id","" },
             };
+        
+        public BiliBiliClient(BiliBiliConfig config)
+        {
+            if (config.Channel == "-1" || config.Channel == "-2")
+            {
+                throw new Exception($"BiliBili Channel Error, require number but what you set is \"{config.Channel}\"");
+            }
 
+            data["roomid"] = config.Channel;
             RawPayload += ProcessJson;
-
             _config = config;
+
+        }
+        public BiliBiliClient(TwitchConfig twConfig)
+        {
+            if (twConfig.Channel == "-1" || twConfig.Channel == "-2")
+            {
+                throw new Exception($"BiliBili Channel Error, require number but what you set is \"{twConfig.Channel}\"");
+            }
+
+            data["roomid"] = twConfig.Channel;
+            RawPayload += ProcessJson;
+            if(twConfig is BiliBiliConfig)
+            {
+                _config = (BiliBiliConfig)twConfig;
+            }
+            else
+            {
+                _config = new BiliBiliConfig
+                {
+                    Username = twConfig.Username,
+                    Channel = twConfig.Channel,
+                };
+            }
+
         }
 
         public void Dispose()
@@ -136,37 +152,43 @@ namespace HollowTwitch.Clients
             }
         }
 
-        private static bool TimeOut(Message m)
+        private bool timeOut(Message m)
         {
             return (DateTime.Now - Convert.ToDateTime(m.time)).TotalSeconds > 30;
         }
-
+        
+        /// <summary>
+        /// process the json result which response from BiliBili
+        /// </summary>
+        /// <param name="json"></param>
         private void ProcessJson(string json)
         {
             if (json != null)
             {
-                var rt = JsonConvert.DeserializeObject<Root>(json);
-
-                List<RoomItem> room = rt.data.room;
-
-                foreach (RoomItem r in room)
+                DanmuJson.Root rt = JsonConvert.DeserializeObject<DanmuJson.Root>(json);
+                try
                 {
-                    var m = new Message(r.nickname, r.timeline, r.text);
+                    var room = rt.data.room;
+                    foreach (var r in room)
+                    {
+                        var m = new Message(r.nickname, r.timeline, r.text);
+                        if (!log.Contains(m))
+                        {
+                            log.Add(m);
 
-                    if (log.Contains(m))
-                        continue;
-
-                    log.Add(m);
-
-                    // skip command history
-                    if (TimeOut(m))
-                        continue;
-
-                    ChatMessageReceived?.Invoke(m.user, m.text);
-
-                    if (!userid.ContainsKey(m.user))
-                        userid[m.user] = r.uid;
+                            if (timeOut(m)) // skip command history
+                            {
+                                continue;
+                            }
+                            ChatMessageReceived?.Invoke(m.user, m.text);
+                        }
+                    }
                 }
+                catch
+                {
+                    this.ClientErrored.Invoke($"{rt==null} Please Check your Roomid[{data["roomid"]}] \r\n {json}");
+                }
+                
             }
 
             if (log.Count > 1000)
@@ -174,17 +196,20 @@ namespace HollowTwitch.Clients
                 log.RemoveRange(0, 800);
             }
         }
-
-        private static string Post(string url, Dictionary<string, string> dic)
+        /// <summary>
+        /// Request a url in POST method
+        /// </summary>
+        /// <param name="url">The url you will request</param>
+        /// <param name="dic">request argument</param>
+        /// <returns></returns>
+        public static string Post(string url, Dictionary<string, string> dic)
         {
             var req = (HttpWebRequest) WebRequest.Create(url);
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
-
-            #region 添加Post 参数
-
-            var builder = new StringBuilder();
-
+            
+            #region Add Post Argument
+            StringBuilder builder = new StringBuilder();
             int i = 0;
 
             foreach ((string key, string value) in dic)
@@ -211,91 +236,20 @@ namespace HollowTwitch.Clients
 
             var resp = (HttpWebResponse) req.GetResponse();
             Stream stream = resp.GetResponseStream();
-
-            //获取响应内容
-            using var reader = new StreamReader(stream ?? throw new InvalidOperationException("Unable to get response stream."), Encoding.UTF8);
-
-            return reader.ReadToEnd();
-        }
-
-        private static string Get(string url, Dictionary<string, string> dic)
-        {
-            var builder = new StringBuilder();
-
-            builder.Append(url);
-
-            if (dic.Count > 0)
+            
+            // Get Response context
+            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
             {
-                builder.Append("?");
-
-                int i = 0;
-
-                foreach ((string key, string value) in dic)
-                {
-                    if (i > 0)
-                    {
-                        builder.Append("&");
-                    }
-
-                    builder.AppendFormat("{0}={1}", key, value);
-
-                    i++;
-                }
-            }
-
-            var req = (HttpWebRequest) WebRequest.Create(builder.ToString());
-
-            //添加参数
-            var resp = (HttpWebResponse) req.GetResponse();
-            Stream stream = resp.GetResponseStream();
-
-            try
-            {
-                //获取内容
-                using var reader = new StreamReader(stream ?? throw new InvalidOperationException("Stream had no response!"));
-
                 return reader.ReadToEnd();
             }
-            finally
-            {
-                stream?.Close();
-            }
         }
-
-        public string GetFace(string user)
-        {
-            if (!userid.ContainsKey(user))
-                return null;
-
-            string json = Get("http://api.bilibili.com/x/space/acc/info", new Dictionary<string, string> { { "mid", userid[user].ToString() } });
-
-            if (json.Length <= 100) return null;
-
-            const string tz = "\"face\":\"";
-
-            int img_url_start_idx = json.IndexOf(tz);
-
-            string sub = json.Substring(img_url_start_idx + tz.Length);
-
-            int end_idx = sub.IndexOf("\"");
-
-            sub = sub.Substring(0, end_idx);
-
-            return sub;
-        }
-
-        public (List<Message>, Dictionary<string, int>, string) GetStatic()
-        {
-            return (log, userid, _config.Channel);
-        }
+        
     }
 }
 
-
+// this is automatically generate from some tools.
 namespace DanmuJson
 {
-    //如果好用，请收藏地址，帮忙分享。
-    [Serializable]
     public class Check_info
     {
         /// <summary>

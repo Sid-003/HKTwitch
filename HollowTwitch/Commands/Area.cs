@@ -169,7 +169,7 @@ namespace HollowTwitch.Commands
             }
         }
 
-        [HKCommand("absorb")]
+        [HKCommand("orb")]
         [Cooldown(2)]
         [Summary("Spawns an abs orb.")]
         public IEnumerator SpawnAbsOrb()
