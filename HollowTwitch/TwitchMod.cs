@@ -21,6 +21,7 @@ namespace HollowTwitch
         private Thread _currentThread;
 
         internal TwitchConfig Config = new TwitchConfig();
+        //internal TwitchConfig Config = new BiliBiliConfig(); // if you want to use bilibili, pls use this instead TwitchConfig
 
         internal CommandProcessor Processor { get; private set; }
 
@@ -66,6 +67,7 @@ namespace HollowTwitch
             }
 
             _client = new TwitchClient(Config);
+            //_client = new BiliBiliClient(Config);  // if you want to use bilibili, pls use this instead TwitchClient
             _client.ChatMessageReceived += OnMessageReceived;
 
             _client.ClientErrored += s => Log($"An error occured while receiving messages.\nError: {s}");
