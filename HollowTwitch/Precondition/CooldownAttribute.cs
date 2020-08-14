@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using HollowTwitch.Entities.Attributes;
 
 namespace HollowTwitch.Precondition

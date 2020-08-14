@@ -1,16 +1,15 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using System.Net.Security;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using DanmuJson;
 using HollowTwitch.Extensions;
+using Newtonsoft.Json;
 
 namespace HollowTwitch.Clients
 {
@@ -20,20 +19,17 @@ namespace HollowTwitch.Clients
         public readonly string time;
         public readonly string text;
 
-        public Message(string nickname, string timeline, string text)
+        public Message(string nickname, string timeline, string content)
         {
-            this.user = nickname;
-            this.time = timeline;
-            this.text = text;
+            user = nickname;
+            time = timeline;
+            text = content;
         }
     }
 
     /// <summary>
-    /// To Change Client To BiliBili Platform
-    /// You can change this code "_client = new TwitchClient(Config);" to "_client = new BiliBiliClient(Config);"
-    /// And the Configuration File you just need to set up two variables
-    /// Channel is the room id in your channel
-    /// UserName is your nickname
+    /// In the config, you just need to set up one variable
+    /// BilibiliRoomID is the room id in your channel
     /// </summary>
     internal class BiliBiliClient : IClient
     {
@@ -124,6 +120,7 @@ namespace HollowTwitch.Clients
                     ClientErrored?.Invoke("Error occured trying to read stream: " + e);
                 }
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         private static bool TimeOut(Message m)
@@ -217,127 +214,9 @@ namespace HollowTwitch.Clients
     }
 }
 
-// this is automatically generate from some tools.
+// Auto-generated.
 namespace DanmuJson
 {
-    [Serializable]
-    public class CheckInfo
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public int ts { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string ct { get; set; }
-    }
-
-    [Serializable]
-    public class AdminItem
-    {
-        /// <summary>
-        /// 游戏：『糖豆人：终极淘汰赛』 平台：Steam、PS4
-        /// </summary>
-        public string text { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int uid { get; set; }
-
-        /// <summary>
-        /// 席子酱-Caxiz
-        /// </summary>
-        public string nickname { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string uname_color { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string timeline { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int isadmin { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int vip { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int svip { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> medal { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> title { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> user_level { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int rank { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int teamid { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string rnd { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string user_title { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int guard_level { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int bubble { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string bubble_color { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public CheckInfo check_info { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int lpl { get; set; }
-    }
-
     [Serializable]
     public class RoomItem
     {
@@ -347,136 +226,22 @@ namespace DanmuJson
         public string text { get; set; }
 
         /// <summary>
-        /// 
-        /// </summary>
-        public int uid { get; set; }
-
-        /// <summary>
         /// 守夜冠军007
         /// </summary>
         public string nickname { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public string uname_color { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public string timeline { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int isadmin { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int vip { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int svip { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> medal { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> title { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<string> user_level { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int rank { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int teamid { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string rnd { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string user_title { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int guard_level { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int bubble { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string bubble_color { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public CheckInfo check_info { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int lpl { get; set; }
     }
 
     [Serializable]
     public class Data
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public List<AdminItem> admin { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public List<RoomItem> room { get; set; }
     }
 
     [Serializable]
     public class Root
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public int code { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         public Data data { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string message { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string msg { get; set; }
     }
 }
