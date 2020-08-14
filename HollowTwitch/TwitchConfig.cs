@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Modding;
+using UnityEngine.Serialization;
 
 namespace HollowTwitch
 {
@@ -11,8 +12,11 @@ namespace HollowTwitch
 
         public string Username;
 
-        public string Channel;
+        [FormerlySerializedAs("Channel")]
+        public string TwitchChannel;
 
+        public int BilibiliRoomID;
+        
         public string Prefix = "!";
 
         public List<string> BlacklistedCommands = new List<string>();

@@ -44,7 +44,7 @@ namespace HollowTwitch.Clients
                 
             SendMessage($"PASS oauth:{config.Token}");
             SendMessage($"NICK {config.Username}");
-            SendMessage($"JOIN #{config.Channel}");
+            SendMessage($"JOIN #{config.TwitchChannel}");
         }
 
         private void Reconnect(int delay)

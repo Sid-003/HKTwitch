@@ -2,24 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using DanmuJson;
-using HollowTwitch.Commands;
 using HollowTwitch.Extensions;
-using UnityEngine;
-    
-/// <summary>
-/// To Change Client To BiliBili Platform
-/// You can change this code "_client = new TwitchClient(Config);" to "_client = new BiliBiliClient(Config);"
-/// And the Configuration File you just need to set up two variables
-/// Channel is the room id in your channel
-/// UserName is your nickname
-/// </summary>
+
 namespace HollowTwitch.Clients
 {
     public readonly struct Message
@@ -36,56 +25,36 @@ namespace HollowTwitch.Clients
         }
     }
 
+    /// <summary>
+    /// To Change Client To BiliBili Platform
+    /// You can change this code "_client = new TwitchClient(Config);" to "_client = new BiliBiliClient(Config);"
+    /// And the Configuration File you just need to set up two variables
+    /// Channel is the room id in your channel
+    /// UserName is your nickname
+    /// </summary>
     internal class BiliBiliClient : IClient
     {
         private readonly List<Message> log = new List<Message>();
-        public event Action<string, string> ChatMessageReceived;
-        public event Action<string> ClientErrored;
-        public event Action<string> RawPayload;
-        private static BiliBiliConfig _config;
-        private readonly string url = "https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory";
-        private readonly Dictionary<string, string> data = new Dictionary<string, string>
-            {
-                {"roomid","PUT YOUR ROOM ID HERE" },
-                {"csrf_token","" },
-                {"csrf","" },
-                {"visit_id","" },
-            };
         
-        public BiliBiliClient(BiliBiliConfig config)
+        public event Action<string, string> ChatMessageReceived;
+        public event Action<string>         ClientErrored;
+        public event Action<string>         RawPayload;
+
+        private const string URL = "https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory";
+
+        private readonly Dictionary<string, string> data = new Dictionary<string, string>
         {
-            if (config.Channel == "-1" || config.Channel == "-2")
-            {
-                throw new Exception($"BiliBili Channel Error, require number but what you set is \"{config.Channel}\"");
-            }
+            { "roomid", "PUT YOUR ROOM ID HERE" },
+            { "csrf_token", "" },
+            { "csrf", "" },
+            { "visit_id", "" },
+        };
 
-            data["roomid"] = config.Channel;
-            RawPayload += ProcessJson;
-            _config = config;
-
-        }
-        public BiliBiliClient(TwitchConfig twConfig)
+        public BiliBiliClient(TwitchConfig config)
         {
-            if (twConfig.Channel == "-1" || twConfig.Channel == "-2")
-            {
-                throw new Exception($"BiliBili Channel Error, require number but what you set is \"{twConfig.Channel}\"");
-            }
+            data["roomid"] = config.BilibiliRoomID.ToString();
 
-            data["roomid"] = twConfig.Channel;
             RawPayload += ProcessJson;
-            if(twConfig is BiliBiliConfig)
-            {
-                _config = (BiliBiliConfig)twConfig;
-            }
-            else
-            {
-                _config = new BiliBiliConfig
-                {
-                    Username = twConfig.Username,
-                    Channel = twConfig.Channel,
-                };
-            }
-
         }
 
         public void Dispose()
@@ -119,14 +88,14 @@ namespace HollowTwitch.Clients
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
                 chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
                 chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-                
-                bool chainIsValid = chain.Build( (X509Certificate2) certificate);
+
+                bool chainIsValid = chain.Build((X509Certificate2) certificate);
 
                 if (chainIsValid)
                     continue;
-                
+
                 isOk = false;
-                
+
                 break;
             }
 
@@ -142,7 +111,7 @@ namespace HollowTwitch.Clients
                 Thread.Sleep(1000);
                 try
                 {
-                    var message = Post(url, data);
+                    var message = Post(URL, data);
                     RawPayload?.Invoke(message);
                 }
                 catch (Exception e)
@@ -156,7 +125,7 @@ namespace HollowTwitch.Clients
         {
             return (DateTime.Now - Convert.ToDateTime(m.time)).TotalSeconds > 30;
         }
-        
+
         /// <summary>
         /// process the json result which response from BiliBili
         /// </summary>
@@ -180,15 +149,15 @@ namespace HollowTwitch.Clients
                             {
                                 continue;
                             }
+
                             ChatMessageReceived?.Invoke(m.user, m.text);
                         }
                     }
                 }
                 catch
                 {
-                    this.ClientErrored.Invoke($"{rt==null} Please Check your Roomid[{data["roomid"]}] \r\n {json}");
+                    this.ClientErrored.Invoke($"{rt == null} Please Check your Roomid[{data["roomid"]}] \r\n {json}");
                 }
-                
             }
 
             if (log.Count > 1000)
@@ -196,6 +165,7 @@ namespace HollowTwitch.Clients
                 log.RemoveRange(0, 800);
             }
         }
+
         /// <summary>
         /// Request a url in POST method
         /// </summary>
@@ -207,8 +177,9 @@ namespace HollowTwitch.Clients
             var req = (HttpWebRequest) WebRequest.Create(url);
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
-            
+
             #region Add Post Argument
+
             StringBuilder builder = new StringBuilder();
             int i = 0;
 
@@ -236,14 +207,13 @@ namespace HollowTwitch.Clients
 
             var resp = (HttpWebResponse) req.GetResponse();
             Stream stream = resp.GetResponseStream();
-            
+
             // Get Response context
             using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
             {
                 return reader.ReadToEnd();
             }
         }
-        
     }
 }
 
