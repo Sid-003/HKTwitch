@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using HollowTwitch.Clients;
 using Modding;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using UnityEngine.Serialization;
 
 namespace HollowTwitch
 {
     [Serializable]
-    public class TwitchConfig : ModSettings
+    public class Config : ModSettings
     {
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ClientType Client = ClientType.Twitch;
+        
         public string Token;
 
         public string Username;

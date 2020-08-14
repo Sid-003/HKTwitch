@@ -18,10 +18,10 @@ namespace HollowTwitch
     public class TwitchMod : Mod, ITogglableMod
     {
         private IClient _client;
+        
         private Thread _currentThread;
 
-        internal TwitchConfig Config = new TwitchConfig();
-        //internal TwitchConfig Config = new BiliBiliConfig(); // if you want to use bilibili, pls use this instead TwitchConfig
+        internal Config Config = new Config();
 
         internal CommandProcessor Processor { get; private set; }
 
@@ -30,7 +30,7 @@ namespace HollowTwitch
         public override ModSettings GlobalSettings
         {
             get => Config;
-            set => Config = value as TwitchConfig;
+            set => Config = value as Config;
         }
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
@@ -66,8 +66,17 @@ namespace HollowTwitch
                 return;
             }
 
-            _client = new TwitchClient(Config);
-            //_client = new BiliBiliClient(Config);  // if you want to use bilibili, pls use this instead TwitchClient
+            _client = Config.Client switch 
+            {
+                ClientType.Twitch => new TwitchClient(Config),
+                
+                ClientType.Bilibili => new BiliBiliClient(Config),
+                
+                ClientType.Local => new LocalClient(Config),
+                
+                _ => throw new InvalidOperationException($"Enum member {Config.Client} does not exist!") 
+            };
+
             _client.ChatMessageReceived += OnMessageReceived;
 
             _client.ClientErrored += s => Log($"An error occured while receiving messages.\nError: {s}");

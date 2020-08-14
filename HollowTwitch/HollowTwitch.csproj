@@ -83,11 +83,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Clients\BiliBiliClient.cs" />
+    <Compile Include="Clients\ClientType.cs" />
     <Compile Include="Clients\LocalClient.cs" />
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="Commands\Area.cs" />
     <Compile Include="Commands\Camera.cs" />
-    <Compile Include="Commands\ChineseCommand.cs" />
     <Compile Include="Commands\Game.cs" />
     <Compile Include="Commands\Meta.cs" />
     <Compile Include="Components\ApplyShader.cs" />
@@ -113,7 +113,7 @@
     <Compile Include="Precondition\EnsureFloatAttribute.cs" />
     <Compile Include="Precondition\OwnerOnlyAttribute.cs" />
     <Compile Include="Precondition\RequireSceneChangeAttribute.cs" />
-    <Compile Include="TwitchConfig.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="TwitchMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Clients\TwitchClient.cs" />

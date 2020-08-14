@@ -24,7 +24,7 @@ namespace HollowTwitch.Clients
 
         private readonly int Port;
         
-        public LocalClient(TwitchConfig config,int port = 1234)
+        public LocalClient(Config config,int port = 1234)
         {
             Port = port;
             
@@ -82,8 +82,10 @@ namespace HollowTwitch.Clients
             
             if (byte_len <= 0)
             {
-                Logger.LogError("Length error");
+                Logger.LogError("Received length < 0!");
                 
+                ClientErrored?.Invoke("Invalid length!");
+                    
                 return;
             }
             
