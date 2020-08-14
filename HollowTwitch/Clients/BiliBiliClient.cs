@@ -23,26 +23,7 @@ namespace HollowTwitch.Clients
         {
             this.user = nickname;
             this.time = timeline;
-            string tmp = text;
-
-            if(tmp != null)
-                tmp = tmp.Trim().Replace("@", "!").Replace("！", "!").Replace("+", " ");
-
-            if (tmp != null && tmp.Length > 1 && tmp.StartsWith(TwitchMod.Instance.GetPrefix()))
-            {
-                foreach (var kv in ChineseCommand.CmdTranslation)
-                {
-                    if (tmp.Contains(kv.Key))
-                    {
-                        tmp = tmp.Replace(kv.Key, kv.Value);
-                    }
-                }
-                this.text = tmp;
-            }
-            else
-            {
-                this.text = text;
-            }
+            this.text = text;
         }
     }
     internal class BiliBiliClient : IClient
@@ -55,13 +36,13 @@ namespace HollowTwitch.Clients
         public event Action<string, string> ChatMessageReceived;
         public event Action<string> ClientErrored;
         public event Action<string> RawPayload;
-        private static TwitchConfig _config;
-        public BiliBiliClient(TwitchConfig config)
+        private static BiliBiliConfig _config;
+        public BiliBiliClient(BiliBiliConfig config)
         {
             url = "https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory";
             data = new Dictionary<string, string>
             {
-                {"roomid","22102251" },
+                {"roomid",$"{config.Channel}" },
                 {"csrf_token","" },
                 {"csrf","" },
                 {"visit_id","" },
@@ -192,67 +173,7 @@ namespace HollowTwitch.Clients
             }
             return result;
         }
-        public static string Get(string url, Dictionary<string, string> dic)
-        {
-            string result = "";
-            StringBuilder builder = new StringBuilder();
-            builder.Append(url);
-            if (dic.Count > 0)
-            {
-                builder.Append("?");
-                int i = 0;
-                foreach (var item in dic)
-                {
-                    if (i > 0)
-                        builder.Append("&");
-                    builder.AppendFormat("{0}={1}", item.Key, item.Value);
-                    i++;
-                }
-            }
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(builder.ToString());
-            //添加参数
-            HttpWebResponse resp = (HttpWebResponse)req.GetResponse();
-            Stream stream = resp.GetResponseStream();
-            try
-            {
-                //获取内容
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    result = reader.ReadToEnd();
-                }
-            }
-            finally
-            {
-                stream.Close();
-            }
-            return result;
-
-        }
-
-        public string GetFace(string user)
-        {
-            if (!userid.ContainsKey(user))
-                return null;
-
-            var json = Get("http://api.bilibili.com/x/space/acc/info", new Dictionary<string, string> { { "mid", userid[user].ToString() } });
-            if (json.Length > 100)
-            {
-                string tz = "\"face\":\"";
-                var img_url_start_idx = json.IndexOf(tz);
-                var sub = json.Substring(img_url_start_idx + tz.Length);
-                var end_idx = sub.IndexOf("\"");
-                sub = sub.Substring(0, end_idx);
-
-                return sub;
-            }
-
-            return null;
-        }
         
-        public (List<Message>,Dictionary<string,int>,string) GetStatic()
-        {
-            return (log, userid,_config.Channel);
-        }
     }
 }
 
@@ -260,7 +181,6 @@ namespace HollowTwitch.Clients
 namespace DanmuJson
 {
 
-    //如果好用，请收藏地址，帮忙分享。
     public class Check_info
     {
         /// <summary>
