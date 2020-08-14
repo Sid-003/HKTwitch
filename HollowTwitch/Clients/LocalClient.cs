@@ -7,12 +7,14 @@ using System.Text;
 namespace HollowTwitch.Clients
 {
     /// <summary>
-    /// This is just for Local Test for Mod
-    /// you should make a Server in your Machine and start it.
-    /// the Client will try to connect local Server you built and receive message from it.
+    /// This is just for local testing
+    /// You should make a server on your Machine and start it.
+    /// The client will try to connect to your local Server and receive messages.
     /// </summary>
-    class LocalClient : IClient
+    internal class LocalClient : IClient
     {
+        private const string LocalUser = "LocalUser";
+
         public event Action<string, string> ChatMessageReceived;
         public event Action<string> ClientErrored;
 
@@ -20,11 +22,13 @@ namespace HollowTwitch.Clients
         private static byte[] receiveBuf;
         private static NetworkStream stream;
 
-        private int Port;
+        private readonly int Port;
+        
         public LocalClient(TwitchConfig config,int port = 1234)
         {
-            this.Port = port;
-            config.AdminUsers.Add("_localAdmin");
+            Port = port;
+            
+            config.AdminUsers.Add(LocalUser);
         }
 
         public void Dispose()
@@ -38,7 +42,7 @@ namespace HollowTwitch.Clients
             Connect("127.0.0.1", Port);
         }
 
-        public void Connect(string host, int port)
+        private void Connect(string host, int port)
         {
             _client = new TcpClient
             {
@@ -47,44 +51,53 @@ namespace HollowTwitch.Clients
             };
 
             receiveBuf = new byte[4096];
-            Log("Connecting...");
+            
+            Logger.Log("Connecting...");
+            
             _client.BeginConnect(host, port, ConnectCallback, _client);
-
         }
+        
         private void ConnectCallback(IAsyncResult result)
         {
             _client.EndConnect(result);
 
             if (!_client.Connected)
             {
-                Log("Connect Failed");
+                Logger.LogError("Connection failed.");
+                
                 return;
             }
 
-            Log("Connect Success,Waiting for Msg");
+            Logger.Log("Connection Successful. Waiting for messages.");
 
             stream = _client.GetStream();
 
             stream.BeginRead(receiveBuf, 0, 4096, RecvCallback, null);
         }
+        
         private void RecvCallback(IAsyncResult result)
         {
 
             int byte_len = stream.EndRead(result);
+            
             if (byte_len <= 0)
             {
-                Log("Length Error");
+                Logger.LogError("Length error");
+                
                 return;
             }
-            byte[] data = new byte[byte_len];
+            
+            var data = new byte[byte_len];
+            
             Array.Copy(receiveBuf, data, byte_len);
 
-            string msg = System.Text.Encoding.UTF8.GetString(data);
-            Log("_localAdmin:"+msg);
+            string msg = Encoding.UTF8.GetString(data);
+            
+            Logger.Log($"Received message: {LocalUser}: {msg}");
 
-            ChatMessageReceived.Invoke("_localAdmin", msg);
+            ChatMessageReceived?.Invoke(LocalUser, msg);
+            
             stream.BeginRead(receiveBuf, 0, 4096, RecvCallback, null);
         }
-        static void Log(object msg) => Modding.Logger.LogDebug(msg);
     }
 }

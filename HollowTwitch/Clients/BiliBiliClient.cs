@@ -2,11 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using DanmuJson;
 using HollowTwitch.Extensions;
 
 namespace HollowTwitch.Clients
@@ -34,7 +37,7 @@ namespace HollowTwitch.Clients
     /// </summary>
     internal class BiliBiliClient : IClient
     {
-        private readonly List<Message> log = new List<Message>();
+        private readonly List<Message> _log = new List<Message>();
         
         public event Action<string, string> ChatMessageReceived;
         public event Action<string>         ClientErrored;
@@ -109,9 +112,11 @@ namespace HollowTwitch.Clients
             while (true)
             {
                 Thread.Sleep(1000);
+                
                 try
                 {
-                    var message = Post(URL, data);
+                    string message = Post(URL, data);
+                    
                     RawPayload?.Invoke(message);
                 }
                 catch (Exception e)
@@ -121,7 +126,7 @@ namespace HollowTwitch.Clients
             }
         }
 
-        private bool timeOut(Message m)
+        private static bool TimeOut(Message m)
         {
             return (DateTime.Now - Convert.ToDateTime(m.time)).TotalSeconds > 30;
         }
@@ -132,37 +137,34 @@ namespace HollowTwitch.Clients
         /// <param name="json"></param>
         private void ProcessJson(string json)
         {
-            if (json != null)
+            if (json == null)
+                return;
+
+            var rt = JsonConvert.DeserializeObject<Root>(json);
+
+            try
             {
-                DanmuJson.Root rt = JsonConvert.DeserializeObject<DanmuJson.Root>(json);
-                try
-                {
-                    var room = rt.data.room;
-                    foreach (var r in room)
-                    {
-                        var m = new Message(r.nickname, r.timeline, r.text);
-                        if (!log.Contains(m))
-                        {
-                            log.Add(m);
+                List<RoomItem> room = rt.data.room;
 
-                            if (timeOut(m)) // skip command history
-                            {
-                                continue;
-                            }
-
-                            ChatMessageReceived?.Invoke(m.user, m.text);
-                        }
-                    }
-                }
-                catch
+                foreach (Message m in room.Select(r => new Message(r.nickname, r.timeline, r.text)).Where(m => !_log.Contains(m)))
                 {
-                    this.ClientErrored.Invoke($"{rt == null} Please Check your Roomid[{data["roomid"]}] \r\n {json}");
+                    _log.Add(m);
+
+                    // Don't execute messages > 30 seconds.
+                    if (TimeOut(m))
+                        continue;
+
+                    ChatMessageReceived?.Invoke(m.user, m.text);
                 }
             }
-
-            if (log.Count > 1000)
+            catch
             {
-                log.RemoveRange(0, 800);
+                ClientErrored?.Invoke($"{rt == null} Please Check your Roomid[{data["roomid"]}] \r\n {json}");
+            }
+
+            if (_log.Count > 1000)
+            {
+                _log.RemoveRange(0, 800);
             }
         }
 
@@ -172,15 +174,14 @@ namespace HollowTwitch.Clients
         /// <param name="url">The url you will request</param>
         /// <param name="dic">request argument</param>
         /// <returns></returns>
-        public static string Post(string url, Dictionary<string, string> dic)
+        private static string Post(string url, Dictionary<string, string> dic)
         {
             var req = (HttpWebRequest) WebRequest.Create(url);
             req.Method = "POST";
             req.ContentType = "application/x-www-form-urlencoded";
 
-            #region Add Post Argument
-
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
+            
             int i = 0;
 
             foreach ((string key, string value) in dic)
@@ -196,23 +197,22 @@ namespace HollowTwitch.Clients
             }
 
             byte[] data = Encoding.UTF8.GetBytes(builder.ToString());
+            
             req.ContentLength = data.Length;
+            
             using (Stream reqStream = req.GetRequestStream())
             {
                 reqStream.Write(data, 0, data.Length);
-                reqStream.Close();
             }
-
-            #endregion
 
             var resp = (HttpWebResponse) req.GetResponse();
-            Stream stream = resp.GetResponseStream();
+            
+            Stream stream = resp.GetResponseStream() ?? throw new InvalidOperationException("Missing response stream!");
 
             // Get Response context
-            using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(stream, Encoding.UTF8);
+            
+            return reader.ReadToEnd();
         }
     }
 }
@@ -220,7 +220,8 @@ namespace HollowTwitch.Clients
 // this is automatically generate from some tools.
 namespace DanmuJson
 {
-    public class Check_info
+    [Serializable]
+    public class CheckInfo
     {
         /// <summary>
         /// 
@@ -329,7 +330,7 @@ namespace DanmuJson
         /// <summary>
         /// 
         /// </summary>
-        public Check_info check_info { get; set; }
+        public CheckInfo check_info { get; set; }
 
         /// <summary>
         /// 
@@ -433,7 +434,7 @@ namespace DanmuJson
         /// <summary>
         /// 
         /// </summary>
-        public Check_info check_info { get; set; }
+        public CheckInfo check_info { get; set; }
 
         /// <summary>
         /// 
