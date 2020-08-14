@@ -6,6 +6,11 @@ using System.Text;
 
 namespace HollowTwitch.Clients
 {
+    /// <summary>
+    /// This is just for Local Test for Mod
+    /// you should make a Server in your Machine and start it.
+    /// the Client will try to connect local Server you built and receive message from it.
+    /// </summary>
     class LocalClient : IClient
     {
         public event Action<string, string> ChatMessageReceived;
@@ -14,6 +19,14 @@ namespace HollowTwitch.Clients
         private static TcpClient _client;
         private static byte[] receiveBuf;
         private static NetworkStream stream;
+
+        private int Port;
+        public LocalClient(TwitchConfig config,int port = 1234)
+        {
+            this.Port = port;
+            config.AdminUsers.Add("_localAdmin");
+        }
+
         public void Dispose()
         {
             stream.Dispose();
@@ -22,7 +35,7 @@ namespace HollowTwitch.Clients
 
         public void StartReceive()
         {
-            Connect("127.0.0.1", 1234);
+            Connect("127.0.0.1", Port);
         }
 
         public void Connect(string host, int port)
@@ -67,9 +80,9 @@ namespace HollowTwitch.Clients
             Array.Copy(receiveBuf, data, byte_len);
 
             string msg = System.Text.Encoding.UTF8.GetString(data);
-            Log("a2659802:"+msg);
+            Log("_localAdmin:"+msg);
 
-            ChatMessageReceived.Invoke("a2659802", msg);
+            ChatMessageReceived.Invoke("_localAdmin", msg);
             stream.BeginRead(receiveBuf, 0, 4096, RecvCallback, null);
         }
         static void Log(object msg) => Modding.Logger.LogDebug(msg);
