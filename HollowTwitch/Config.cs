@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 namespace HollowTwitch
 {
     [Serializable]
-    public class Config : ModSettings
+    public class Config
     {
         [JsonConverter(typeof(StringEnumConverter))]
         public ClientType Client = ClientType.Twitch;
@@ -27,12 +27,12 @@ namespace HollowTwitch
         
         public string Prefix = "!";
 
-        public List<string> BlacklistedCommands = new List<string>();
+        public List<string> BlacklistedCommands = new();
 
-        public List<string> AdminUsers = new List<string>();
+        public List<string> AdminUsers = new();
 
-        public List<string> BannedUsers = new List<string>();
+        public List<string> BannedUsers = new();
 
-        public Dictionary<string, int> Cooldowns = new Dictionary<string, int>();
+        public Dictionary<string, int> Cooldowns = new();
     }
 }

@@ -31,16 +31,13 @@ namespace HollowTwitch.Commands
         [Cooldown(80)]
         public IEnumerator Text([RemainingText]string msg)
         {
-            string OnLangGet(string key, string title)
-            {
-                return msg;
-            }
+            string OnLangGet(string key, string title, string orig) => msg;
 
-            ModHooks.Instance.LanguageGetHook += OnLangGet;
+            ModHooks.LanguageGetHook += OnLangGet;
 
             yield return new WaitForSeconds(20f);
 
-            ModHooks.Instance.LanguageGetHook -= OnLangGet;
+            ModHooks.LanguageGetHook -= OnLangGet;
         }
 
         [HKCommand("heal")]
@@ -148,7 +145,7 @@ namespace HollowTwitch.Commands
 
             var playHook = new Hook
             (
-                typeof(AudioSource).GetMethod("Play", new Type[0]),
+                typeof(AudioSource).GetMethod("Play", Type.EmptyTypes),
                 new Action<Action<AudioSource>, AudioSource>(Play)
             );
 
@@ -158,12 +155,12 @@ namespace HollowTwitch.Commands
             playHook.Dispose();
         }
 
-        private void PlayOneShot(Action<AudioSource, AudioClip, float> orig, AudioSource self, AudioClip clip, float volumeScale)
+        private static void PlayOneShot(Action<AudioSource, AudioClip, float> orig, AudioSource self, AudioClip clip, float volumeScale)
         {
             orig(self, Clips[Random.Range(0, Clips.Length - 1)], volumeScale);
         }
 
-        private void Play(Action<AudioSource> orig, AudioSource self)
+        private static void Play(Action<AudioSource> orig, AudioSource self)
         {
             AudioClip orig_clip = self.clip;
 

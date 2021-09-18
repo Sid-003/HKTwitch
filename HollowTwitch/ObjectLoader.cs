@@ -4,17 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using HollowTwitch.Extensions;
+using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using ModCommon.Util;
 using UnityEngine;
+using Vasi;
 using Object = UnityEngine.Object;
 
 namespace HollowTwitch
 {
     internal static class ObjectLoader
     {
-        public static readonly Dictionary<(string, Func<GameObject, GameObject>), (string, string)> ObjectList = new Dictionary<(string, Func<GameObject, GameObject>), (string, string)>
-        {
+        public static readonly Dictionary<(string, Func<GameObject, GameObject>), (string, string)> ObjectList = new() {
             {
                 ("aspid", obj =>
                 {
@@ -73,11 +73,15 @@ namespace HollowTwitch
                 {
                     go.SetActive(true);
                     
-                    GameObject spike = Object.Instantiate(go.GetComponentsInChildren<Transform>(true).First(x => x.name.Contains("Nightmare Spike")).gameObject);
+                    GameObject spike = Object.Instantiate(
+                        go.GetComponentsInChildren<Transform>(true)
+                          .First(x => x.name.Contains("Nightmare Spike"))
+                          .gameObject
+                    );
 
                     Object.DontDestroyOnLoad(spike);
-
-                    spike.LocateMyFSM("Control").ChangeTransition("Dormant", "SPIKE READY", "Ready");
+                    
+                    spike.LocateMyFSM("Control").ChangeTransition("Dormant", "SPIKES READY", "Ready");
                     
                     go.SetActive(false);
                     
@@ -88,28 +92,32 @@ namespace HollowTwitch
             {
                 ("AbsOrb",abs =>
                 {
-                    var fsm = abs.LocateMyFSM("Attack Commands");
-                    var spwanAction = fsm.GetAction<SpawnObjectFromGlobalPool>("Spawn Fireball", 1);
-                    var orbPre = spwanAction.gameObject.Value;
-                    var ShotCharge = abs.transform.Find("Shot Charge").gameObject;
-                    var ShotCharge2 = abs.transform.Find("Shot Charge 2").gameObject;
+                    PlayMakerFSM fsm = abs.LocateMyFSM("Attack Commands");
+                    
+                    var spawn = fsm.GetAction<SpawnObjectFromGlobalPool>("Spawn Fireball", 1);
+                    
+                    GameObject orbPre = spawn.gameObject.Value;
+                    
+                    GameObject ShotCharge = abs.transform.Find("Shot Charge").gameObject;
+                    GameObject ShotCharge2 = abs.transform.Find("Shot Charge 2").gameObject;
 
-                    GameObject orb = new GameObject("AbsOrb");
+                    var orb = new GameObject("AbsOrb");
                     orbPre.transform.SetParent(orb.transform);
                     ShotCharge.transform.SetParent(orb.transform);
                     ShotCharge2.transform.SetParent(orb.transform);
 
-                    GameObject.DontDestroyOnLoad(orb);
-                    GameObject.Destroy(abs);
+                    Object.DontDestroyOnLoad(orb);
+                    Object.Destroy(abs);
+                    
                     return orb;
                 }),
                 ("GG_Radiance","Boss Control/Absolute Radiance")
             }
         };
 
-        public static Dictionary<string, GameObject> InstantiableObjects { get; } = new Dictionary<string, GameObject>();
+        public static Dictionary<string, GameObject> InstantiableObjects { get; } = new();
 
-        public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
+        public static Dictionary<string, Shader> Shaders { get; } = new();
 
         public static void Load(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
@@ -138,7 +146,8 @@ namespace HollowTwitch
 
         public static void LoadAssets()
         {
-            Assembly assembly = Assembly.GetExecutingAssembly();
+            var assembly = Assembly.GetExecutingAssembly();
+            
             string bundleName = assembly.GetManifestResourceNames().First(x => x.Contains("shaders"));
 
             using Stream bundleStream = assembly.GetManifestResourceStream(bundleName);

@@ -5,7 +5,7 @@ using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using JetBrains.Annotations;
-using ModCommon.Util;
+using Vasi;
 using On.HutongGames.PlayMaker.Actions;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -33,7 +33,7 @@ namespace HollowTwitch.Commands
         private Matrix4x4 _reflectMatrix = Matrix4x4.identity;
         private CameraEffects _activeEffects;
 
-        private readonly Material _invertMat = new Material(ObjectLoader.Shaders["Custom/InvertColor"]);
+        private readonly Material _invertMat = new(ObjectLoader.Shaders["Custom/InvertColor"]);
 
         [HKCommand("cameffect")]
         [Summary("Applies various effects to the camera.\nEffects: Invert, Flip, Nausea, Backwards, Mirror, Pixelate, and Zoom.")]
@@ -57,8 +57,10 @@ namespace HollowTwitch.Commands
             }
 
             tk2dCamera tk2dCam = GameCameras.instance.tk2dCam;
-            UCamera cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
+            
+            UCamera cam = Mirror.GetField<tk2dCamera, UCamera>(GameCameras.instance.tk2dCam, "_unityCamera");
 
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (camEffect)
             {
                 case CameraEffects.Zoom:
@@ -159,7 +161,7 @@ namespace HollowTwitch.Commands
             if (GameCameras.instance == null || GameCameras.instance.tk2dCam == null)
                 return;
 
-            UCamera cam = GameCameras.instance.tk2dCam.GetAttr<tk2dCamera, UCamera>("_unityCamera");
+            UCamera cam = Mirror.GetField<tk2dCamera, UCamera>(GameCameras.instance.tk2dCam, "_unityCamera");
 
             if (cam == null)
                 return;

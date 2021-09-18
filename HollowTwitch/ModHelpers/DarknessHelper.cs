@@ -6,7 +6,7 @@ namespace HollowTwitch.ModHelpers
     // Stolen from Darkness mod by Katie and 56 again https://github.com/fifty-six/HollowKnight.Darkenss
     public static class DarknessHelper
     {
-        private static readonly Dictionary<(string Name, string EventName), string> _originalTransitions = new Dictionary<(string Name, string EventName), string>();
+        private static readonly Dictionary<(string Name, string EventName), string> _originalTransitions = new();
 
         public static void Lighten()
         {

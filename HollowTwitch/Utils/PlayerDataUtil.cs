@@ -8,18 +8,18 @@ namespace HollowTwitch.Utils
     {
         internal static IEnumerator FakeSet(string name, bool val, float time)
         {
-            bool GetBool(string orig)
+            bool GetBool(string bool_name, bool orig)
             {
-                return orig == name 
+                return bool_name == name 
                     ? val 
-                    : PlayerData.instance.GetBoolInternal(orig);
+                    : orig;
             }
             
-            ModHooks.Instance.GetPlayerBoolHook += GetBool;
+            ModHooks.GetPlayerBoolHook += GetBool;
 
             yield return new WaitForSeconds(time);
             
-            ModHooks.Instance.GetPlayerBoolHook -= GetBool;
+            ModHooks.GetPlayerBoolHook -= GetBool;
         }
     }
 }

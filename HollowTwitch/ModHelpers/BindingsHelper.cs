@@ -10,7 +10,7 @@ namespace HollowTwitch.ModHelpers
     public static class BindingsHelper
     {
         // Stolen 100% from https://github.com/fifty-six/HollowKnight.Bindings
-        private static readonly List<Detour> _detours =  new List<Detour>();
+        private static readonly List<Detour> _detours =  new();
 
         private static List<int> _prevCharms;
 

@@ -33,7 +33,7 @@ namespace HollowTwitch.Clients
     /// </summary>
     internal class BiliBiliClient : IClient
     {
-        private readonly List<Message> _log = new List<Message>();
+        private readonly List<Message> _log = new();
         
         public event Action<string, string> ChatMessageReceived;
         public event Action<string>         ClientErrored;
@@ -41,8 +41,7 @@ namespace HollowTwitch.Clients
 
         private const string URL = "https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory";
 
-        private readonly Dictionary<string, string> data = new Dictionary<string, string>
-        {
+        private readonly Dictionary<string, string> data = new() {
             { "roomid", "PUT YOUR ROOM ID HERE" },
             { "csrf_token", "" },
             { "csrf", "" },

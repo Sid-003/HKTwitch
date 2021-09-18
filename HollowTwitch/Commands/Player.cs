@@ -12,6 +12,7 @@ using Modding;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using Vasi;
 using UObject = UnityEngine.Object;
 
 namespace HollowTwitch.Commands
@@ -55,12 +56,19 @@ namespace HollowTwitch.Commands
         [Cooldown(60)]
         public IEnumerator Blind()
         {
+            void OnSceneLoad(On.GameManager.orig_EnterHero orig, GameManager self, bool additiveGateSearch)
+            {
+                orig(self, additiveGateSearch);
+                
+                DarknessHelper.Darken();
+            }
+
             DarknessHelper.Darken();
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoad;
+            On.GameManager.EnterHero += OnSceneLoad;
 
             yield return new WaitForSecondsRealtime(30);
 
-            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoad;
+            On.GameManager.EnterHero -= OnSceneLoad;
             DarknessHelper.Lighten();
         }
 
@@ -155,13 +163,13 @@ namespace HollowTwitch.Commands
                 return hit;
             }
 
-            ModHooks.Instance.TakeHealthHook += TakeHealth;
-            ModHooks.Instance.HitInstanceHook += HitInstance;
+            ModHooks.TakeHealthHook += TakeHealth;
+            ModHooks.HitInstanceHook += HitInstance;
 
             yield return new WaitForSeconds(15f);
 
-            ModHooks.Instance.TakeHealthHook -= TakeHealth;
-            ModHooks.Instance.HitInstanceHook -= HitInstance;
+            ModHooks.TakeHealthHook -= TakeHealth;
+            ModHooks.HitInstanceHook -= HitInstance;
         }
 
         [HKCommand("sleep")]
@@ -225,15 +233,15 @@ namespace HollowTwitch.Commands
                 HeroController.instance.cState.inConveyorZone = false;
                 HeroController.instance.conveyorSpeed = prev_s;
                 
-                ModHooks.Instance.BeforePlayerDeadHook -= BeforePlayerDead;
+                ModHooks.BeforePlayerDeadHook -= BeforePlayerDead;
             }
 
             // Prevent wind from pushing you OOB on respawn.
-            ModHooks.Instance.BeforePlayerDeadHook += BeforePlayerDead;
+            ModHooks.BeforePlayerDeadHook += BeforePlayerDead;
 
             yield return new WaitForSecondsRealtime(30);
             
-            ModHooks.Instance.BeforePlayerDeadHook -= BeforePlayerDead;
+            ModHooks.BeforePlayerDeadHook -= BeforePlayerDead;
 
             HeroController.instance.cState.inConveyorZone = false;
             HeroController.instance.conveyorSpeed = prev_s;
@@ -301,11 +309,11 @@ namespace HollowTwitch.Commands
                 return (Vector2) (vec = new Vector2(x, y));
             }
 
-            ModHooks.Instance.DashVectorHook += VectorHook;
+            ModHooks.DashVectorHook += VectorHook;
 
             yield return new WaitForSecondsRealtime(30f);
 
-            ModHooks.Instance.DashVectorHook -= VectorHook;
+            ModHooks.DashVectorHook -= VectorHook;
         }
 
         [HKCommand("triplejump")]
@@ -320,7 +328,7 @@ namespace HollowTwitch.Commands
 
                 if (!triple_jump)
                 {
-                    ReflectionHelper.SetAttr(self, "doubleJumped", false);
+                    Mirror.SetField(self, "doubleJumped", false);
 
                     triple_jump = true;
                 }
@@ -335,13 +343,6 @@ namespace HollowTwitch.Commands
             yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasDoubleJump), true, 30);
                                                         
             On.HeroController.DoDoubleJump -= Triple;
-        }
-
-        private static void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
-        {
-            if (HeroController.instance == null) return;
-
-            DarknessHelper.Darken();
         }
 
         [HKCommand("overflow")]
@@ -411,12 +412,12 @@ namespace HollowTwitch.Commands
             }
 
             On.HeroController.Move += Invert;
-            ModHooks.Instance.DashVectorHook += InvertDash;
+            ModHooks.DashVectorHook += InvertDash;
             
             yield return new WaitForSecondsRealtime(60);
             
             On.HeroController.Move -= Invert;
-            ModHooks.Instance.DashVectorHook -= InvertDash;
+            ModHooks.DashVectorHook -= InvertDash;
         }
 
         [HKCommand("slippery")]
@@ -698,11 +699,11 @@ namespace HollowTwitch.Commands
                 rb2d.drag = 6;
             }
             
-            ModHooks.Instance.SlashHitHook += SlashHit;
+            ModHooks.SlashHitHook += SlashHit;
 
             yield return new WaitForSeconds(60f);
             
-            ModHooks.Instance.SlashHitHook -= SlashHit;
+            ModHooks.SlashHitHook -= SlashHit;
         }
 
         [HKCommand("toggle")]
@@ -735,7 +736,7 @@ namespace HollowTwitch.Commands
                     yield return PlayerDataUtil.FakeSet(nameof(PlayerData.hasDreamNail), pd.hasDreamNail ^ true, time);
                     break;
                 case "nail":
-                    ReflectionHelper.SetAttr(HeroController.instance, "attack_cooldown", 15f);
+                    Mirror.SetField(HeroController.instance, "attack_cooldown", 15f);
                     break;
             }
         }
@@ -746,9 +747,9 @@ namespace HollowTwitch.Commands
         public IEnumerator DoubleDamage()
         {
             static int InstanceOnTakeDamageHook(ref int hazardtype, int damage) => damage * 2;
-            ModHooks.Instance.TakeDamageHook += InstanceOnTakeDamageHook;
+            ModHooks.TakeDamageHook += InstanceOnTakeDamageHook;
             yield return new WaitForSecondsRealtime(30);
-            ModHooks.Instance.TakeDamageHook -= InstanceOnTakeDamageHook;
+            ModHooks.TakeDamageHook -= InstanceOnTakeDamageHook;
         }
     }
 }

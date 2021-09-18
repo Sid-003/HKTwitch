@@ -9,29 +9,29 @@ using HollowTwitch.Commands;
 using HollowTwitch.Entities;
 using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Precondition;
+using JetBrains.Annotations;
 using Modding;
 using UnityEngine;
 using Camera = HollowTwitch.Commands.Camera;
 
 namespace HollowTwitch
 {
-    public class TwitchMod : Mod, ITogglableMod
+    [UsedImplicitly]
+    public class TwitchMod : Mod, ITogglableMod, IGlobalSettings<Config>
     {
         private IClient _client;
         
         private Thread _currentThread;
 
-        internal Config Config = new Config();
+        internal Config Config = new();
 
         internal CommandProcessor Processor { get; private set; }
 
         public static TwitchMod Instance;
+        
+        public void OnLoadGlobal(Config s) => Config = s;
 
-        public override ModSettings GlobalSettings
-        {
-            get => Config;
-            set => Config = value as Config;
-        }
+        public Config OnSaveGlobal() => Config;
 
         public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
         {
@@ -40,7 +40,7 @@ namespace HollowTwitch
             ObjectLoader.Load(preloadedObjects);
             ObjectLoader.LoadAssets();
 
-            ModHooks.Instance.ApplicationQuitHook += OnQuit;
+            ModHooks.ApplicationQuitHook += OnQuit;
 
             ReceiveCommands();
         }

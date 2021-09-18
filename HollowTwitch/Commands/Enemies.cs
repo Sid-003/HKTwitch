@@ -5,10 +5,9 @@ using HollowTwitch.Entities.Attributes;
 using HollowTwitch.Extensions;
 using HollowTwitch.Precondition;
 using HutongGames.PlayMaker.Actions;
-using ModCommon.Util;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using InvokeMethod = ModCommon.Util.InvokeMethod;
+using Vasi;
 using USceneManager = UnityEngine.SceneManagement.SceneManager;
 
 namespace HollowTwitch.Commands
@@ -20,7 +19,7 @@ namespace HollowTwitch.Commands
         [Cooldown(60, 3)]
         public IEnumerator SpawnEnemy(string name)
         {
-            var enemies = new[] {"aspid", "buzzer", "roller"};
+            string[] enemies = { "aspid", "buzzer", "roller" };
             
             Logger.Log($"Trying to spawn enemy {name}");
 
@@ -130,9 +129,10 @@ namespace HollowTwitch.Commands
             control.FsmVariables.FindFsmFloat("Plume Y").Value = y - 3.2f;
             control.FsmVariables.FindFsmFloat("Stun Land Y").Value = y + 3f;
 
-            control.InsertMethod
+            var plume_gen = control.GetState("Plume Gen");
+
+            plume_gen.InsertMethod
             (
-                "Plume Gen",
                 3,
                 () =>
                 {
@@ -142,9 +142,8 @@ namespace HollowTwitch.Commands
                     fsm.GetAction<FloatCompare>("Outside Arena?", 3).float2.Value = -Mathf.Infinity;
                 }
             );
-            control.InsertMethod
+            plume_gen.InsertMethod
             (
-                "Plume Gen",
                 5,
                 () =>
                 {
@@ -154,7 +153,7 @@ namespace HollowTwitch.Commands
                     fsm.GetAction<FloatCompare>("Outside Arena?", 3).float2.Value = -Mathf.Infinity;
                 }
             );
-            control.RemoveAction("HUD Out", 0);
+            control.GetState("HUD Out").RemoveAction(0);
 
             var cp = pv.GetComponent<ConstrainPosition>();
             cp.xMax = x + castRight.distance;
@@ -189,7 +188,7 @@ namespace HollowTwitch.Commands
             ctrl.SetState("Appear Pause");
             
             // ReSharper disable once ImplicitlyCapturedClosure (ctrl)
-            ctrl.AddAction("Hit", new InvokeMethod(() => Object.Destroy(revek)));
+            ctrl.GetState("Hit").AddMethod(() => Object.Destroy(revek));
 
             // ReSharper disable once ImplicitlyCapturedClosure (ctrl)
             void OnUnload()
