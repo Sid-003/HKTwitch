@@ -143,12 +143,11 @@ namespace HollowTwitch
                 || user.ToLower() == "sid0003";
 
             bool banned = Config.BannedUsers.Contains(user, StringComparer.OrdinalIgnoreCase);
-            bool blacklisted = Config.BlacklistedCommands.Contains(command, StringComparer.OrdinalIgnoreCase);
 
-            if (!admin && (banned || blacklisted))
+            if (!admin && banned)
                 return;
 
-            Processor.Execute(user, command, admin);
+            Processor.Execute(user, command, Config.BlacklistedCommands.AsReadOnly(), admin);
         }
 
         private void GenerateHelpInfo()

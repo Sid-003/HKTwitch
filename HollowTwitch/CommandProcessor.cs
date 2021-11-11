@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -40,7 +41,7 @@ namespace HollowTwitch
             _parsers.Add(t, parser);
         }
 
-        public void Execute(string user, string command, bool ignoreChecks = false)
+        public void Execute(string user, string command, ReadOnlyCollection<string> blacklist, bool ignoreChecks = false)
         {
             string[] pieces = command.Split(Seperator);
 
@@ -50,7 +51,7 @@ namespace HollowTwitch
             
             foreach (Command c in found)
             {
-                bool allGood = true;
+                bool allGood = !blacklist.Contains(c.Name, StringComparer.OrdinalIgnoreCase);
 
                 foreach (PreconditionAttribute p in c.Preconditions)
                 {
